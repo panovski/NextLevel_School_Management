@@ -1,0 +1,90 @@
+﻿.GridView
+{	
+    width: inherit;
+    border:0vw solid transparent;
+}
+.GridViewHeader
+{
+	background-color: whitesmoke;
+	color: transparent;
+	height: 1vw;
+	text-align: left;
+	font-size: 0.8vw;
+    border: 0vw solid white;
+}
+
+.GridViewRows
+{
+	background-color: antiquewhite;
+	font-size: 0.7vw;
+    color:black;    
+	text-align: left;
+	border: 0vw solid white;
+}
+.GridViewRows:hover
+{
+	background-color: lightgoldenrodyellow;
+	color: darkseagreen;
+}
+.GridViewRowsAlt
+{
+	background-color: PaleGoldenrod;
+	font-size: 0.7vw;
+	color: black;
+	text-align: left;
+	border: 0vw solid gold;
+}
+.GridViewRowsAlt:hover
+{
+	background-color: lightgoldenrodyellow;
+	color: darkseagreen;
+}
+.GridViewSelectedRow
+{
+    background-color: darkseagreen;
+	color: white;
+	font-size: 0.7vw;
+	border: 0.1vw groove #ffffff;    
+    
+}
+.GridViewSelectedRow::content
+{
+        width:2vw;
+}
+.GridView a /** FOR THE PAGING ICONS  **/
+{
+	background-color: Transparent;
+	padding: 0.5vw;
+	color:white;
+	text-decoration: none;
+	font-weight: bold;
+    text-shadow:0 0 0.18vw black;
+}
+
+.GridView a:hover /** FOR THE PAGING ICONS  HOVER STYLES**/
+{
+	background-color: gold;
+	color: white;
+    border-radius:1vw;
+}
+.GridView span /** FOR THE PAGING ICONS CURRENT PAGE INDICATOR **/
+{
+	background-color: lightgray;
+	color: black;
+    border-radius:1vw;
+}
+.GridViewPager
+{
+	background-color: lightgray;
+	color: white;
+	text-align: inherit;
+}
+
+.GridView td
+{
+	padding: 0.5vw;
+}
+.GridView th
+{
+	padding: 0.5vw;
+}

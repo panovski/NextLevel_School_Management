@@ -1,0 +1,57 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeFile="MP_NextLevel.master.cs" Inherits="MP_NextLevel" %>
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <link rel="icon" type="image/gif" href="Images/favicon.gif" />
+    <link href="Styles/Styles.css" rel="stylesheet" />
+    <link href="Styles/component.css" rel="stylesheet" />
+    <link href="Styles/GridView.css" rel="stylesheet" />
+    <script src="Scripts/jquery-1.4.1.js" type="text/javascript"></script>
+    <script src="Scripts/modernizr.custom.js"></script>
+    <title>Next Level - School Management Software</title>
+    <asp:ContentPlaceHolder id="head" runat="server">
+    </asp:ContentPlaceHolder>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <table id="TabelaGlavna" class="GlavnaTabela">
+        <tr>            
+            <td id="tdGlaven">
+                <table style="text-align:left; padding:0px; border-spacing:0;" id="Tabela2" >
+                <tr>
+                    <asp:Button ID="btnLogout" runat="server" Text="Logout" CssClass="Logout_Button" Visible="false" OnClick="btnLogout_Click" />
+                    <td class="GlavnoMeni" > 
+                       <nav class="cl-effect-16">
+                            <a href="Default.aspx">
+                                <img src="Images/NL_Logo-small.png" style="width:15vw" />
+                            </a>
+                        </nav>
+                    <div class="DivMeni">
+                        <asp:Panel ID="pnlMeni" runat="server">
+                        <nav class="cl-effect-16">
+                            <asp:Panel ID="pnlMiTeachers" runat="server" Visible="False"><a class="MeniItems" href="Employees.aspx" data-hover="Employees">Employees</a><br/></asp:Panel>
+                            <asp:Panel ID="pnlMiStudents" runat="server" Visible="False"><a class="MeniItems" href="Students.aspx" data-hover="Students">Students</a><br/></asp:Panel>
+                            <asp:Panel ID="pnlMiGroups" runat="server" Visible="False"><a class="MeniItems" href="Groups.aspx" data-hover="Groups">Groups</a><br/></asp:Panel>
+                            <asp:Panel ID="pnlMiPayments" runat="server" Visible="False"><a class="MeniItems" href="Payments.aspx" data-hover="Payments">Payments</a><br/></asp:Panel>
+                            <asp:Panel ID="pnlMiServices" runat="server" Visible="False"><a class="MeniItems" href="Services.aspx" data-hover="Services">Services</a><br/></asp:Panel>                           
+                            <asp:Panel ID="pnlMiChangePassword" runat="server" Visible="False"><a class="MeniItems" href="ChangePassword.aspx" data-hover="Change Password">Change Password</a><br /></asp:Panel>
+                            <asp:Panel ID="pnlMiAdministrate" runat="server" Visible="False"><a class="MeniItems" href="AdministrationPage.aspx" data-hover="Administrate">Administrate</a><br /></asp:Panel>
+                             <asp:Panel ID="pnlUser" runat="server"><asp:Label ID="lblUser" runat="server" Text="User" CssClass="Label_Small"></asp:Label><br /></asp:Panel>
+                            <br /><br />
+                        </nav>
+                        </asp:Panel>
+                    </div>
+                    </td>
+                    <td class="MasterContainer">
+                        <asp:ContentPlaceHolder id="ContentPlaceHolder1" runat="server">
+                        </asp:ContentPlaceHolder>
+                    </td>
+                </tr>
+                </table>
+            </td>
+        </tr>
+        </table>
+    </form>
+</body>
+</html>
