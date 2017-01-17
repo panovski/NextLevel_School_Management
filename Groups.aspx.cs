@@ -176,7 +176,8 @@ public partial class Groups : System.Web.UI.Page
     }
     private void PrintPDF(String Path)
     {
-        FileInfo fileInfo = new FileInfo(Path + ".pdf");
+        //FileInfo fileInfo = new FileInfo(Path + ".pdf");
+        FileInfo fileInfo = new FileInfo(Path + "-1.docx");
         if (fileInfo.Exists)
         {
             Response.Clear();
@@ -351,7 +352,8 @@ public partial class Groups : System.Web.UI.Page
             String PaymentPath = Functions.ExecuteScalar("SELECT TOP 1 TemplateFile FROM Template WHERE TemplateType=3 ORDER BY CreatedDate DESC");
             String PathDoc = Server.MapPath(PaymentPath.Replace(".dotx", ""));
             Functions.PrintWord(PathDoc, SQLPrint);
-            FileInfo fileInfo = new FileInfo(PathDoc + ".pdf");
+            //FileInfo fileInfo = new FileInfo(PathDoc + ".pdf");
+            FileInfo fileInfo = new FileInfo(PathDoc + "-1.docx");
             if (fileInfo.Exists)
             {
                 Response.Clear();

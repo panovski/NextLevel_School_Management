@@ -188,7 +188,8 @@ public partial class Students : System.Web.UI.Page
     }
     private void PrintPDF(String Path)
     {
-        FileInfo fileInfo = new FileInfo(Path + ".pdf");
+        //FileInfo fileInfo = new FileInfo(Path + ".pdf");
+        FileInfo fileInfo = new FileInfo(Path + "-1.docx");
         if (fileInfo.Exists)
         {
             Response.Clear();
@@ -407,6 +408,7 @@ public partial class Students : System.Web.UI.Page
             String PathDoc = Server.MapPath(PaymentPath.Replace(".dotx", ""));
             Functions.PrintWord(PathDoc, SQLPrint);
             FileInfo fileInfo = new FileInfo(PathDoc + ".pdf");
+            //FileInfo fileInfo = new FileInfo(PathDoc + "-1.docx");
             if (fileInfo.Exists)
             {
                 Response.Clear();

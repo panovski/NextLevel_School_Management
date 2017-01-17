@@ -250,7 +250,8 @@ public partial class Payments : System.Web.UI.Page
         String PaymentPath = Functions.ExecuteScalar("SELECT TOP 1 TemplateFile FROM Template WHERE TemplateType=3 ORDER BY CreatedDate DESC");
         String PathDoc = Server.MapPath(PaymentPath.Replace(".dotx", ""));
         Functions.PrintWord(PathDoc, SQLPrint);
-        FileInfo fileInfo = new FileInfo(PathDoc + ".pdf");
+        //FileInfo fileInfo = new FileInfo(PathDoc + ".pdf");
+        FileInfo fileInfo = new FileInfo(PathDoc + "-1.docx");
         if (fileInfo.Exists)
         {
             Response.Clear();
