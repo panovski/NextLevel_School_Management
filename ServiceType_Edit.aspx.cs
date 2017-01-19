@@ -46,6 +46,8 @@ public partial class ServiceType_Edit : System.Web.UI.Page
             {
                 row.ToolTip = string.Empty;
                 Fill_Details(gvMain.SelectedValue.ToString());
+                btnSave.Visible = true;
+                break;
             }
             else
             {
@@ -66,11 +68,14 @@ public partial class ServiceType_Edit : System.Web.UI.Page
     }
     protected void btnSave_Click(object sender, EventArgs e)
     {
-        String SQL = @"UPDATE ServiceType SET ServiceName=N'" + tbServiceName.Text.Replace("'", "''") + "', Description=N'" + tbDescription.Text +
-               "', Cost=N'" + tbCost.Text.Replace("'", "''") + "', EmployeePercentage=N'" + tbEmployeePercentage.Text.Replace("'", "''") + "'" +
-               " WHERE ServiceTypeID=" + gvMain.SelectedValue;
-        Functions.ExecuteCommand(SQL);
-        Fill_Grid();
+        if (gvMain.SelectedValue != null)
+        {
+            String SQL = @"UPDATE ServiceType SET ServiceName=N'" + tbServiceName.Text.Replace("'", "''") + "', Description=N'" + tbDescription.Text +
+                   "', Cost=N'" + tbCost.Text.Replace("'", "''") + "', EmployeePercentage=N'" + tbEmployeePercentage.Text.Replace("'", "''") + "'" +
+                   " WHERE ServiceTypeID=" + gvMain.SelectedValue;
+            Functions.ExecuteCommand(SQL);
+            Fill_Grid();
+        }
 
     }
     protected void btnInsert_Click(object sender, EventArgs e)

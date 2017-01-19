@@ -63,6 +63,7 @@ public partial class StudentsContract_Edit : System.Web.UI.Page
         tbCreatedDate.Text = Contract[5];
         tbCreatedBy.Text = Contract[7];
         lblInfo.Visible = false;
+        btnSave.Visible = true;
     }
     protected void gvMain_Sorted(object sender, EventArgs e)
     {

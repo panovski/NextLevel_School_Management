@@ -48,6 +48,7 @@ public partial class Templates_Edit : System.Web.UI.Page
         tbCreatedDate.Text = Template[4];
         tbCreatedBy.Text = Template[6];
         lblInfo.Visible = false;
+        btnSave.Visible = true;
     }
     protected void gvMain_Sorted(object sender, EventArgs e)
     {

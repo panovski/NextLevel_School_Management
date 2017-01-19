@@ -76,6 +76,9 @@
         </tr>
     </table>
     </asp:Panel>
+    <asp:ScriptManager ID="scriptmanager" runat="server"></asp:ScriptManager>
+    <asp:UpdatePanel runat="server" id="upData">
+    <ContentTemplate>
     <table id="TabelaGlavna" class="GlavnaStandard">
         <tr>
             <td colspan="2">
@@ -195,6 +198,8 @@
             </td>
         </tr>
     </table>
+    </ContentTemplate>    
+    </asp:UpdatePanel>
     <script type="text/javascript">
     function ShowDialog() {
         var rtvalue = window.showModalDialog("Users_Edit.aspx");

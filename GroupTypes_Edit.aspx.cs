@@ -55,8 +55,10 @@ public partial class GroupTypes_Edit : System.Web.UI.Page
                 //lblAlreadyAdded.Visible = false;
                 row.ToolTip = string.Empty;
                 Fill_Details(gvMain.SelectedValue.ToString());
+                btnSave.Visible = true;
                 //pnlAddPermission.Visible = true;
                 //Login_Redirect();
+                break;
             }
             else
             {
@@ -70,11 +72,14 @@ public partial class GroupTypes_Edit : System.Web.UI.Page
     }
     protected void btnSave_Click(object sender, EventArgs e)
     {
-        String SQL = @"UPDATE GroupType SET Language=N'" + tbLanguage.Text.Replace("'", "''") + "', Program=N'" + tbProgram.Text +
-            "', Level=N'" + tbLevel.Text.Replace("'", "''") + "', LevelDescription=N'" + tbLevelDescription.Text.Replace("'", "''") +
-            "' WHERE GroupTypeID=" + gvMain.SelectedValue;
-        Functions.ExecuteCommand(SQL);
-        Fill_Grid();
+        if (gvMain.SelectedValue != null)
+        {
+            String SQL = @"UPDATE GroupType SET Language=N'" + tbLanguage.Text.Replace("'", "''") + "', Program=N'" + tbProgram.Text +
+                "', Level=N'" + tbLevel.Text.Replace("'", "''") + "', LevelDescription=N'" + tbLevelDescription.Text.Replace("'", "''") +
+                "' WHERE GroupTypeID=" + gvMain.SelectedValue;
+            Functions.ExecuteCommand(SQL);
+            Fill_Grid();
+        }
     }
     protected void btnInsert_Click(object sender, EventArgs e)
     {

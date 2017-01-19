@@ -195,6 +195,7 @@ public partial class Services : System.Web.UI.Page
                 row.ToolTip = string.Empty;
                 Login_Redirect();
                 Fill_Payments();
+                break;
             }
             else
             {

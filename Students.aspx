@@ -97,6 +97,9 @@
         </tr>
     </table>
     </asp:Panel>
+    <asp:ScriptManager ID="scriptmanager" runat="server"></asp:ScriptManager>
+    <asp:UpdatePanel runat="server" id="upData">
+    <ContentTemplate>
     <table id="TabelaGlavna" class="GlavnaStandard">
         <tr>
             <td colspan="2">
@@ -306,7 +309,7 @@
                                         <td>
                                         </td>
                                         <td>
-                                            <asp:Button ID="btnPrintPayment" runat="server" Text="Print payment" CssClass="PrintButton" OnClick="btnPrintPayment_Click"/>
+                                            
                                         </td>
                                     </tr>
                                 </table>
@@ -355,13 +358,23 @@
                                 <asp:ImageButton ID="imgbtnRefresh" runat="server" ImageUrl="~/Images/Icons/Refresh1.png" OnClick="imgbtnRefresh_Click" CssClass="RefreshButton"/>
                                 <br /><br />
                                     Cert. Template:<asp:DropDownList ID="ddlTemplateCertificate" runat="server" CssClass="TextBoxNumber" ValidationGroup="2"></asp:DropDownList>                               
-                                    <asp:Button ID="btnPrintSelectedCertificate" runat="server" Text="Print selected Certificate" CssClass="PrintButton" OnClick="btnPrintSelectedCertificate_Click" />
-                                    <asp:Button ID="btnPrintSelectedContract" runat="server" Text="Print selected Contract" CssClass="PrintButton" OnClick="btnPrintSelectedContract_Click" />                                    
+                                    
                             </td>                           
                         </tr>
                         </table>
                 </div>
 
+            </td>
+        </tr>
+    </table>
+    </ContentTemplate>    
+    </asp:UpdatePanel>
+    <table id="TabelaBottomn" class="MeniBottom">
+        <tr>
+            <td>                
+                <asp:Button ID="btnPrintPayment" runat="server" Text="Print payment" CssClass="PrintButton" OnClick="btnPrintPayment_Click"/>
+                <asp:Button ID="btnPrintSelectedCertificate" runat="server" Text="Print selected Certificate" CssClass="PrintButton" OnClick="btnPrintSelectedCertificate_Click" />
+                <asp:Button ID="btnPrintSelectedContract" runat="server" Text="Print selected Contract" CssClass="PrintButton" OnClick="btnPrintSelectedContract_Click" />                                    
             </td>
         </tr>
     </table>

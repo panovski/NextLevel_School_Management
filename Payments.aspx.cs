@@ -533,6 +533,7 @@ public partial class Payments : System.Web.UI.Page
                 row.ToolTip = string.Empty;
                 Fill_Payment(gvMain.SelectedValue.ToString());
                 pnlPayment.Visible = true;
+                break;
             }
             else
             {

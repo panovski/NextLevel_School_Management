@@ -119,7 +119,7 @@
                     <tr>
                         <td colspan="3">
                             <br />
-                            <asp:Button ID="btnSave" runat="server" Text="Save changes" CssClass="EditFormButton" OnClick="btnSave_Click"  ValidationGroup="1" />
+                            <asp:Button ID="btnSave" runat="server" Text="Save changes" CssClass="EditFormButton" OnClick="btnSave_Click"  ValidationGroup="1" Visible="False" />
                             <asp:Button ID="btnInsert" runat="server" Text="Insert new Group Type" CssClass="EditFormButton" ValidationGroup="1" OnClick="btnInsert_Click" />
                             <asp:Button ID="btnDelete" runat="server" Text="Delete the selected Group Type" CssClass="EditFormButton" ValidationGroup="1" OnClick="btnDelete_Click" onclientclick="javascript:return confirm('Are you sure to delete the selected group type?');" />                
                         </td>

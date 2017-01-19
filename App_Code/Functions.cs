@@ -12,7 +12,6 @@ using System.Net.Mime;
 using System.Web.UI.WebControls;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.Office.Interop.Word;
 using System.Web;
 using Novacode;
 
@@ -207,7 +206,7 @@ public class Functions
     {
         String pSQLEmail = "SELECT ConfigValue FROM [DP_Config] WHERE ConfigOption='email'";
         String ToAddress = ExecuteScalar(pSQLEmail);
-        const string FromAddress = "divnapesic.webservice@gmail.com";
+        const string FromAddress = "x@gmail.com";
         System.Net.Mail.MailMessage mail = new System.Net.Mail.MailMessage();
         mail.To.Add(ToAddress);
         //mail.To.Add("panovski_v@yahoo.com");
@@ -224,7 +223,7 @@ public class Functions
         mail.AlternateViews.Add(alternate);
 
         SmtpClient client = new SmtpClient();
-        client.Credentials = new System.Net.NetworkCredential(FromAddress, "dpws1234");
+        client.Credentials = new System.Net.NetworkCredential(FromAddress, "password");
         client.Port = 587; // Gmail works on this port
         client.Host = "smtp.gmail.com"; client.EnableSsl = true; //Gmail works on Server Secured Layer
         try
@@ -386,9 +385,9 @@ public class Functions
     public static void PrintWord(String Dokument, String Sql, String Sql2 = "")
     {
         object missing = System.Reflection.Missing.Value;
-        object oTemplate = Dokument +".dotx";
+        object oTemplate = Dokument +".docx";
 
-        DocX owordDocnew = DocX.Load(Dokument + ".docx");
+        DocX owordDocnew = DocX.Load(Dokument);// + ".docx");
         
         //owordDocnew.ApplyTemplate(Dokument+".dotx");
         //Microsoft.Office.Interop.Word.ApplicationClass oWordApp = new Microsoft.Office.Interop.Word.ApplicationClass();
@@ -427,9 +426,9 @@ public class Functions
                     //oWordDoc.Bookmarks[dcol.ColumnName].Range.Text = dr[dcol.ColumnName].ToString();
                 }
                 catch(Exception err) {
-                    HttpContext.Current.Session["ErrorMessage"] = err.Message.ToString();
-                    if (HttpContext.Current != null)
-                        HttpContext.Current.Response.Redirect(@"~\Error.aspx");
+                    //HttpContext.Current.Session["ErrorMessage"] = err.Message.ToString();
+                    //if (HttpContext.Current != null)
+                    //    HttpContext.Current.Response.Redirect(@"~\Error.aspx");
                 }
             }
         }
@@ -545,8 +544,10 @@ public class Functions
         object missing = System.Reflection.Missing.Value;
         object oTemplate = Dokument;//+ Template+ ".dotx";
 
-        Microsoft.Office.Interop.Word.ApplicationClass oWordApp = new Microsoft.Office.Interop.Word.ApplicationClass();
-        Microsoft.Office.Interop.Word.Document oWordDoc = oWordApp.Documents.Add(ref oTemplate, ref missing, ref missing, ref missing);
+        //Microsoft.Office.Interop.Word.ApplicationClass oWordApp = new Microsoft.Office.Interop.Word.ApplicationClass();
+        //Microsoft.Office.Interop.Word.Document oWordDoc = oWordApp.Documents.Add(ref oTemplate, ref missing, ref missing, ref missing);
+
+        DocX owordDocnew = DocX.Load(Dokument);
 
 
         SqlConnection MyConn = new SqlConnection();
@@ -577,12 +578,13 @@ public class Functions
             {
                 try
                 {
-                    oWordDoc.Bookmarks[dcol.ColumnName].Range.Text = dr[dcol.ColumnName].ToString();
+                    //oWordDoc.Bookmarks[dcol.ColumnName].Range.Text = dr[dcol.ColumnName].ToString();
+                    owordDocnew.Bookmarks[dcol.ColumnName].SetText(dr[dcol.ColumnName].ToString());
                 }
                 catch (Exception err) {
-                    HttpContext.Current.Session["ErrorMessage"] = err.Message.ToString();
-                    if (HttpContext.Current != null)
-                        HttpContext.Current.Response.Redirect(@"~\Error.aspx");
+                    //HttpContext.Current.Session["ErrorMessage"] = err.Message.ToString();
+                    //if (HttpContext.Current != null)
+                    //    HttpContext.Current.Response.Redirect(@"~\Error.aspx");
                 }
             }
         }
@@ -591,101 +593,105 @@ public class Functions
         Int32 tTableForPrint = 0;
         if (ds.Tables.Count > 1)
         {
-            try
-            {
-                for (int brTabeli = 1; brTabeli <= ds.Tables.Count - 1; brTabeli++)
-                {
-                    int BrRedovi = 1;
-                    Boolean tPostoi = false;
-                    Boolean tKreiranaTabela = false;
-                    int rows = ds.Tables[brTabeli].Rows.Count;
-                    int columns = ds.Tables[brTabeli].Columns.Count;
+            //try
+            //{
+            //    for (int brTabeli = 1; brTabeli <= ds.Tables.Count - 1; brTabeli++)
+            //    {
+            //        int BrRedovi = 1;
+            //        Boolean tPostoi = false;
+            //        Boolean tKreiranaTabela = false;
+            //        int rows = ds.Tables[brTabeli].Rows.Count;
+            //        int columns = ds.Tables[brTabeli].Columns.Count;
 
-                    if (brTabeli <= oWordDoc.Tables.Count)
-                    {
-                        tTableForPrint += 1;
-                        for (int tBrPostoecki = 1; tBrPostoecki <= oWordDoc.Tables.Count; tBrPostoecki++)
-                        {
-                            if (oWordDoc.Bookmarks["Table" + brTabeli].Range.Start >= oWordDoc.Tables[tBrPostoecki].Range.Start)
-                            {
-                                if ((oWordDoc.Bookmarks["Table" + brTabeli].Range.Start >= oWordDoc.Tables[tBrPostoecki].Range.Start &&
-                                    oWordDoc.Bookmarks["Table" + brTabeli].Range.Start <= oWordDoc.Tables[tBrPostoecki].Range.End) ||
-                                    (oWordDoc.Bookmarks["Table" + brTabeli].Range.End >= oWordDoc.Tables[tBrPostoecki].Range.Start &&
-                                    oWordDoc.Bookmarks["Table" + brTabeli].Range.End >= oWordDoc.Tables[tBrPostoecki].Range.End))
-                                //ako ima iskreirano tabeli vo template-ot:
-                                {
-                                    BrRedovi = 1; tPostoi = true; tTableForPrint = tBrPostoecki;
-                                    for (int tPostoeckiRows = 1; tPostoeckiRows <= oWordDoc.Tables[tBrPostoecki].Rows.Count; tPostoeckiRows++)
-                                    {
-                                        for (int tPostoeckiColumns = 1; tPostoeckiColumns <= oWordDoc.Tables[tBrPostoecki].Columns.Count; tPostoeckiColumns++)
-                                        {
-                                            if (oWordDoc.Tables[tBrPostoecki].Cell(tPostoeckiRows, tPostoeckiColumns).Range.Text.Length > 2)
-                                            {
-                                                BrRedovi += 1;
-                                            }
-                                        }
-                                    cont:;
-                                    }
+            //        if (brTabeli <= oWordDoc.Tables.Count)
+            //        {
+            //            tTableForPrint += 1;
+            //            for (int tBrPostoecki = 1; tBrPostoecki <= oWordDoc.Tables.Count; tBrPostoecki++)
+            //            {
+            //                if (oWordDoc.Bookmarks["Table" + brTabeli].Range.Start >= oWordDoc.Tables[tBrPostoecki].Range.Start)
+            //                {
+            //                    if ((oWordDoc.Bookmarks["Table" + brTabeli].Range.Start >= oWordDoc.Tables[tBrPostoecki].Range.Start &&
+            //                        oWordDoc.Bookmarks["Table" + brTabeli].Range.Start <= oWordDoc.Tables[tBrPostoecki].Range.End) ||
+            //                        (oWordDoc.Bookmarks["Table" + brTabeli].Range.End >= oWordDoc.Tables[tBrPostoecki].Range.Start &&
+            //                        oWordDoc.Bookmarks["Table" + brTabeli].Range.End >= oWordDoc.Tables[tBrPostoecki].Range.End))
+            //                    //ako ima iskreirano tabeli vo template-ot:
+            //                    {
+            //                        BrRedovi = 1; tPostoi = true; tTableForPrint = tBrPostoecki;
+            //                        for (int tPostoeckiRows = 1; tPostoeckiRows <= oWordDoc.Tables[tBrPostoecki].Rows.Count; tPostoeckiRows++)
+            //                        {
+            //                            for (int tPostoeckiColumns = 1; tPostoeckiColumns <= oWordDoc.Tables[tBrPostoecki].Columns.Count; tPostoeckiColumns++)
+            //                            {
+            //                                if (oWordDoc.Tables[tBrPostoecki].Cell(tPostoeckiRows, tPostoeckiColumns).Range.Text.Length > 2)
+            //                                {
+            //                                    BrRedovi += 1;
+            //                                }
+            //                            }
+            //                        cont:;
+            //                        }
 
-                                    for (int tBr = 0; tBr <= rows - 2; tBr++)
-                                    {
-                                        oWordDoc.Tables[tBrPostoecki].Rows.Add();
-                                    }
-                                    goto cont1;
-                                }
-                                else
-                                {
-                                    tPostoi = false; tTableForPrint = tBrPostoecki;
-                                }
-                            }
-                        cont1:;
-                        }
-                    }
-                    else tPostoi = false;
+            //                        for (int tBr = 0; tBr <= rows - 2; tBr++)
+            //                        {
+            //                            oWordDoc.Tables[tBrPostoecki].Rows.Add();
+            //                        }
+            //                        goto cont1;
+            //                    }
+            //                    else
+            //                    {
+            //                        tPostoi = false; tTableForPrint = tBrPostoecki;
+            //                    }
+            //                }
+            //            cont1:;
+            //            }
+            //        }
+            //        else tPostoi = false;
 
-                    if (tPostoi == false)
-                    {
-                        Range r = oWordDoc.Bookmarks["Table" + brTabeli].Range;
-                        oWordDoc.Tables.Add(r, rows + 1, columns);
-                        BrRedovi = 2;
-                        tTableForPrint += 1;
+            //        if (tPostoi == false)
+            //        {
+            //            Range r = oWordDoc.Bookmarks["Table" + brTabeli].Range;
+            //            oWordDoc.Tables.Add(r, rows + 1, columns);
+            //            BrRedovi = 2;
+            //            tTableForPrint += 1;
 
-                        int j = 1;
-                        foreach (DataColumn dcc in ds.Tables[brTabeli].Columns)
-                        {
-                            oWordDoc.Tables[tTableForPrint].Cell(1, j).Range.InsertAfter(dcc.ColumnName);
-                            j++;
-                        }
-                    }
+            //            int j = 1;
+            //            foreach (DataColumn dcc in ds.Tables[brTabeli].Columns)
+            //            {
+            //                oWordDoc.Tables[tTableForPrint].Cell(1, j).Range.InsertAfter(dcc.ColumnName);
+            //                j++;
+            //            }
+            //        }
 
-                    int i = 2; // BrRedovi;
-                    foreach (DataRow drr in ds.Tables[brTabeli].Rows)
-                    {
-                        int j = 1;
-                        foreach (DataColumn dc2 in ds.Tables[brTabeli].Columns)
-                        {
-                            oWordDoc.Tables[tTableForPrint].Cell(i, j).Range.InsertAfter(drr[dc2.ColumnName].ToString());
-                            j++;
-                        }
-                        i++;
-                    }
-                }
-            }
-            catch (Exception err) {
-                HttpContext.Current.Session["ErrorMessage"] = err.Message.ToString();
-                if (HttpContext.Current != null)
-                    HttpContext.Current.Response.Redirect(@"~\Error.aspx");
-            }
+            //        int i = 2; // BrRedovi;
+            //        foreach (DataRow drr in ds.Tables[brTabeli].Rows)
+            //        {
+            //            int j = 1;
+            //            foreach (DataColumn dc2 in ds.Tables[brTabeli].Columns)
+            //            {
+            //                oWordDoc.Tables[tTableForPrint].Cell(i, j).Range.InsertAfter(drr[dc2.ColumnName].ToString());
+            //                j++;
+            //            }
+            //            i++;
+            //        }
+            //    }
+            //}
+            //catch (Exception err) {
+            //    HttpContext.Current.Session["ErrorMessage"] = err.Message.ToString();
+            //    if (HttpContext.Current != null)
+            //        HttpContext.Current.Response.Redirect(@"~\Error.aspx");
+            //}
         }
 
-        oWordDoc.Activate();
+        //oWordDoc.Activate();
         //oWordDoc.SaveAs2(Dokument + "Multi\\" + Template + Number.ToString() + ".docx");
-        oWordDoc.SaveAs(Output + Number.ToString() + ".docx");
+        //oWordDoc.SaveAs(Output + Number.ToString() + ".docx");
 
-        object oMissing = System.Reflection.Missing.Value;
-        object saveChanges = WdSaveOptions.wdDoNotSaveChanges;
-        ((_Document)oWordDoc).Close(ref saveChanges, ref oMissing, ref oMissing);
-        oWordDoc = null;
+        owordDocnew.SaveAs(Output + Number.ToString() + ".docx");
+
+        //object oMissing = System.Reflection.Missing.Value;
+        //object saveChanges = WdSaveOptions.wdDoNotSaveChanges;
+        //((_Document)oWordDoc).Close(ref saveChanges, ref oMissing, ref oMissing);
+        //oWordDoc = null;
+
+        owordDocnew = null;
     }
 
     public static string ReturnLatin(String Input)
@@ -710,9 +716,9 @@ public class Functions
         }
         catch (Exception err)
         {
-            HttpContext.Current.Session["ErrorMessage"] = err.Message.ToString();
-            if (HttpContext.Current != null)
-                HttpContext.Current.Response.Redirect(@"~\Error.aspx");
+            //HttpContext.Current.Session["ErrorMessage"] = err.Message.ToString();
+            //if (HttpContext.Current != null)
+            //    HttpContext.Current.Response.Redirect(@"~\Error.aspx");
             return Izlez;
         }
     }
@@ -722,32 +728,44 @@ public class Functions
         object missing = System.Reflection.Missing.Value;
         object oExportDoc = ExportDoc; //+ ".dotx";
         object oCurrentDoc = CurrentDoc;
-        object pageBreak = Microsoft.Office.Interop.Word.WdBreakType.wdPageBreak;
+        //object pageBreak = Microsoft.Office.Interop.Word.WdBreakType.wdPageBreak;
 
-        Microsoft.Office.Interop.Word.ApplicationClass oWordApp = new Microsoft.Office.Interop.Word.ApplicationClass();
-        Microsoft.Office.Interop.Word.Document oWordDocExport = oWordApp.Documents.Add(ref oExportDoc, ref missing, ref missing, ref missing);
+        //Microsoft.Office.Interop.Word.ApplicationClass oWordApp = new Microsoft.Office.Interop.Word.ApplicationClass();
+        //Microsoft.Office.Interop.Word.Document oWordDocExport = oWordApp.Documents.Add(ref oExportDoc, ref missing, ref missing, ref missing);
+
+        DocX owordDocnew = DocX.Load(oExportDoc.ToString());
+        DocX oWordCurrent = DocX.Load(CurrentDoc.ToString());
      
         if (Clear)
         {
-            oWordDocExport.Content.Delete();
+            //oWordDocExport.Content.Delete();
+            //owordDocnew.Text.Remove(0, 100000);
+            owordDocnew.SaveAs(ExportDoc.Replace(".docx", "-temp.docx"));
         }
 
-        Microsoft.Office.Interop.Word.Selection selection = oWordApp.Selection;
-        selection.InsertFile(CurrentDoc, ref missing, ref missing, ref missing, ref missing);
+        owordDocnew = DocX.Load(ExportDoc.Replace(".docx", "-temp.docx"));
+        //Microsoft.Office.Interop.Word.Selection selection = oWordApp.Selection;
+        //selection.InsertFile(CurrentDoc, ref missing, ref missing, ref missing, ref missing);
+        owordDocnew.InsertDocument(oWordCurrent, true);
 
         //if(!Last)
         //    selection.InsertBreak(ref pageBreak);
 
-        oWordDocExport.Activate();
-        oWordDocExport.PageSetup.Orientation = WdOrientation.wdOrientLandscape;
-        oWordDocExport.SaveAs(ExportDoc);
+        //oWordDocExport.Activate();
+        //oWordDocExport.PageSetup.Orientation = WdOrientation.wdOrientLandscape;
+        //oWordDocExport.SaveAs(ExportDoc);
+
+        owordDocnew.PageLayout.Orientation = Novacode.Orientation.Landscape;
+        owordDocnew.SaveAs(ExportDoc.Replace(".docx", "-temp.docx"));
 
         if (Last)
-            oWordDocExport.SaveAs(ExportDoc.Replace(".docx", ".pdf"), WdSaveFormat.wdFormatPDF);
+            //oWordDocExport.SaveAs(ExportDoc.Replace(".docx", ".pdf"), WdSaveFormat.wdFormatPDF);
+            owordDocnew.SaveAs(ExportDoc.Replace(".docx", "-1.docx"));
 
-        object oMissing = System.Reflection.Missing.Value;
-        object saveChanges = WdSaveOptions.wdDoNotSaveChanges;
-        ((_Document)oWordDocExport).Close(ref saveChanges, ref oMissing, ref oMissing);
-        oWordDocExport = null;
+        //object oMissing = System.Reflection.Missing.Value;
+        //object saveChanges = WdSaveOptions.wdDoNotSaveChanges;
+        //((_Document)oWordDocExport).Close(ref saveChanges, ref oMissing, ref oMissing);
+        //oWordDocExport = null;
+        owordDocnew = null;
     }
 }

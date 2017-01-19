@@ -72,11 +72,14 @@
             <td>
                 <asp:Button ID="btnEdit" runat="server" Text="Edit selected" CssClass="FilterButton" ValidationGroup="1" OnClick="btnEdit_Click" />
                 <asp:Button ID="btnCreate" runat="server" Text="Create Employee" CssClass="FilterButton" ValidationGroup="1" OnClick="btnCreate_Click" />
-                <asp:Button ID="btnDelete" runat="server" Text="Delete the selected Employee" CssClass="FilterButton" ValidationGroup="1" OnClick="btnDelete_Click" onclientclick="javascript:return confirm('Are you sure to delete the selected Employee?');" />
+                <asp:Button ID="btnDelete" runat="server" Text="Delete the selected Employee" CssClass="FilterButton" ValidationGroup="1" OnClick="btnDelete_Click" onclientclick="javascript:return confirm('Are you sure to delete the selected Employee?');" Visible="False" />
             </td>
         </tr>
     </table>
     </asp:Panel>
+    <asp:ScriptManager ID="scriptmanager" runat="server"></asp:ScriptManager>
+    <asp:UpdatePanel runat="server" id="upData">
+    <ContentTemplate>
     <table id="TabelaGlavna" class="GlavnaStandard">
         <tr>
             <td>
@@ -150,6 +153,8 @@
             </td>
         </tr>
     </table>
+    </ContentTemplate>    
+    </asp:UpdatePanel>
 <script type="text/javascript">
     function ShowDialog() {
         var rtvalue = window.showModalDialog("Employees_Edit.aspx");

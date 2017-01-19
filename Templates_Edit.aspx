@@ -68,7 +68,7 @@
                         </td>
                         <td>                            
                             <asp:RequiredFieldValidator ID="rfvfuFile" runat="server" ErrorMessage="!" CssClass="RequredField" ControlToValidate="fuFile" ValidationGroup="1" ></asp:RequiredFieldValidator>
-                            <asp:RegularExpressionValidator ID="revfuFile" runat="server" ErrorMessage="Just .dotx is allowed!" CssClass="RequredField" ControlToValidate="fuFile" ValidationGroup="1" ValidationExpression="^(([a-zA-Z]:)|(\\{2}\w+)\$?)(\\(\w[\w].*))(.dotx)$"></asp:RegularExpressionValidator>
+                            <asp:RegularExpressionValidator ID="revfuFile" runat="server" ErrorMessage="Just .docx is allowed!" CssClass="RequredField" ControlToValidate="fuFile" ValidationGroup="1" ValidationExpression="^(([a-zA-Z]:)|(\\{2}\w+)\$?)(\\(\w[\w].*))(.docx)$"></asp:RegularExpressionValidator>
                         </td>
                     </tr>
                     <tr>
@@ -105,7 +105,7 @@
                     <tr>
                         <td colspan="3">
                             <br />
-                            <asp:Button ID="btnSave" runat="server" Text="Save changes" CssClass="EditFormButton" OnClick="btnSave_Click"  ValidationGroup="2"  />               
+                            <asp:Button ID="btnSave" runat="server" Text="Save changes" CssClass="EditFormButton" OnClick="btnSave_Click"  ValidationGroup="2" Visible="False"  />               
                             <asp:Button ID="btnInsert" runat="server" Text="Create New Template" CssClass="EditFormButton" ValidationGroup="1" OnClick="btnInsert_Click" />                
                             <asp:Button ID="btnDelete" runat="server" Text="Delete the Template" CssClass="EditFormButton" ValidationGroup="2" OnClick="btnDelete_Click" onclientclick="javascript:return confirm('Are you sure to delete the selected contract?');" />                
                             <asp:Button ID="btnDownload" runat="server" Text="Download selected Template" CssClass="EditFormButton" OnClick="btnDownload_Click" />     

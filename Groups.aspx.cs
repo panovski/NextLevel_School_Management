@@ -31,6 +31,8 @@ public partial class Groups : System.Web.UI.Page
                                 ","+ ConfigurationManager.AppSettings["Advanced"].ToString() + ") GROUP BY e.EmployeeID, e.FirstName, e.LastName", ddlTeacher, "Name", "EmployeeID");
 
             Functions.FillCombo("SELECT TemplateName, TemplateFile FROM Template WHERE TemplateType=2 ORDER BY CreatedDate DESC", ddlTemplateCertificate, "TemplateName", "TemplateFile");
+            Functions.FillCombo("SELECT -1 as Enable, '' as Description UNION SELECT 1 as Enable, 'Active' as Description UNION SELECT 0 as Enable, 'Finished' as Description", ddlStatus, "Description", "Enable");
+            ddlStatus.SelectedValue = "1";
             Login_Redirect();
             btnSearch_Click(sender, e);
         }
@@ -73,7 +75,7 @@ public partial class Groups : System.Web.UI.Page
     }
     public void FillDataGrid(String WherePart)
     {
-        dsMain.SelectCommand = @"SELECT g.*,gt.*,g.GroupID as ID,
+        dsMain.SelectCommand = @"SELECT g.*,gt.*,g.GroupID as ID, CASE WHEN Status=1 THEN 'Active' WHEN Status=0 THEN 'Finished' END as StatusDesc, 
                                (SELECT COUNT(*) FROM GroupStudent as gs LEFT OUTER JOIN Student s ON s.StudentID=gs.StudentID WHERE gs.GroupID=g.GroupID AND gs.Transfered=0 AND s.Status=1 )as StudentsNo
                                FROM [Group] as g LEFT OUTER JOIN GroupType as gt ON gt.GroupTypeID=g.GroupTypeID " + WherePart + " ORDER BY g.GroupID DESC";
     }
@@ -85,6 +87,7 @@ public partial class Groups : System.Web.UI.Page
         WherePart = Functions.VratiWherePartDDL(ddlLanguage, "gt.Language", WherePart);
         WherePart = Functions.VratiWherePartDDL(ddlLevel, "gt.LevelDescription", WherePart);
         WherePart = Functions.VratiWherePartDDL(ddlTeacher, "g.EmployeeID", WherePart);
+        WherePart = Functions.VratiWherePartDDL(ddlStatus, "g.Status", WherePart);
 
         if (WherePart.Length > 0) WherePart = " WHERE " + WherePart;
         return WherePart;
@@ -383,10 +386,10 @@ public partial class Groups : System.Web.UI.Page
     {
         if (gvCertificates.SelectedRow != null)
         {
-            string SQLPrint = @"SELECT c.RegNo, s.FirstName + ' ' + s.LastName as StudentName, FORMAT(s.DateOfBirth,'dd.MM.yyyy') as DateOfBirth,
+            string SQLPrint = @"SELECT c.RegNo, s.FirstName + ' ' + s.LastName as StudentName, convert(varchar,s.DateOfBirth,104) as DateOfBirth,
                             s.Place, gt.Language, gt.LevelDescription, gt.Level, gt.Program, g.NumberOfClasses, 
-							FORMAT(g.StartDate,'dd.MM.yyyy') as StartDate, FORMAT(g.EndDate,'dd.MM.yyyy') as EndDate, 
-							FORMAT(g.EndDate,'dd.MM.yyyy') as DateOfPrint, e.FirstName + ' ' + e.LastName as Teacher
+							convert(varchar,g.StartDate,104) as StartDate, convert(varchar,g.EndDate,104) as EndDate, 
+							convert(varchar,g.EndDate,104) as DateOfPrint, e.FirstName + ' ' + e.LastName as Teacher
                             FROM [Certificate] c LEFT OUTER JOIN Student s ON s.StudentID=c.StudentID
                             LEFT OUTER JOIN [Group] g ON g.GroupID=c.GroupID
                             LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID
@@ -403,10 +406,10 @@ public partial class Groups : System.Web.UI.Page
             Language = Functions.ReturnLatin(Language);
             Teacher = Functions.ReturnLatin(Teacher);
 
-            SQLPrint = @"SELECT c.RegNo, '" + StudentName + @"' as StudentName, FORMAT(s.DateOfBirth,'dd.MM.yyyy') as DateOfBirth,
+            SQLPrint = @"SELECT c.RegNo, '" + StudentName + @"' as StudentName, convert(varchar,s.DateOfBirth,104) as DateOfBirth,
                             '" + Place + @"' as Place, '" + Language + @"' as Language, gt.LevelDescription, gt.Level, gt.Program, g.NumberOfClasses, 
-							FORMAT(g.StartDate,'dd.MM.yyyy') as StartDate, FORMAT(g.EndDate,'dd.MM.yyyy') as EndDate, 
-							FORMAT(g.EndDate,'dd.MM.yyyy') as DateOfPrint, '" + Teacher + @"' as Teacher,
+							convert(varchar,g.StartDate,104) as StartDate, convert(varchar,g.EndDate,104) as EndDate, 
+							convert(varchar,g.EndDate,104) as DateOfPrint, '" + Teacher + @"' as Teacher,
                             (CASE WHEN s.Gender = 1 THEN '' ELSE 'a' END) as Gender
                             FROM [Certificate] c LEFT OUTER JOIN Student s ON s.StudentID=c.StudentID
                             LEFT OUTER JOIN [Group] g ON g.GroupID=c.GroupID
@@ -429,10 +432,10 @@ public partial class Groups : System.Web.UI.Page
             if (gr.RowIndex > -1)
             {
                 gvCertificates.SelectRow(gr.RowIndex);
-                string SQLPrint = @"SELECT c.RegNo, s.FirstName + ' ' + s.LastName as StudentName, FORMAT(s.DateOfBirth,'dd.MM.yyyy') as DateOfBirth,
+                string SQLPrint = @"SELECT c.RegNo, s.FirstName + ' ' + s.LastName as StudentName, convert(varchar,s.DateOfBirth,104) as DateOfBirth,
                             s.Place, gt.Language, gt.LevelDescription, gt.Level, gt.Program, g.NumberOfClasses, 
-							FORMAT(g.StartDate,'dd.MM.yyyy') as StartDate, FORMAT(g.EndDate,'dd.MM.yyyy') as EndDate, 
-							FORMAT(g.EndDate,'dd.MM.yyyy') as DateOfPrint, e.FirstName + ' ' + e.LastName as Teacher
+							convert(varchar,g.StartDate,104) as StartDate, convert(varchar,g.EndDate,104) as EndDate, 
+							convert(varchar,g.EndDate,104) as DateOfPrint, e.FirstName + ' ' + e.LastName as Teacher
                             FROM [Certificate] c LEFT OUTER JOIN Student s ON s.StudentID=c.StudentID
                             LEFT OUTER JOIN [Group] g ON g.GroupID=c.GroupID
                             LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID
@@ -449,10 +452,10 @@ public partial class Groups : System.Web.UI.Page
                 Language = Functions.ReturnLatin(Language);
                 Teacher = Functions.ReturnLatin(Teacher);
 
-                SQLPrint = @"SELECT c.RegNo, '" + StudentName + @"' as StudentName, FORMAT(s.DateOfBirth,'dd.MM.yyyy') as DateOfBirth,
+                SQLPrint = @"SELECT c.RegNo, '" + StudentName + @"' as StudentName, convert(varchar,s.DateOfBirth,104) as DateOfBirth,
                             '" + Place + @"' as Place, '" + Language + @"' as Language, gt.LevelDescription, gt.Level, gt.Program, g.NumberOfClasses, 
-							FORMAT(g.StartDate,'dd.MM.yyyy') as StartDate, FORMAT(g.EndDate,'dd.MM.yyyy') as EndDate, 
-							FORMAT(g.EndDate,'dd.MM.yyyy') as DateOfPrint, '" + Teacher + @"' as Teacher,
+							convert(varchar,g.StartDate,104) as StartDate, convert(varchar,g.EndDate,104) as EndDate, 
+							convert(varchar,g.EndDate,104) as DateOfPrint, '" + Teacher + @"' as Teacher,
                             (CASE WHEN s.Gender = 1 THEN '' ELSE 'a' END) as Gender
                             FROM [Certificate] c LEFT OUTER JOIN Student s ON s.StudentID=c.StudentID
                             LEFT OUTER JOIN [Group] g ON g.GroupID=c.GroupID
@@ -576,6 +579,7 @@ public partial class Groups : System.Web.UI.Page
                 Fill_Certificates(gvMain.SelectedValue.ToString());
                 pnlAddPermission.Visible = true;
                 Login_Redirect();
+                break;
             }
             else
             {

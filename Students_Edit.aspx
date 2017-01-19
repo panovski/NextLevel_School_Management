@@ -35,7 +35,7 @@
 
             <td rowspan="7" style="vertical-align:top; text-align:left">
                 <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="EditFormButton" OnClick="btnSave_Click"  ValidationGroup="1" Visible="false"/>               
-                <asp:Button ID="btnInsert" runat="server" Text="Insert New Employee" CssClass="EditFormButton" ValidationGroup="1" OnClick="btnInsert_Click" Visible="false"/>                
+                <asp:Button ID="btnInsert" runat="server" Text="Insert New Student" CssClass="EditFormButton" ValidationGroup="1" OnClick="btnInsert_Click" Visible="false"/>                
                 <asp:Panel ID="pnlParrents" runat="server" Visible="false">
                     <br />Parents:<br />
                     <table>

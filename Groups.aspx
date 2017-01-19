@@ -100,7 +100,10 @@
         </tr>
     </table>
     </asp:Panel>
-    <table id="TabelaGlavna" class="GlavnaStandard">
+    <asp:ScriptManager ID="scriptmanager" runat="server"></asp:ScriptManager>
+    <asp:UpdatePanel runat="server" id="upData">
+    <ContentTemplate>
+    <table id="TabelaGlavna" class="GlavnaStandard">        
         <tr>
             <td colspan="2">
                 <div id="Filters" class="TabelaFilters">
@@ -141,7 +144,14 @@
                                 <asp:DropDownList ID="ddlTeacher" runat="server" CssClass="TextBoxRoundedFilters" ValidationGroup="1"></asp:DropDownList>                               
                             </td>
                             <td style="padding-left:1vw"></td>
-                            <td colspan="7" style="text-align:right">
+                            <td>
+                               Status:
+                            </td>
+                            <td>
+                                <asp:DropDownList ID="ddlStatus" runat="server" CssClass="TextBoxRoundedFilters" ValidationGroup="1"></asp:DropDownList>                               
+                            </td>
+                            <td style="padding-left:1vw"></td>
+                            <td colspan="5" style="text-align:right">
                                 
                             </td>
                         </tr>                    
@@ -162,6 +172,7 @@
                            <asp:BoundField DataField="Language" HeaderText="Language" SortExpression="Language" />
                            <asp:BoundField DataField="LevelDescription" HeaderText="Level" SortExpression="LevelDescription"/>
                            <asp:BoundField DataField="StudentsNo" HeaderText="Students" SortExpression="StudentsNo" ItemStyle-HorizontalAlign="Center"/>
+                           <asp:BoundField DataField="StatusDesc" HeaderText="Status" SortExpression="StatusDesc" ItemStyle-HorizontalAlign="Center"/>
                            <asp:BoundField DataField="CreatedDate" HeaderText="Created Date" SortExpression="CreatedDate" ReadOnly="true" Visible="false"/>
                            <asp:BoundField DataField="CreatedBy" HeaderText="Created By" SortExpression="CreatedBy" ReadOnly="true" Visible="false"/>
                        </Columns>
@@ -303,7 +314,7 @@
                                         <td>
                                         </td>
                                         <td>
-                                            <asp:Button ID="btnPrintPayment" runat="server" Text="Print payment" CssClass="PrintButton" OnClick="btnPrintPayment_Click"/>                                            
+                                            
                                         </td>
                                     </tr>
                                 </table>
@@ -338,8 +349,7 @@
                                 <asp:ImageButton ID="imgbtnRefresh" runat="server" ImageUrl="~/Images/Icons/Refresh1.png" OnClick="imgbtnRefresh_Click" CssClass="RefreshButton"/>
                                 <br /><br />
                                     Certificate Template:<asp:DropDownList ID="ddlTemplateCertificate" runat="server" CssClass="TextBoxRoundedFilters" ValidationGroup="2"></asp:DropDownList>                               
-                                    <asp:Button ID="btnPrintSelectedCertificate" runat="server" Text="Print selected Certificate" CssClass="PrintButton" OnClick="btnPrintSelectedCertificate_Click" /><br />
-                                    <asp:Button ID="btnPrintAllCertificates" runat="server" Text="Print all Certificates" CssClass="PrintButton" OnClick="btnPrintAllCertificates_Click" /><br /><br />
+                                    
                                     <asp:Button ID="btnCreateAllCertificates" runat="server" Text="Create all Certificates" CssClass="NormalButton" OnClick="btnCreateAllCertificates_Click"  onclientclick="javascript:return confirm('Are you sure to create certificates for everyone?');"/>
                                     <asp:Button ID="btnDeleteAllCertificates" runat="server" Text="Delete all Certificates" CssClass="NormalButton" onclientclick="javascript:return confirm('Are you sure to delete all certificates in this group?');" OnClick="btnDeleteAllCertificates_Click" Visible="False"/>
                             </td>                           
@@ -350,6 +360,18 @@
             </td>
         </tr>
     </table>
+    </ContentTemplate>    
+    </asp:UpdatePanel>
+    <table id="TabelaBottomn" class="MeniBottom">
+        <tr>
+            <td>                
+                <asp:Button ID="btnPrintPayment" runat="server" Text="Print payment" CssClass="PrintButton" OnClick="btnPrintPayment_Click"/>   
+                <asp:Button ID="btnPrintSelectedCertificate" runat="server" Text="Print selected Certificate" CssClass="PrintButton" OnClick="btnPrintSelectedCertificate_Click" />
+                <asp:Button ID="btnPrintAllCertificates" runat="server" Text="Print all Certificates" CssClass="PrintButton" OnClick="btnPrintAllCertificates_Click" />                                        
+            </td>
+        </tr>
+    </table>
+    
     <script type="text/javascript">
     function ShowDialog() {
         var rtvalue = window.showModalDialog("Groups_Edit.aspx");

@@ -83,6 +83,9 @@
         </tr>
     </table>
     </asp:Panel>
+    <asp:ScriptManager ID="scriptmanager" runat="server"></asp:ScriptManager>
+    <asp:UpdatePanel runat="server" id="upData">
+    <ContentTemplate>
     <table id="TabelaGlavna" class="GlavnaStandard">
         <tr>
             <td colspan="2">
@@ -208,7 +211,7 @@
                                         <td>
                                         </td>
                                         <td>
-                                            <asp:Button ID="btnPrintPayment" runat="server" Text="Print payment" CssClass="PrintButton" OnClick="btnPrintPayment_Click"/>
+                                            
                                         </td>
                                     </tr>
                                 </table>
@@ -217,6 +220,15 @@
                         </table>
                 </div>                
 
+            </td>
+        </tr>
+    </table>
+    </ContentTemplate>    
+    </asp:UpdatePanel>
+    <table id="TabelaBottomn" class="MeniBottom">
+        <tr>
+            <td>                
+                <asp:Button ID="btnPrintPayment" runat="server" Text="Print payment" CssClass="PrintButton" OnClick="btnPrintPayment_Click"/>
             </td>
         </tr>
     </table>

@@ -328,6 +328,7 @@ public partial class Students : System.Web.UI.Page
                     //btnDeactivate.Visible = false;
                     //btnActivate.Visible = true;
                 }
+                break;
             }
             else
             {
@@ -407,8 +408,8 @@ public partial class Students : System.Web.UI.Page
             String PaymentPath = Functions.ExecuteScalar("SELECT TOP 1 TemplateFile FROM Template WHERE TemplateType=3 ORDER BY CreatedDate DESC");
             String PathDoc = Server.MapPath(PaymentPath.Replace(".dotx", ""));
             Functions.PrintWord(PathDoc, SQLPrint);
-            FileInfo fileInfo = new FileInfo(PathDoc + ".pdf");
-            //FileInfo fileInfo = new FileInfo(PathDoc + "-1.docx");
+            //FileInfo fileInfo = new FileInfo(PathDoc + ".pdf");
+            FileInfo fileInfo = new FileInfo(PathDoc + "-1.docx");
             if (fileInfo.Exists)
             {
                 Response.Clear();
@@ -458,19 +459,9 @@ public partial class Students : System.Web.UI.Page
     {
         if (gvContracts.SelectedRow != null)
         {
-
-            //      string SQLPrint = @"SELECT FirstName + ' ' + LastName as StudentName, Address as StudentAddress,
-            //                  HouseNumber as StudentHouseNumber, Place as StudentPlace, SocialNumber as StudentSN,
-            //                  Place as StudentGrad, FORMAT(c.StartDate,'dd.MM.yyyy') as StartDate,
-            //CASE WHEN DATEDIFF(DAY,s.DateOfBirth, GETDATE())<6570 THEN 
-            //N' (малолетен преку својот законски родител-старател) ' + Parent_FirstName + ' ' + Parent_LastName +
-            //N' од ' + Parent_Place + N', со стан на ул.' + Parent_Address + N' бр.' + Parent_HouseNumber + N' во ' + 
-            //Parent_Place + N' и ЕМБГ:' + Parent_SocialNumber +'.' ELSE '' END as MaloletenInfo
-            //                  FROM Student s LEFT OUTER JOIN [Contract] c ON c.StudentID=s.StudentID WHERE c.ContractID=" + gvContracts.SelectedValue;
-
             string SQLPrint = @"SELECT FirstName + ' ' + LastName as StudentName, Address as StudentAddress,
                         HouseNumber as StudentHouseNumber, Place as StudentPlace, SocialNumber as StudentSN,
-                        Place as StudentGrad, FORMAT(c.StartDate,'dd.MM.yyyy') as StartDate,
+                        Place as StudentGrad, convert(varchar,c.StartDate,104) as StartDate,
 						CASE WHEN DATEDIFF(DAY,s.DateOfBirth, GETDATE())<6570 THEN 
 						N' (малолетен преку својот законски родител-старател) ' + Parent_FirstName + ' ' + Parent_LastName +
 						N' од ' + Parent_Place + N', со стан на ул.' + Parent_Address + N' бр.' + Parent_HouseNumber + N' во ' + 
@@ -486,7 +477,7 @@ public partial class Students : System.Web.UI.Page
 						WHERE c.ContractID=" + gvContracts.SelectedValue;
 
             String PaymentPath = Functions.ExecuteScalar("SELECT TOP 1 TemplateFile FROM Template WHERE TemplateType=1 ORDER BY CreatedDate DESC");
-            String PathDoc = Server.MapPath(PaymentPath.Replace(".dotx", ""));
+            String PathDoc = Server.MapPath(PaymentPath.Replace(".dotx", ".docx"));
             Functions.PrintWord(PathDoc, SQLPrint);
             PrintPDF(PathDoc);
         }
@@ -495,10 +486,10 @@ public partial class Students : System.Web.UI.Page
     {
         if (gvCertificates.SelectedRow != null)
         {
-            string SQLPrint = @"SELECT c.RegNo, s.FirstName + ' ' + s.LastName as StudentName, FORMAT(s.DateOfBirth,'dd.MM.yyyy') as DateOfBirth,
+            string SQLPrint = @"SELECT c.RegNo, s.FirstName + ' ' + s.LastName as StudentName, convert(varchar, s.DateOfBirth, 104) as DateOfBirth,
                             s.Place, gt.Language, gt.LevelDescription, gt.Level, gt.Program, g.NumberOfClasses, 
-							FORMAT(g.StartDate,'dd.MM.yyyy') as StartDate, FORMAT(g.EndDate,'dd.MM.yyyy') as EndDate, 
-							FORMAT(g.EndDate,'dd.MM.yyyy') as DateOfPrint, e.FirstName + ' ' + e.LastName as Teacher
+							convert(varchar, g.StartDate, 104) as StartDate, convert(varchar, g.EndDate, 104) as EndDate, 
+							convert(varchar, g.EndDate, 104) as DateOfPrint, e.FirstName + ' ' + e.LastName as Teacher
                             FROM [Certificate] c LEFT OUTER JOIN Student s ON s.StudentID=c.StudentID
                             LEFT OUTER JOIN [Group] g ON g.GroupID=c.GroupID
                             LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID
@@ -515,10 +506,10 @@ public partial class Students : System.Web.UI.Page
             Language = Functions.ReturnLatin(Language);
             Teacher = Functions.ReturnLatin(Teacher);
 
-            SQLPrint = @"SELECT c.RegNo, '"+ StudentName + @"' as StudentName, FORMAT(s.DateOfBirth,'dd.MM.yyyy') as DateOfBirth,
-                            '"+ Place + @"' as Place, '"+ Language + @"' as Language, gt.LevelDescription, gt.Level, gt.Program, g.NumberOfClasses, 
-							FORMAT(g.StartDate,'dd.MM.yyyy') as StartDate, FORMAT(g.EndDate,'dd.MM.yyyy') as EndDate, 
-							FORMAT(g.EndDate,'dd.MM.yyyy') as DateOfPrint, '"+ Teacher + @"' as Teacher,
+            SQLPrint = @"SELECT c.RegNo, '" + StudentName + @"' as StudentName, convert(varchar,s.DateOfBirth, 104) as DateOfBirth,
+                            '" + Place + @"' as Place, '"+ Language + @"' as Language, gt.LevelDescription, gt.Level, gt.Program, g.NumberOfClasses, 
+							convert(varchar,g.StartDate,104) as StartDate, convert(varchar,g.EndDate,104) as EndDate, 
+							convert(varchar,g.EndDate,104) as DateOfPrint, '" + Teacher + @"' as Teacher,
                             (CASE WHEN s.Gender = 1 THEN '' ELSE 'a' END) as Gender
                             FROM [Certificate] c LEFT OUTER JOIN Student s ON s.StudentID=c.StudentID
                             LEFT OUTER JOIN [Group] g ON g.GroupID=c.GroupID

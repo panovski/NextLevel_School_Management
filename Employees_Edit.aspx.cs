@@ -27,7 +27,7 @@ public partial class Employees_Edit : System.Web.UI.Page
             else
             {
                 btnInsert.Visible = true;
-                calStartDate.SelectedDate = DateTime.Today.AddHours(Convert.ToDouble(ConfigurationManager.AppSettings["HourZone"]));
+                //calStartDate.SelectedDate = DateTime.Today.AddHours(Convert.ToDouble(ConfigurationManager.AppSettings["HourZone"]));
                 cbUserName.Visible = true;
             }
         }
@@ -37,7 +37,7 @@ public partial class Employees_Edit : System.Web.UI.Page
     #region Functions
     public void FillDetailsEdit()
     {
-        String CurrentEmployee = Functions.ExecuteScalar(@"SELECT FirstName +';' + LastName+';'+ ContactPhone+';'+ convert(varchar(25), startdate, 104) +';'+
+        String CurrentEmployee = Functions.ExecuteScalar(@"SELECT FirstName +';' + LastName+';'+ ContactPhone+';'+ convert(varchar(25), startdate) +';'+
                                                             convert(varchar(25), Status) + ';' + convert(varchar(25), CASE WHEN UserId IS NULL THEN '-1' ELSE UserId END) +';' + Email FROM[Employee]
                                                             WHERE EmployeeID =" + Request.QueryString["ID"]);
         string[] curempl = CurrentEmployee.Split(';');
@@ -45,9 +45,10 @@ public partial class Employees_Edit : System.Web.UI.Page
         tbFirstName.Text = curempl[0];
         tbLastName.Text = curempl[1];
         tbContactPhone.Text = curempl[2];
-        DateTime selectedDate = Convert.ToDateTime(curempl[3]).AddHours(Convert.ToDouble(ConfigurationManager.AppSettings["HourZone"]));
-        calStartDate.TodaysDate = selectedDate;
-        calStartDate.SelectedDate = calStartDate.TodaysDate;
+        tbStartDate.Text = Convert.ToDateTime(curempl[3]).ToString("yyyy-MM-dd");
+        //DateTime selectedDate = Convert.ToDateTime(curempl[3]);//.AddHours(Convert.ToDouble(ConfigurationManager.AppSettings["HourZone"]));
+        //calStartDate.TodaysDate = selectedDate;
+        //calStartDate.SelectedDate = calStartDate.TodaysDate;
         ddlStatus.SelectedValue = curempl[4];
         ddlUserName.SelectedValue = curempl[5];
         tbEmail.Text = curempl[6];
@@ -113,7 +114,7 @@ public partial class Employees_Edit : System.Web.UI.Page
         if (Exists < 1 || OldUserID == UserID)
         {
             String SQL = @"UPDATE Employee SET FirstName=N'" + tbFirstName.Text.Replace("'", "''") + "',LastName=N'" + tbLastName.Text.Replace("'", "''") +
-                        "',ContactPhone=N'" + tbContactPhone.Text.Replace("'", "''") + "', StartDate='" + calStartDate.SelectedDate + "', Status='" + ddlStatus.SelectedValue.Replace("'", "''") +
+                        "',ContactPhone=N'" + tbContactPhone.Text.Replace("'", "''") + "', StartDate='" + tbStartDate.Text.Replace("'", "''") + "', Status='" + ddlStatus.SelectedValue.Replace("'", "''") +
                         "', UserId=" + UserID.Replace("'", "''") + EndDate + ",Email='" + tbEmail.Text + "' WHERE EmployeeID=" + Request.QueryString["ID"];
             Functions.ExecuteCommand(SQL);
 
@@ -163,10 +164,14 @@ public partial class Employees_Edit : System.Web.UI.Page
 
         String SQL = @"INSERT INTO Employee  (FirstName,LastName,ContactPhone,StartDate,Status,UserId,CreatedBy,Email)
                     VALUES(N'" + tbFirstName.Text.Replace("'", "''") + "',N'" + tbLastName.Text.Replace("'", "''") +
-                    "',N'" + tbContactPhone.Text.Replace("'", "''") + "','" + calStartDate.SelectedDate + "','" +
+                    "',N'" + tbContactPhone.Text.Replace("'", "''") + "','" + tbStartDate.Text.Replace("'", "''") + "','" +
                     ddlStatus.SelectedValue.Replace("'", "''") + "'," + UserID.Replace("'", "''") + "," + Session["UserID"] + ",'" + tbEmail.Text + "')";
         Functions.ExecuteCommand(SQL);
         Page.ClientScript.RegisterStartupScript(this.GetType(), "Call my function", "CloseDialog()", true);
     }
     #endregion
+    protected void tbStartDate_TextChanged(object sender, EventArgs e)
+    {
+
+    }
 }

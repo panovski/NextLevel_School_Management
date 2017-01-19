@@ -127,6 +127,14 @@
         </tr>
         <tr>
             <td>
+                Status:
+            </td>
+            <td>
+                <asp:DropDownList ID="ddlStatus" runat="server" CssClass="TextBoxRoundedEdit"></asp:DropDownList>                 
+            </td>
+        </tr>   
+        <tr>
+            <td>
                 Paid with invoice:
             </td>
             <td>

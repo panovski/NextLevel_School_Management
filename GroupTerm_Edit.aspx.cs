@@ -113,6 +113,7 @@ public partial class GroupTerm_Edit : System.Web.UI.Page
             {
                 row.ToolTip = string.Empty;
                 Fill_Details(gvMain.SelectedValue.ToString());
+                break;
             }
             else
             {

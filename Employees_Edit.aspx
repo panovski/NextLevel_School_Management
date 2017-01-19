@@ -34,21 +34,7 @@
                 <asp:RequiredFieldValidator ID="rfvFirstName" runat="server" ErrorMessage="Required!" CssClass="RequredField" ControlToValidate="tbFirstName" ValidationGroup="1"></asp:RequiredFieldValidator>
             </td>
             <td style="padding-left:5vw"></td>
-            <td>
-                StartDate:
-            </td>
             <td rowspan="5" style="padding-left:1vw; padding-top:1vw;">
-                <asp:Calendar ID="calStartDate" runat="server" DayNameFormat="Shortest" CssClass="Calender" TabIndex="8">
-                    <DayHeaderStyle BackColor="#CCCCCC" Font-Bold="True" Font-Size="7pt" />
-                    <NextPrevStyle VerticalAlign="Bottom" />
-                    <OtherMonthDayStyle ForeColor="#808080" />
-                    <SelectedDayStyle BackColor="#666666" Font-Bold="True" ForeColor="White" />
-                    <SelectorStyle BackColor="#CCCCCC" />
-                    <TitleStyle BackColor="#999999" BorderColor="Black" Font-Bold="True" />
-                    <TodayDayStyle BackColor="#CCCCCC" ForeColor="Black" />
-                    <WeekendDayStyle BackColor="#FFFFCC" />
-                </asp:Calendar>    
-                <br />
                 <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="EditFormButton" OnClick="btnSave_Click"  ValidationGroup="1" Visible="false" TabIndex="6"/>               
                 <asp:Button ID="btnInsert" runat="server" Text="Insert New Employee" CssClass="EditFormButton" ValidationGroup="1" OnClick="btnInsert_Click" Visible="false" TabIndex="7"/>
                 <br />
@@ -92,6 +78,18 @@
             </td>
             <td>
                 <asp:DropDownList ID="ddlUserName" runat="server" CssClass="TextBoxRoundedEdit" TabIndex="4"></asp:DropDownList>                      
+            </td>
+        </tr>
+         <tr>
+            <td>
+                Start Date:
+            </td>
+            <td>
+                <asp:TextBox ID="tbStartDate" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1" TextMode="Date" AutoPostBack="True" OnTextChanged="tbStartDate_TextChanged"></asp:TextBox>                               
+            </td>
+             <td>
+                <asp:RequiredFieldValidator ID="rfvDateOfBirth" runat="server" ErrorMessage="Required!" CssClass="RequredField" ControlToValidate="tbStartDate" ValidationGroup="1"></asp:RequiredFieldValidator><br />
+                <asp:CompareValidator ID="cvtbDateOfBirth" runat="server" ErrorMessage="Wrong date!" Operator="DataTypeCheck" Type="Date" ControlToValidate="tbStartDate"  CssClass="RequredField" ValidationGroup="1" ></asp:CompareValidator>                    
             </td>
         </tr>
          <tr>

@@ -80,6 +80,9 @@
  </script>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+    <asp:ScriptManager ID="scriptmanager" runat="server"></asp:ScriptManager>
+    <asp:UpdatePanel runat="server" id="upData">
+    <ContentTemplate>
     <table class="AdminPage">
         <tr>
             <td colspan="10">
@@ -402,6 +405,7 @@
            </td> 
         </tr>
     </table>    
-
+        </ContentTemplate>    
+    </asp:UpdatePanel>
 </asp:Content>
 

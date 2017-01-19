@@ -23,6 +23,8 @@ public partial class Groups_Edit : System.Web.UI.Page
                                 WHERE e.Status=1 AND ua.UserTypeID NOT IN (" + ConfigurationManager.AppSettings["Admin"].ToString() +
                                 "," + ConfigurationManager.AppSettings["Advanced"].ToString() + ") GROUP BY e.EmployeeID, e.FirstName, e.LastName", ddlTeacher, "Name", "EmployeeID");
 
+            Functions.FillCombo("SELECT 1 as Enable, 'Active' as Description UNION SELECT 0 as Enable, 'Finished' as Description", ddlStatus, "Description", "Enable");
+
             if (Request.QueryString["ID"] != "")
             {
                 FillDetailsEdit();
@@ -77,6 +79,7 @@ public partial class Groups_Edit : System.Web.UI.Page
         tbCost.Text = Group[7];
         ddlTeacher.SelectedValue = Group[8];
         tbTeacherPercentage.Text = Group[9];
+        ddlStatus.SelectedValue = Group[10];
         Boolean Checked = false;
         if (Convert.ToBoolean(Group[11])) Checked = true;
         cbInvoice.Checked = Checked;
@@ -116,6 +119,7 @@ public partial class Groups_Edit : System.Web.UI.Page
       ", Cost= " + tbCost.Text +
       ", EmployeeID= " + ddlTeacher.SelectedValue +
       ", TeacherPercentage= " + tbTeacherPercentage.Text.Replace("'", "''") +
+      ", Status=" + ddlStatus.SelectedValue +
       ", Invoice=" + Invoice +
       " WHERE GroupID=" + Request.QueryString["ID"];
         Functions.ExecuteCommand(SQL);
@@ -131,7 +135,7 @@ public partial class Groups_Edit : System.Web.UI.Page
                     Cost,EmployeeID, TeacherPercentage, Status, Invoice, CreatedBy)
                    VALUES(N'" + tbGroupName.Text.Replace("'", "''") + "'," + ddlCourse.SelectedValue + ",N'" + tbStartDate.Text.Replace("'", "''") +
                   "',N'" + tbEndDate.Text.Replace("'", "''") + "'," + tbNoClasses.Text + "," + tbNoPayments.Text +
-                  "," + tbCost.Text + "," + ddlTeacher.SelectedValue + "," + tbTeacherPercentage.Text.Replace("'", "''") + ",0," + Invoice + "," + Session["UserID"] + ")";
+                  "," + tbCost.Text + "," + ddlTeacher.SelectedValue + "," + tbTeacherPercentage.Text.Replace("'", "''") + ",'" + ddlStatus.SelectedValue + "'," + Invoice + "," + Session["UserID"] + ")";
         Functions.ExecuteCommand(SQL);
         Page.ClientScript.RegisterStartupScript(this.GetType(), "Call my function", "CloseDialog()", true);
     }

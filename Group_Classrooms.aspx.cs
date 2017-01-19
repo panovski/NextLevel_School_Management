@@ -50,6 +50,8 @@ public partial class Group_Classrooms : System.Web.UI.Page
             {
                 row.ToolTip = string.Empty;
                 Fill_Details(gvMain.SelectedValue.ToString());
+                btnSave.Visible = true;
+                break;
             }
             else
             {
@@ -85,12 +87,15 @@ public partial class Group_Classrooms : System.Web.UI.Page
     }
     protected void btnSave_Click(object sender, EventArgs e)
     {
-        String SQL = @"UPDATE Classroom SET Name=N'" + tbClassroomName.Text.Replace("'", "''") + "', Description=N'" + tbDescription.Text +
-                     "' WHERE ClassroomID=" + gvMain.SelectedValue;
-        Functions.ExecuteCommand(SQL);
-        Fill_Grid();
-        lblInfo.Text = "The changes are saved!";
-        lblInfo.Visible = true;
+        if (gvMain.SelectedValue != null)
+        {
+            String SQL = @"UPDATE Classroom SET Name=N'" + tbClassroomName.Text.Replace("'", "''") + "', Description=N'" + tbDescription.Text +
+                         "' WHERE ClassroomID=" + gvMain.SelectedValue;
+            Functions.ExecuteCommand(SQL);
+            Fill_Grid();
+            lblInfo.Text = "The changes are saved!";
+            lblInfo.Visible = true;
+        }
     }
     #endregion
 }
