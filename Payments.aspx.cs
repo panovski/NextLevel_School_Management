@@ -232,7 +232,9 @@ public partial class Payments : System.Web.UI.Page
     protected void PrintPayment(String PaymentID)
     {
         string SQLPrint = @"SELECT p.AccountNumber,p.Ammount, p.AmmountWords, g.GroupName+'-'+gt.Language+'-'+gt.LevelDescription as PaymentGroup,
-                        s.FirstName+' '+s.LastName as PaymentName, p.PaymentNumber, s.Place as PaymentPlace
+                        s.FirstName+' '+s.LastName as PaymentName, p.PaymentNumber, s.Place as PaymentPlace,
+                        convert(varchar,p.DateOfPayment,104) as DateOfPayment, gs.TotalCost, gs.TotalCost-p.Ammount as RemainingCost,
+						(SELECT COUNT(*) FROM Payment p2 where p2.GroupStudentID=gs.GroupStudentID) as NoPayments, g.NumberOfPayments as TotalNoPayment
                         FROM Payment p LEFT OUTER JOIN GroupStudent gs ON gs.GroupStudentID=p.GroupStudentID
                         LEFT OUTER JOIN [Group] g ON g.GroupID=gs.GroupID LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID
                         LEFT OUTER JOIN Student s ON s.StudentID=gs.StudentID WHERE p.PaymentID=" + PaymentID;

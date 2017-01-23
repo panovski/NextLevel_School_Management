@@ -212,7 +212,10 @@ public partial class Services : System.Web.UI.Page
         if (gvPayments.SelectedRow != null)
         {
             string SQLPrint = @"SELECT p.AccountNumber,p.Ammount, p.AmmountWords, CAST(s.ServiceID AS VARCHAR(16)) + '-' + st.ServiceName as PaymentGroup,
-                        c.FirstName+' '+c.LastName as PaymentName, p.PaymentNumber, c.Place as PaymentPlace                        
+                        c.FirstName+' '+c.LastName as PaymentName, p.PaymentNumber, c.Place as PaymentPlace,
+						convert(varchar,p.DateOfPayment,104) as DateOfPayment, st.Cost as TotalCost, st.Cost-p.Ammount as RemainingCost,
+						(SELECT COUNT(*) FROM Payment p2 where p2.ServiceID=s.ServiceID) as NoPayments,
+						(SELECT COUNT(*) FROM Payment p2 where p2.ServiceID=s.ServiceID) as TotalNoPayment						                    
 						FROM Payment p LEFT OUTER JOIN [Service] s ON s.ServiceID=p.ServiceID 
 						LEFT OUTER JOIN ServiceType st ON st.ServiceTypeID=s.ServiceTypeID
 						LEFT OUTER JOIN Customer c ON c.CustomerID=s.CustomerID
