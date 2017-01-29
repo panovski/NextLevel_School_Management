@@ -17,7 +17,7 @@ public partial class MP_NextLevel : System.Web.UI.MasterPage
         //{
         //    Response.Redirect("Default.aspx");
         //}
-
+        lblUser.Text = "";
         if (Session["Loaded"] == null) Session["Loaded"] = false;
         
         

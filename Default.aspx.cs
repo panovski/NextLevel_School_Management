@@ -43,7 +43,7 @@ public partial class _Default : System.Web.UI.Page
             {
                 btnLogin.Enabled = false;
                 btnLogin.Visible = false;
-                lblInfoNajava.Text = "You reached maximum tries! Please wait!";
+                lblInfoNajava.Text = "Maximum 5 tries! Please wait for 30 minutes!";
                 lblInfoNajava.Visible = true;
             }
         }
