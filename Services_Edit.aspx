@@ -148,6 +148,17 @@
                         <td> 
                             <asp:CompareValidator ID="cvtbToDate" runat="server" ErrorMessage="Wrong date!" Operator="DataTypeCheck" Type="Date" ControlToValidate="tbToDate"  CssClass="RequredField" ValidationGroup="1" ></asp:CompareValidator>                             
                         </td>
+                    </tr>     
+                    <tr>
+                        <td>
+                            Quantity:
+                        </td>
+                        <td>
+                            <asp:TextBox ID="tbQuantity" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1" TextMode="Number" >1</asp:TextBox>
+                        </td>
+                        <td> 
+                            <asp:RequiredFieldValidator ID="RequiredFieldValidator1" runat="server" ErrorMessage="Required!" CssClass="RequredField" ControlToValidate="tbQuantity" ValidationGroup="1" ></asp:RequiredFieldValidator>
+                        </td>
                     </tr>                                                      
                     <tr>
                         <td>

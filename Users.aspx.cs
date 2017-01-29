@@ -30,8 +30,10 @@ public partial class Users : System.Web.UI.Page
     #region Functions
     public void Login_Redirect()
     {
-        if (Session["PermLevel"] == null) Response.Redirect("Default.aspx");
-        if (Session["PermLevel"].ToString() != ConfigurationManager.AppSettings["Admin"].ToString())
+        if (Request.Cookies["PermLevel"] == null) Response.Redirect("Default.aspx");
+        else if (Request.Cookies["PermLevel"].Value == "") Response.Redirect("Default.aspx");
+        String PermLevel = Functions.Decrypt(Request.Cookies["PermLevel"].Value);
+        if (PermLevel != ConfigurationManager.AppSettings["Admin"].ToString())
         {
             Response.Redirect("Default.aspx");
         }
@@ -129,7 +131,7 @@ public partial class Users : System.Web.UI.Page
     {
         if (gvUsers.SelectedRow != null)
         {
-            String SQL = "INSERT INTO UserAccess (UserID,UserTypeID,CreatedBy) VALUES (" + gvUsers.SelectedValue.ToString() + "," + ddlUserType.SelectedValue.ToString() + "," + Session["UserID"] + ")";
+            String SQL = "INSERT INTO UserAccess (UserID,UserTypeID,CreatedBy) VALUES (" + gvUsers.SelectedValue.ToString() + "," + ddlUserType.SelectedValue.ToString() + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ")";
             Functions.ExecuteCommand(SQL);
             Fill_Details();
         }

@@ -20,12 +20,12 @@ public partial class Payments : System.Web.UI.Page
     {
         if (!Page.IsPostBack)
         {
+            Login_Redirect();
             Functions.FillCombo("SELECT -1 as GroupID, '' as Description UNION SELECT g.GroupId, g.GroupName + '-' + gt.Language + '-' + gt.LevelDescription as Description FROM [Group] g LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID ORDER BY GroupID", ddlGroup, "Description", "GroupID");
             Functions.FillCombo(@"SELECT CustomerID, FirstName+' '+LastName as Name FROM Customer", ddlCustomers, "Name", "CustomerID");
             Functions.FillCombo(@"SELECT g.GroupID, g.GroupName + ' - ' + gt.Language + ' - ' + gt.LevelDescription as Course
                                 FROM [Group] g LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID = g.GroupTypeID
                                 WHERE g.Invoice=1", ddlInvoiceGroup, "Course", "GroupID");
-            Login_Redirect();
             btnSearch_Click(sender, e);
             rblType.SelectedValue = "0";
             tbAddPaymentNumber.Text = Get_PaymentNumber();
@@ -36,14 +36,16 @@ public partial class Payments : System.Web.UI.Page
     #region Functions
     public void Login_Redirect()
     {
-        if (Session["PermLevel"] == null) Response.Redirect("Default.aspx");
-        if (Session["PermLevel"].ToString() == ConfigurationManager.AppSettings["Admin"].ToString())
+        if (Request.Cookies["PermLevel"] == null) Response.Redirect("Default.aspx");
+        else if (Request.Cookies["PermLevel"].Value == "") Response.Redirect("Default.aspx");
+        String PermLevel = Functions.Decrypt(Request.Cookies["PermLevel"].Value);
+        if (PermLevel == ConfigurationManager.AppSettings["Admin"].ToString())
         {
             pnlTopMeni.Visible = true;
             pnlPayment.Visible = true;
         }
-        else if (Session["PermLevel"].ToString() == ConfigurationManager.AppSettings["Edit"].ToString()
-            || Session["PermLevel"].ToString() == ConfigurationManager.AppSettings["Advanced"].ToString())
+        else if (PermLevel == ConfigurationManager.AppSettings["Edit"].ToString()
+            || PermLevel == ConfigurationManager.AppSettings["Advanced"].ToString())
         {
             pnlTopMeni.Visible = false;
             pnlPayment.Visible = true;
@@ -101,7 +103,6 @@ public partial class Payments : System.Web.UI.Page
         tbAddPaymentNumber.Text = Payment[1];
         tbAddAmmount.Text = Payment[2];
         tbAddAmmountWords.Text = Payment[3];
-        tbAccountNumber.Text = Payment[4];
         tbAddDateOfPayment.Text = Convert.ToDateTime(Payment[5]).ToString("yyyy-MM-dd"); ;
 
         if (Payment[6] != "")
@@ -172,7 +173,6 @@ public partial class Payments : System.Web.UI.Page
         tbAddPaymentNumber.Enabled = false;
         tbAddAmmount.Enabled = false;
         tbAddAmmountWords.Enabled = false;
-        tbAccountNumber.Enabled = false;
         tbAddDateOfPayment.Enabled = false;
 
         pnlButtonsAdd.Visible = false;
@@ -231,25 +231,47 @@ public partial class Payments : System.Web.UI.Page
     }
     protected void PrintPayment(String PaymentID)
     {
-        string SQLPrint = @"SELECT p.AccountNumber,p.Ammount, p.AmmountWords, g.GroupName+'-'+gt.Language+'-'+gt.LevelDescription as PaymentGroup,
+        String PaymentPath = "";
+        string SQLPrint = "";
+        if (rblType.SelectedValue == "0")
+        {
+            SQLPrint = @"SELECT p.AccountNumber,p.Ammount, p.AmmountWords, g.GroupName+'-'+gt.Language+'-'+gt.LevelDescription as PaymentGroup,
                         s.FirstName+' '+s.LastName as PaymentName, p.PaymentNumber, s.Place as PaymentPlace,
-                        convert(varchar,p.DateOfPayment,104) as DateOfPayment, gs.TotalCost, gs.TotalCost-p.Ammount as RemainingCost,
-						(SELECT COUNT(*) FROM Payment p2 where p2.GroupStudentID=gs.GroupStudentID) as NoPayments, g.NumberOfPayments as TotalNoPayment
+                        convert(varchar,p.DateOfPayment,104) as DateOfPayment, gs.TotalCost, 
+						gs.TotalCost-(SELECT SUM(p2.Ammount) FROM Payment p2 where p2.GroupStudentID=gs.GroupStudentID AND p2.DateOfPayment<=p.DateOfPayment) as RemainingCost,
+						(SELECT COUNT(*) FROM Payment p2 where p2.GroupStudentID=gs.GroupStudentID AND p2.DateOfPayment<=p.DateOfPayment) as NoPayments, g.NumberOfPayments as TotalNoPayment
                         FROM Payment p LEFT OUTER JOIN GroupStudent gs ON gs.GroupStudentID=p.GroupStudentID
                         LEFT OUTER JOIN [Group] g ON g.GroupID=gs.GroupID LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID
                         LEFT OUTER JOIN Student s ON s.StudentID=gs.StudentID WHERE p.PaymentID=" + PaymentID;
-
-        if (rblType.SelectedValue == "1")
+            PaymentPath = Functions.ExecuteScalar("SELECT TOP 1 TemplateFile FROM Template WHERE TemplateType=3 ORDER BY CreatedDate DESC");
+        }
+        else if (rblType.SelectedValue == "1")
         {
             SQLPrint = @"SELECT p.AccountNumber,p.Ammount, p.AmmountWords, CAST(s.ServiceID AS VARCHAR(16)) + '-' + st.ServiceName as PaymentGroup,
-                        c.FirstName+' '+c.LastName as PaymentName, p.PaymentNumber, c.Place as PaymentPlace                        
+                        c.FirstName+' '+c.LastName as PaymentName, p.PaymentNumber, c.Place as PaymentPlace,
+						convert(varchar,p.DateOfPayment,104) as DateOfPayment, s.TotalCost as TotalCost, 
+						s.TotalCost-(SELECT SUM(p2.Ammount) FROM Payment p2 where p2.ServiceID=s.ServiceID AND p2.DateOfPayment<=p.DateOfPayment) as RemainingCost,
+						(SELECT COUNT(*) FROM Payment p2 where p2.ServiceID=s.ServiceID AND p2.DateOfPayment<=p.DateOfPayment) as NoPayments,
+						(SELECT COUNT(*) FROM Payment p2 where p2.ServiceID=s.ServiceID) as TotalNoPayment						                    
 						FROM Payment p LEFT OUTER JOIN [Service] s ON s.ServiceID=p.ServiceID 
 						LEFT OUTER JOIN ServiceType st ON st.ServiceTypeID=s.ServiceTypeID
 						LEFT OUTER JOIN Customer c ON c.CustomerID=s.CustomerID
 						WHERE p.PaymentID=" + PaymentID;
+            PaymentPath = Functions.ExecuteScalar("SELECT TOP 1 TemplateFile FROM Template WHERE TemplateType=3 ORDER BY CreatedDate DESC");
         }
-
-        String PaymentPath = Functions.ExecuteScalar("SELECT TOP 1 TemplateFile FROM Template WHERE TemplateType=3 ORDER BY CreatedDate DESC");
+        else if (rblType.SelectedValue == "2")
+        {
+            SQLPrint = @"SELECT p.AccountNumber,p.Ammount, p.AmmountWords, g.GroupName+'-'+gt.Language+'-'+gt.LevelDescription as PaymentGroup,
+                        g.GroupName + '-' + gt.Language + '-' + gt.LevelDescription as PaymentName, p.PaymentNumber,-- s.Place as PaymentPlace,
+                        convert(varchar,p.DateOfPayment,104) as DateOfPayment, g.Cost as TotalCost, 
+						g.Cost-(SELECT SUM(p2.Ammount) FROM Payment p2 where p2.InvoiceID=g.GroupID AND p2.DateOfPayment<=p.DateOfPayment) as RemainingCost,
+						(SELECT COUNT(*) FROM Payment p2 where p2.InvoiceID=g.GroupID AND p2.DateOfPayment<=p.DateOfPayment) as NoPayments, g.NumberOfPayments as TotalNoPayment
+                        FROM Payment p 
+                        LEFT OUTER JOIN [Group] g ON g.GroupID=p.InvoiceID LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID
+                        WHERE p.PaymentID=" + PaymentID;
+            PaymentPath = Functions.ExecuteScalar("SELECT TOP 1 TemplateFile FROM Template WHERE TemplateType=4 ORDER BY CreatedDate DESC");
+        }
+       
         String PathDoc = Server.MapPath(PaymentPath.Replace(".dotx", ""));
         Functions.PrintWord(PathDoc, SQLPrint);
         //FileInfo fileInfo = new FileInfo(PathDoc + ".pdf");
@@ -372,10 +394,10 @@ public partial class Payments : System.Web.UI.Page
     protected void CalculatePaymentsService()
     {
         String SQL = @"SELECT COUNT(p.PaymentID) as NumberOfPayments, 
-                    (SELECT CASE WHEN SUM(p.Ammount) IS NULL THEN 0 ELSE SUM(p.Ammount) END) as TotalPaid, st.Cost - (SELECT CASE WHEN SUM(p.Ammount) IS NULL THEN 0 ELSE SUM(p.Ammount) END) as TotalRemain					
+                    (SELECT CASE WHEN SUM(p.Ammount) IS NULL THEN 0 ELSE SUM(p.Ammount) END) as TotalPaid, s.TotalCost - (SELECT CASE WHEN SUM(p.Ammount) IS NULL THEN 0 ELSE SUM(p.Ammount) END) as TotalRemain					
 					FROM [Service] s LEFT OUTER JOIN ServiceType st ON st.ServiceTypeID=s.ServiceTypeID
 					LEFT OUTER JOIN Payment p ON p.ServiceID = s.ServiceID
-                    WHERE s.ServiceID= " + ddlService.SelectedValue + "	GROUP BY st.Cost";
+                    WHERE s.ServiceID= " + ddlService.SelectedValue + "	GROUP BY s.TotalCost";
 
         string[] Payments = Functions.ReturnIntoArray(SQL, 3);
 
@@ -632,10 +654,10 @@ public partial class Payments : System.Web.UI.Page
                 //else //ako e se vo red izvrsi uplata
                 //{
                 String GroupStudentID = Functions.ExecuteScalar("SELECT GroupStudentID FROM GroupStudent WHERE GroupID=" + ddlAddGroup.SelectedValue + " AND StudentID=" + ddlStudents.SelectedValue);
-                String SQL = @"INSERT INTO Payment (PaymentNumber,Ammount,AmmountWords,AccountNumber,DateOfPayment,
+                String SQL = @"INSERT INTO Payment (PaymentNumber,Ammount,AmmountWords,DateOfPayment,
                                 GroupStudentID,UserId,CreatedBy) VALUES('" + tbAddPaymentNumber.Text.Replace("'", "''") +
-                            "'," + tbAddAmmount.Text + ",N'" + tbAddAmmountWords.Text.Replace("'", "''") + "',N'" + tbAccountNumber.Text.Replace("'", "''") +
-                            "',N'" + tbAddDateOfPayment.Text.Replace("'", "''") + "'," + GroupStudentID + "," + Session["UserID"] + "," + Session["UserID"] + "); SELECT SCOPE_IDENTITY()";
+                            "'," + tbAddAmmount.Text + ",N'" + tbAddAmmountWords.Text.Replace("'", "''") +
+                            "',N'" + tbAddDateOfPayment.Text.Replace("'", "''") + "'," + GroupStudentID + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + "); SELECT SCOPE_IDENTITY()";
                 String ID = Functions.ExecuteScalar(SQL);
                 //CalculatePayments();
                 Fill_Payment(ID);
@@ -654,10 +676,10 @@ public partial class Payments : System.Web.UI.Page
         {
             if (Convert.ToInt32(tbAddAmmount.Text) <= Convert.ToInt32(tbCustomerRemaining.Text))
             {
-                String SQL = @"INSERT INTO Payment (PaymentNumber,Ammount,AmmountWords,AccountNumber,DateOfPayment,
+                String SQL = @"INSERT INTO Payment (PaymentNumber,Ammount,AmmountWords,DateOfPayment,
                                 ServiceID,UserId,CreatedBy) VALUES('" + tbAddPaymentNumber.Text.Replace("'", "''") +
-                            "'," + tbAddAmmount.Text + ",N'" + tbAddAmmountWords.Text.Replace("'", "''") + "',N'" + tbAccountNumber.Text.Replace("'", "''") +
-                            "',N'" + tbAddDateOfPayment.Text.Replace("'", "''") + "'," + ddlService.SelectedValue + "," + Session["UserID"] + "," + Session["UserID"] + "); SELECT SCOPE_IDENTITY()";
+                            "'," + tbAddAmmount.Text + ",N'" + tbAddAmmountWords.Text.Replace("'", "''") +
+                            "',N'" + tbAddDateOfPayment.Text.Replace("'", "''") + "'," + ddlService.SelectedValue + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + "); SELECT SCOPE_IDENTITY()";
                 String ID = Functions.ExecuteScalar(SQL);
                 Fill_Payment(ID);
                 lblInfo.Text = "The payments is inserted!";
@@ -675,10 +697,10 @@ public partial class Payments : System.Web.UI.Page
         {
             if (Convert.ToInt32(tbAddAmmount.Text) <= Convert.ToInt32(tbInvoiceRemainingCosts.Text))
             {
-                String SQL = @"INSERT INTO Payment (PaymentNumber,Ammount,AmmountWords,AccountNumber,DateOfPayment,
+                String SQL = @"INSERT INTO Payment (PaymentNumber,Ammount,AmmountWords,DateOfPayment,
                                 InvoiceID,UserId,CreatedBy) VALUES('" + tbAddPaymentNumber.Text.Replace("'", "''") +
-                            "'," + tbAddAmmount.Text + ",N'" + tbAddAmmountWords.Text.Replace("'", "''") + "',N'" + tbAccountNumber.Text.Replace("'", "''") +
-                            "',N'" + tbAddDateOfPayment.Text.Replace("'", "''") + "'," + ddlInvoiceGroup.SelectedValue + "," + Session["UserID"] + "," + Session["UserID"] + "); SELECT SCOPE_IDENTITY()";
+                            "'," + tbAddAmmount.Text + ",N'" + tbAddAmmountWords.Text.Replace("'", "''") +
+                            "',N'" + tbAddDateOfPayment.Text.Replace("'", "''") + "'," + ddlInvoiceGroup.SelectedValue + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + "); SELECT SCOPE_IDENTITY()";
                 String ID = Functions.ExecuteScalar(SQL);
                 Fill_Payment(ID);
                 lblInfo.Text = "The payments is inserted!";
@@ -706,8 +728,7 @@ public partial class Payments : System.Web.UI.Page
         tbPaymentID.Enabled = true;
         //tbAddPaymentNumber.Enabled = true;
         tbAddAmmount.Enabled = true;
-        tbAddAmmountWords.Enabled = true;
-        tbAccountNumber.Enabled = true;
+        tbAddAmmountWords.Enabled = true;        
         tbAddDateOfPayment.Enabled = true;
 
         pnlButtonsAdd.Visible = true;
@@ -725,7 +746,6 @@ public partial class Payments : System.Web.UI.Page
         tbAddPaymentNumber.Text = "";
         tbAddAmmount.Text = "";
         tbAddAmmountWords.Text = "";
-        tbAccountNumber.Text = "";
         tbAddDateOfPayment.Text = Convert.ToDateTime(DateTime.Now).ToString("MM/dd/yyyy");
         tbAddPaymentNumber.Text = Get_PaymentNumber();
 

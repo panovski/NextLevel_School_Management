@@ -15,7 +15,7 @@ public partial class Students_Edit : System.Web.UI.Page
     {
         if (!Page.IsPostBack)
         {
-            //Login_Redirect();
+            Login_Redirect();
             Functions.FillCombo("SELECT 1 as Enable, 'Active' as Description UNION SELECT 0 as Enable, 'Deactivated' as Description", ddlStatus, "Description", "Enable");
 
             if (Request.QueryString["ID"] != "")
@@ -43,10 +43,12 @@ public partial class Students_Edit : System.Web.UI.Page
     #region Functions
     public void Login_Redirect()
     {
-        if (Session["PermLevel"] == null) Response.Redirect("Default.aspx");
-        if (Session["PermLevel"].ToString() != ConfigurationManager.AppSettings["Admin"].ToString() &&
-          Session["PermLevel"].ToString() != ConfigurationManager.AppSettings["Advanced"].ToString() &&
-          Session["PermLevel"].ToString() != ConfigurationManager.AppSettings["Edit"].ToString())
+        if (Request.Cookies["PermLevel"] == null) Response.Redirect("Default.aspx");
+        else if (Request.Cookies["PermLevel"].Value == "") Response.Redirect("Default.aspx");
+        String PermLevel = Functions.Decrypt(Request.Cookies["PermLevel"].Value);
+        if (PermLevel != ConfigurationManager.AppSettings["Admin"].ToString() &&
+          PermLevel != ConfigurationManager.AppSettings["Advanced"].ToString() &&
+          PermLevel != ConfigurationManager.AppSettings["Edit"].ToString())
         {
             Response.Redirect("Default.aspx");
         }
@@ -133,7 +135,7 @@ public partial class Students_Edit : System.Web.UI.Page
                    "',N'" + tbAddress.Text.Replace("'", "''") + "',N'" + tbHouseNumber.Text.Replace("'", "''") + "',N'" + tbPlace.Text.Replace("'", "''") +
                    "','" + tbEmail.Text.Replace("'", "''") + "',N'" + tbParrentFirstName.Text.Replace("'", "''") + "',N'" + tbParrentLastName.Text.Replace("'", "''") +
                    "',N'" + tbParrentAddress.Text.Replace("'", "''") + "',N'" + tbParrentHouseNumber.Text.Replace("'", "''") + "',N'" + tbParrentSN.Text.Replace("'", "''") +
-                   "',N'" + tbParrentPlace.Text.Replace("'", "''") + "'," + Session["UserID"] + ",'"+rblGender.SelectedValue+"')";
+                   "',N'" + tbParrentPlace.Text.Replace("'", "''") + "'," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ",'" + rblGender.SelectedValue + "')";
            Functions.ExecuteCommand(SQL);
            Page.ClientScript.RegisterStartupScript(this.GetType(), "Call my function", "CloseDialog()", true);
         }

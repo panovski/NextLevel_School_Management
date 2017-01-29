@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Web;
+using System.Web.Security;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 #endregion
@@ -16,19 +17,42 @@ public partial class _Default : System.Web.UI.Page
     #region Page Load
     protected void Page_Load(object sender, EventArgs e)
     {
-        if (Session["najaven"] != null)
+
+        if(Request.Cookies["UserID"]!=null)
+        if (Functions.Decrypt(Request.Cookies["UserID"].Value) != "")
         {
-            if (Convert.ToBoolean(Session["najaven"])!= false)
-                Login_Redirect();           
+            //System.Web.Security.FormsAuthentication.RedirectToLoginPage();
+            Login_Redirect();  
         }
+
+        CheckLoginNumber();
+        //if (Session["najaven"] != null)
+        //{
+        //    if (Convert.ToBoolean(Session["najaven"])!= false)
+        //        Login_Redirect();           
+        //}
     }
     #endregion
 
     #region Functions
+    protected void CheckLoginNumber()
+    {
+        if (Session["LoginTries"] != null)
+        {
+            if (Convert.ToInt32(Session["LoginTries"]) >= 5)
+            {
+                btnLogin.Enabled = false;
+                btnLogin.Visible = false;
+                lblInfoNajava.Text = "You reached maximum tries! Please wait!";
+                lblInfoNajava.Visible = true;
+            }
+        }
+    }
     public void Login_Redirect()
     {
         Session["Loaded"] = true;
-            if (Convert.ToBoolean(Session["najaven"]) && Session["PermLevel"].ToString() == ConfigurationManager.AppSettings["Admin"].ToString())
+            //if (Convert.ToBoolean(Session["najaven"]) && Session["PermLevel"].ToString() == ConfigurationManager.AppSettings["Admin"].ToString())
+        if (Request.Cookies["UserID"]!=null && Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Admin"].ToString())
                 Response.Redirect("AdministrationPage.aspx");
             else
                 Response.Redirect("Groups.aspx");
@@ -38,41 +62,81 @@ public partial class _Default : System.Web.UI.Page
     #region Handled Events
     protected void btnLogin_Click(object sender, EventArgs e)
     {
-        Session["PermLevel"] = 0;
-        Session["najaven"] = false;
-        lblInfoNajava.Text = "Wrong username or password!";
-        lblInfoNajava.Visible = true;
+        if (Session["LoginTries"] != null)
+            Session["LoginTries"] = Convert.ToInt32(Session["LoginTries"]) + 1;
+        else
+            Session["LoginTries"] = 1;
 
-        String SQL = "SELECT COUNT(*) as Broj FROM [User] WHERE UserName=N'" + tbUserName.Text + "' AND Password='" + Functions.Encrypt(tbPassword.Text) + "' AND Enabled=1";
-        String Br = Functions.ExecuteScalar(SQL);
-        if (Convert.ToInt32(Br) > 0)
+        if (Convert.ToInt32(Session["LoginTries"]) <= 5)
         {
-            Session["najaven"] = true;
-            SQL = "SELECT UserID FROM [User] WHERE UserName=N'" + tbUserName.Text + "' AND Password='" + Functions.Encrypt(tbPassword.Text) + "'";
-            Session["UserID"] = Functions.ExecuteScalar(SQL);
 
-            SQL = "SELECT Count(UserTypeID) as Broj FROM UserAccess WHERE UserID=" + Session["UserID"];
-            String Broj = Functions.ExecuteScalar(SQL);
-            SQL = "SELECT UserTypeID FROM UserAccess WHERE UserID=" + Session["UserID"] + " ORDER BY UserTypeID DESC";
-            Session["Permissions"] = Functions.ReadIntoArray(SQL, "UserTypeID");
+            //Session["PermLevel"] = 0;
+            //Session["najaven"] = false;
 
-            SQL = "SELECT Username as Name FROM [User] WHERE UserID=" + Session["UserID"];
-            Session["UserLoged"]=Functions.ExecuteScalar(SQL);
+            //Request.Cookies["PermLevel"].Value = "0";
+            lblInfoNajava.Text = "Wrong username or password!";
+            lblInfoNajava.Visible = true;
 
-            int HighPermission = 99;
-            foreach (string perm in (List<String>)Session["Permissions"])
+            String SQL = "SELECT COUNT(*) as Broj FROM [User] WHERE UserName=N'" + tbUserName.Text + "' AND Password='" + Functions.Encrypt(tbPassword.Text) + "' AND Enabled=1";
+            String Br = Functions.ExecuteScalar(SQL);
+            if (Convert.ToInt32(Br) > 0)
             {
-                if (Convert.ToInt32(perm) < HighPermission)
+                //Session["najaven"] = true;
+
+                SQL = "SELECT UserID FROM [User] WHERE UserName=N'" + tbUserName.Text + "' AND Password='" + Functions.Encrypt(tbPassword.Text) + "'";
+                //Session["UserID"] = Functions.ExecuteScalar(SQL);
+
+                String UserId = Functions.ExecuteScalar(SQL);
+                HttpCookie UserID = new HttpCookie("UserID");
+                UserID.Value = Functions.Encrypt(UserId);
+                UserID.Expires = DateTime.Now.AddHours(8);
+                Response.SetCookie(UserID);
+
+                //FormsAuthentication.SetAuthCookie(Functions.Encrypt(Session["UserID"].ToString()), true);
+                //string name = HttpContext.Current.User.Identity.Name;
+
+                SQL = "SELECT Count(UserTypeID) as Broj FROM UserAccess WHERE UserID=" + UserId;
+                String Broj = Functions.ExecuteScalar(SQL);
+                SQL = "SELECT UserTypeID FROM UserAccess WHERE UserID=" + UserId + " ORDER BY UserTypeID DESC";
+                Session["Permissions"] = Functions.ReadIntoArray(SQL, "UserTypeID");
+
+                //HttpCookie Permissions = new HttpCookie("Permissions");
+                //Permissions.Value = Functions.Encrypt(Session["Permissions"].ToString());
+                //Permissions.Expires = DateTime.Now.AddHours(1);
+                //Response.SetCookie(Permissions);
+
+                SQL = "SELECT Username as Name FROM [User] WHERE UserID=" + UserId;// Session["UserID"];
+                //Session["UserLoged"]=Functions.ExecuteScalar(SQL);
+
+                HttpCookie UserLoged = new HttpCookie("UserLoged");
+                UserLoged.Value = Functions.Encrypt(Functions.ExecuteScalar(SQL));
+                UserLoged.Expires = DateTime.Now.AddHours(8);
+                Response.SetCookie(UserLoged);
+
+                int HighPermission = 99;
+                foreach (string perm in (List<String>)Session["Permissions"])
                 {
-                    HighPermission = Convert.ToInt32(perm);
-                    if (perm == ConfigurationManager.AppSettings["Admin"].ToString()) Session["PermLevel"] = ConfigurationManager.AppSettings["Admin"].ToString();
-                    if (perm == ConfigurationManager.AppSettings["Edit"].ToString()) Session["PermLevel"] = ConfigurationManager.AppSettings["Edit"].ToString();
-                    if (perm == ConfigurationManager.AppSettings["Readonly"].ToString()) Session["PermLevel"] = ConfigurationManager.AppSettings["Readonly"].ToString();
-                    if (perm == ConfigurationManager.AppSettings["Advanced"].ToString()) Session["PermLevel"] = ConfigurationManager.AppSettings["Advanced"].ToString();
+                    if (Convert.ToInt32(perm) < HighPermission)
+                    {
+                        HighPermission = Convert.ToInt32(perm);
+                        if (perm == ConfigurationManager.AppSettings["Admin"].ToString()) Session["PermLevel"] = ConfigurationManager.AppSettings["Admin"].ToString();
+                        if (perm == ConfigurationManager.AppSettings["Edit"].ToString()) Session["PermLevel"] = ConfigurationManager.AppSettings["Edit"].ToString();
+                        if (perm == ConfigurationManager.AppSettings["Readonly"].ToString()) Session["PermLevel"] = ConfigurationManager.AppSettings["Readonly"].ToString();
+                        if (perm == ConfigurationManager.AppSettings["Advanced"].ToString()) Session["PermLevel"] = ConfigurationManager.AppSettings["Advanced"].ToString();
+
+                        HttpCookie PermLevel = new HttpCookie("PermLevel");
+                        PermLevel.Value = Functions.Encrypt(Session["PermLevel"].ToString());
+                        PermLevel.Expires = DateTime.Now.AddHours(8);
+                        Response.SetCookie(PermLevel);
+                    }
                 }
+                Session["LoginTries"]=0;
+                //Request.Cookies["PermLevel"].Value = Session["PermLevel"].ToString();
+                Login_Redirect();
             }
-            Login_Redirect();
         }
+        else
+            CheckLoginNumber();
     }
     #endregion
 }

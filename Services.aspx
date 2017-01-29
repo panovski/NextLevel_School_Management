@@ -136,7 +136,7 @@
         <tr style="vertical-align:top">
             <td>             
                    <div class="TabelaMalaGrid">                   
-                   <div style="width:25.5vw; overflow: scroll">   
+                   <div style="width:25.5vw; height:33.5vw; overflow: scroll">   
                    <asp:GridView ID="gvMain" runat="server" GridLines="None" AutoGenerateColumns="False" DataKeyNames="ServiceID" DataSourceID="dsMain" CssClass="GridView" PagerStyle-CssClass="GridViewPager" HeaderStyle-CssClass="GridViewHeader" RowStyle-CssClass="GridViewRows" AllowPaging="True" AllowSorting="True" PageSize="13" AlternatingRowStyle-CssClass="GridViewRowsAlt" SelectedRowStyle-CssClass="GridViewSelectedRow" EditRowStyle-CssClass="GridViewSelectedRow" OnRowDataBound="gvMain_RowDataBound" OnSelectedIndexChanged="gvMain_SelectedIndexChanged" OnSorted="gvMain_Sorted" OnRowCommand="gvMain_RowCommand" OnPageIndexChanging="gvMain_PageIndexChanging">
 <AlternatingRowStyle CssClass="GridViewRowsAlt"></AlternatingRowStyle>
                        <Columns>

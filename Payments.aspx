@@ -141,7 +141,7 @@
         <tr style="vertical-align:top">
             <td>             
                    <div class="TabelaMalaGrid">
-                   <div style="width:25.5vw; overflow: scroll">                   
+                   <div style="width:25.5vw; height:30.3vw; overflow: scroll">                   
                    <asp:GridView ID="gvMain" runat="server" GridLines="None" AutoGenerateColumns="False" DataKeyNames="PaymentID" DataSourceID="dsMain" CssClass="GridView" PagerStyle-CssClass="GridViewPager" HeaderStyle-CssClass="GridViewHeader" RowStyle-CssClass="GridViewRows" AllowPaging="True" AllowSorting="True" PageSize="13" AlternatingRowStyle-CssClass="GridViewRowsAlt" SelectedRowStyle-CssClass="GridViewSelectedRow" EditRowStyle-CssClass="GridViewSelectedRow" OnRowDataBound="gvMain_RowDataBound" OnSelectedIndexChanged="gvMain_SelectedIndexChanged" OnSorted="gvMain_Sorted" OnPageIndexChanging="gvMain_PageIndexChanged" >
                     <AlternatingRowStyle CssClass="GridViewRowsAlt"></AlternatingRowStyle>
                        <Columns>
@@ -175,6 +175,7 @@
                             <td>
                                 Add Payment:<br />
                                 <asp:TextBox ID="tbPaymentID" runat="server" Visible="false"></asp:TextBox>
+                                <br />
                             </td>                            
                         </tr>
                         <tr>
@@ -187,17 +188,17 @@
                             <td>
                                 <asp:RequiredFieldValidator ID="rfvtbAddPaymentNumber" runat="server" ErrorMessage="!" ControlToValidate="tbAddPaymentNumber" CssClass="RequredField" ValidationGroup="2" ></asp:RequiredFieldValidator>
                             </td>
-                            <td rowspan="8" style="vertical-align:top; padding-left:1vw">
+                            <td rowspan="12" style="vertical-align:top; padding-left:1vw">
                                 <table>
                                      <tr>
-                            <td colspan="2">
-                                <asp:RadioButtonList ID="rblType" runat="server" RepeatDirection="Horizontal" AutoPostBack="True" OnSelectedIndexChanged="rblType_SelectedIndexChanged">
-                                    <asp:ListItem Value="0">Student</asp:ListItem>
-                                    <asp:ListItem Value="1">Additional Service</asp:ListItem>
-                                    <asp:ListItem Value="2">Invoice</asp:ListItem>
-                                </asp:RadioButtonList>
-                            </td>
-                        </tr>
+                                        <td colspan="2">
+                                            <asp:RadioButtonList ID="rblType" runat="server" RepeatDirection="Horizontal" AutoPostBack="True" OnSelectedIndexChanged="rblType_SelectedIndexChanged">
+                                                <asp:ListItem Value="0">Student</asp:ListItem>
+                                                <asp:ListItem Value="1">Additional Service</asp:ListItem>
+                                                <asp:ListItem Value="2">Invoice</asp:ListItem>
+                                            </asp:RadioButtonList>
+                                        </td>
+                                    </tr>
                         <tr>
                             <td colspan="2">
                                 <asp:Panel ID="pnlStudent" runat="server" Visible="true">
@@ -257,7 +258,7 @@
                                                 Service:
                                             </td>
                                             <td>
-                                                <asp:DropDownList ID="ddlService" runat="server" CssClass="TextBoxRoundedFilters" ValidationGroup="2" OnSelectedIndexChanged="ddlService_SelectedIndexChanged"></asp:DropDownList>                                            
+                                                <asp:DropDownList ID="ddlService" runat="server" CssClass="TextBoxRoundedFilters" ValidationGroup="2" OnSelectedIndexChanged="ddlService_SelectedIndexChanged" AutoPostBack="True"></asp:DropDownList>                                            
                                             </td>
                                             <td>
                                                 <asp:RequiredFieldValidator ID="rfvddlService" runat="server" ErrorMessage="!" ControlToValidate="ddlService" CssClass="RequredField" ValidationGroup="2" ></asp:RequiredFieldValidator>
@@ -334,18 +335,7 @@
                             <td style="text-align:left">
                                 <asp:RequiredFieldValidator ID="rfvtbAddAmmountWords" runat="server" ErrorMessage="!" ControlToValidate="tbAddAmmountWords" CssClass="RequredField" ValidationGroup="2" ></asp:RequiredFieldValidator>
                             </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                Account Number:
-                            </td>
-                            <td>
-                                <asp:TextBox ID="tbAccountNumber" runat="server" CssClass="TextBoxRoundedFilters" TabIndex="4" ValidationGroup="2" ></asp:TextBox>                                        
-                            </td>
-                            <td>
-                                
-                            </td>
-                        </tr>
+                        </tr>                     
                         <tr>
                             <td>
                                 Date of Payment:
@@ -358,33 +348,23 @@
                                 <asp:RequiredFieldValidator ID="rfvtbAddDateOfPayment" runat="server" ErrorMessage="!" ControlToValidate="tbAddDateOfPayment" CssClass="RequredField" ValidationGroup="2"></asp:RequiredFieldValidator><br />                                
                                 <asp:CompareValidator ID="cvtbAddDateOfPayment" runat="server" ErrorMessage="Wrong date!" Operator="DataTypeCheck" Type="Date" ControlToValidate="tbAddDateOfPayment"  CssClass="RequredFieldSmall" ></asp:CompareValidator>
                             </td>
-                            <td>
-                                
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><br />                                
-                                
-                            </td><td></td><td></td>
-                        </tr>
-                       <tr>
-                            <td><br /></td><td></td><td></td>
                         </tr>
                         <tr>
                             <td><br /></td><td></td><td></td>
-                        </tr>
+                        </tr>   
                         <tr>
                             <td><br /></td><td></td><td></td>
-                        </tr>
+                        </tr>                       
                         <tr>
                             <td><br /></td><td></td><td></td>
-                        </tr>
+                        </tr>                       
                         <tr>
                             <td><br /></td><td></td><td></td>
-                        </tr>
+                        </tr>                       
                         <tr>
                             <td><br /></td><td></td><td></td>
-                        </tr>
+                        </tr>                                                                  
+                                            
                         </table>
                         </asp:Panel>
                 </div>

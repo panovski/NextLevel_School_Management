@@ -150,18 +150,7 @@
                             <td>
                                 <asp:RequiredFieldValidator ID="rfvtbAddAmmountWords" runat="server" ErrorMessage="!" ControlToValidate="tbAddAmmountWords" CssClass="RequredField" ValidationGroup="2" ></asp:RequiredFieldValidator>
                             </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                Account Number:
-                            </td>
-                            <td>
-                                <asp:TextBox ID="tbAccountNumber" runat="server" CssClass="TextBoxRoundedEdit" TabIndex="4" ValidationGroup="2" ></asp:TextBox>                                        
-                            </td>
-                            <td>
-                                <asp:RequiredFieldValidator ID="rfvtbAccountNumber" runat="server" ErrorMessage="!" ControlToValidate="tbAccountNumber" CssClass="RequredField" ValidationGroup="2" Enabled="false" ></asp:RequiredFieldValidator>
-                            </td>
-                        </tr>
+                        </tr>                        
                         <tr>
                             <td>
                                 Date of Payment:

@@ -21,7 +21,11 @@ public partial class StudentsContract_Edit : System.Web.UI.Page
                                 WHERE gs.StudentID=" + Request.QueryString["ID"], ddlCourse, "Description", "GroupStudentID");
             Fill_Grid();
 
-            if (Session["PermLevel"].ToString() == ConfigurationManager.AppSettings["Admin"].ToString())
+            if (Request.Cookies["PermLevel"] == null) Response.Redirect("Default.aspx");
+            else if (Request.Cookies["PermLevel"].Value == "") Response.Redirect("Default.aspx");
+            String PermLevel = Functions.Decrypt(Request.Cookies["PermLevel"].Value);
+
+            if (PermLevel == ConfigurationManager.AppSettings["Admin"].ToString())
             {
                 btnDelete.Visible = true;
                 btnSave.Visible = true;
@@ -100,7 +104,7 @@ public partial class StudentsContract_Edit : System.Web.UI.Page
         //if (NotClosed == 0)
         //{
             String SQL = "INSERT INTO [Contract] (GroupStudentID,StartDate,EndDate,CreatedBy) VALUES('" + ddlCourse.SelectedValue + "','" +
-                tbStartDate.Text.Replace("'", "''") + "'," + EndD + "," + Session["UserID"] + ")";
+                tbStartDate.Text.Replace("'", "''") + "'," + EndD + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ")";
             Functions.ExecuteCommand(SQL);
             lblInfo.Text = "New contract is created!";
             lblInfo.Visible = true;

@@ -1,6 +1,7 @@
 ﻿#region Using
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -14,18 +15,24 @@ public partial class ChangePassword : System.Web.UI.Page
     {
         if (!Page.IsPostBack)
         {
-            tbUserName.Text = Session["UserLoged"].ToString();
+            Login_Redirect();
+            tbUserName.Text = Functions.Decrypt(Request.Cookies["UserLoged"].Value);// Session["UserLoged"].ToString();
         }
     }
     #endregion
 
     #region Functions
+    public void Login_Redirect()
+    {
+        if (Request.Cookies["PermLevel"] == null) Response.Redirect("Default.aspx");
+        else if (Request.Cookies["PermLevel"].Value == "") Response.Redirect("Default.aspx");       
+    }
     #endregion
 
     #region Handled Events
     protected void btnChange_Click(object sender, EventArgs e)
     {
-        String SQL = "SELECT Password FROM [User] WHERE UserID="+ Session["UserID"]; 
+        String SQL = "SELECT Password FROM [User] WHERE UserID=" + Functions.Decrypt(Request.Cookies["UserID"].Value);// Session["UserID"]; 
         String OldPassword = Functions.ExecuteScalar(SQL);
         OldPassword = Functions.Decrypt(OldPassword);
 

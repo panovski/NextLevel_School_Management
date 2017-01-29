@@ -59,9 +59,11 @@ public partial class Employees_Edit : System.Web.UI.Page
     }
     public void Login_Redirect()
     {
-        if (Session["PermLevel"] == null) Response.Redirect("Default.aspx");
-        if (Session["PermLevel"].ToString() != ConfigurationManager.AppSettings["Admin"].ToString() &&
-          Session["PermLevel"].ToString() != ConfigurationManager.AppSettings["Advanced"].ToString())
+        if (Request.Cookies["PermLevel"] == null) Response.Redirect("Default.aspx");
+        else if (Request.Cookies["PermLevel"].Value == "") Response.Redirect("Default.aspx");
+        String PermLevel = Functions.Decrypt(Request.Cookies["PermLevel"].Value);
+        if (PermLevel != ConfigurationManager.AppSettings["Admin"].ToString() &&
+          PermLevel != ConfigurationManager.AppSettings["Advanced"].ToString())
         {
             Response.Redirect("Default.aspx");
         }
@@ -95,7 +97,7 @@ public partial class Employees_Edit : System.Web.UI.Page
                 String Password = Functions.Encrypt(tbLastName.Text.Replace("'", "''").ToLower().Trim());
                 String SQLInsert = @"INSERT INTO [User] (UserName,Password,FirstName,LastName,ContactPhone,Enabled,CreatedBy) " +
                      "VALUES(N'" + UserName + "',N'" + Password + "',N'" + tbFirstName.Text.Replace("'", "''") + "',N'" + tbLastName.Text.Replace("'", "''") + "',N'" + tbContactPhone.Text.Replace("'", "''")
-                     + "',1," + Session["UserID"] + "); SELECT SCOPE_IDENTITY()";
+                     + "',1," + Functions.Decrypt(Request.Cookies["UserID"].Value) + "); SELECT SCOPE_IDENTITY()";
 
                 UserLoginID = Functions.ExecuteScalar(SQLInsert);
             }
@@ -152,7 +154,7 @@ public partial class Employees_Edit : System.Web.UI.Page
                 String Password = Functions.Encrypt(tbLastName.Text.Replace("'", "''").ToLower().Trim());
                 String SQLInsert = @"INSERT INTO [User] (UserName,Password,FirstName,LastName,ContactPhone,Enabled,CreatedBy) " +
                      "VALUES(N'" + UserName + "',N'" + Password + "',N'" + tbFirstName.Text.Replace("'", "''") + "',N'" + tbLastName.Text.Replace("'", "''") + "',N'" + tbContactPhone.Text.Replace("'", "''")
-                     + "',1," + Session["UserID"] + "); SELECT SCOPE_IDENTITY()";
+                     + "',1," + Functions.Decrypt(Request.Cookies["UserID"].Value) + "); SELECT SCOPE_IDENTITY()";
 
                 UserLoginID = Functions.ExecuteScalar(SQLInsert);
             }
@@ -165,7 +167,7 @@ public partial class Employees_Edit : System.Web.UI.Page
         String SQL = @"INSERT INTO Employee  (FirstName,LastName,ContactPhone,StartDate,Status,UserId,CreatedBy,Email)
                     VALUES(N'" + tbFirstName.Text.Replace("'", "''") + "',N'" + tbLastName.Text.Replace("'", "''") +
                     "',N'" + tbContactPhone.Text.Replace("'", "''") + "','" + tbStartDate.Text.Replace("'", "''") + "','" +
-                    ddlStatus.SelectedValue.Replace("'", "''") + "'," + UserID.Replace("'", "''") + "," + Session["UserID"] + ",'" + tbEmail.Text + "')";
+                    ddlStatus.SelectedValue.Replace("'", "''") + "'," + UserID.Replace("'", "''") + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ",'" + tbEmail.Text + "')";
         Functions.ExecuteCommand(SQL);
         Page.ClientScript.RegisterStartupScript(this.GetType(), "Call my function", "CloseDialog()", true);
     }

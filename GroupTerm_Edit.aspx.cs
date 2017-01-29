@@ -15,6 +15,7 @@ public partial class GroupTerm_Edit : System.Web.UI.Page
     {
         if (!Page.IsPostBack)
         {
+            Login_Redirect();
             Functions.FillCombo("SELECT ClassroomID, Name FROM Classroom", ddlClassroom, "Name", "ClassroomID");
 
             Functions.FillCombo(@"SELECT 1 as Value,'Monday' as DayDesc UNION
@@ -32,7 +33,10 @@ public partial class GroupTerm_Edit : System.Web.UI.Page
                 btnRemove.Visible = false;
             }
 
-            if (Session["PermLevel"].ToString() == ConfigurationManager.AppSettings["Admin"].ToString())
+            if (Request.Cookies["PermLevel"] == null) Response.Redirect("Default.aspx");
+            else if (Request.Cookies["PermLevel"].Value == "") Response.Redirect("Default.aspx");
+            String PermLevel = Functions.Decrypt(Request.Cookies["PermLevel"].Value);
+            if (PermLevel == ConfigurationManager.AppSettings["Admin"].ToString())
             {
                 btnRemove.Visible = true;
             }
@@ -45,6 +49,11 @@ public partial class GroupTerm_Edit : System.Web.UI.Page
     #endregion
 
     #region Functions
+    protected void Login_Redirect()
+    {
+        if (Request.Cookies["PermLevel"] == null) Response.Redirect("Default.aspx");
+        else if (Request.Cookies["PermLevel"].Value == "") Response.Redirect("Default.aspx");
+    }
     protected void DisableControls(Control parent, bool State)
     {
         foreach (Control c in parent.Controls)
@@ -151,7 +160,7 @@ public partial class GroupTerm_Edit : System.Web.UI.Page
         {
             // ne e zafaten
             String SQL = @"INSERT INTO Termin(Day,TimeStart,TimeEnd,ClassRoomID,GroupID,CreatedBy) VALUES('" + ddlTerminDay.SelectedValue +
-                "','" + tbTerminFrom.Text + "','" + tbTerminTo.Text + "'," + ddlClassroom.SelectedValue + "," + Request.QueryString["ID"] + "," + Session["UserID"] + ")";
+                "','" + tbTerminFrom.Text + "','" + tbTerminTo.Text + "'," + ddlClassroom.SelectedValue + "," + Request.QueryString["ID"] + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ")";
 
             Functions.ExecuteCommand(SQL);
             Fill_Grid();

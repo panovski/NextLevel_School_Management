@@ -78,21 +78,23 @@
                             Cost:
                         </td>
                         <td>
-                            <asp:TextBox ID="tbCost" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1" TextMode="Number" ></asp:TextBox>
+                            <asp:TextBox ID="tbCost" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1" ></asp:TextBox>
                         </td>
                         <td>
                             <asp:RequiredFieldValidator ID="rfvtbCost" runat="server" ErrorMessage="Required!" CssClass="RequredField" ControlToValidate="tbCost" ValidationGroup="1" ></asp:RequiredFieldValidator>
+                            <asp:RegularExpressionValidator ID="revtbCost" runat="server" ValidationExpression="^(-)?\d+(\.\d+)?$" ErrorMessage="Number!" CssClass="RequredField" ControlToValidate="tbCost" ValidationGroup="1" />
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            Employee Percentage:
+                            Employee Cost:
                         </td>
                         <td>
-                            <asp:TextBox ID="tbEmployeePercentage" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1" TextMode="Number" ></asp:TextBox>
+                            <asp:TextBox ID="tbEmployeePercentage" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1" ></asp:TextBox>
                         </td>
                         <td>
                             <asp:RequiredFieldValidator ID="rfvtbEmployeePercentage" runat="server" ErrorMessage="Required!" CssClass="RequredField" ControlToValidate="tbEmployeePercentage" ValidationGroup="1" ></asp:RequiredFieldValidator>
+                            <asp:RegularExpressionValidator ID="revtbEmployeePercentage" runat="server" ValidationExpression="^(-)?\d+(\.\d+)?$" ErrorMessage="Number!" CssClass="RequredField" ControlToValidate="tbEmployeePercentage" ValidationGroup="1" />
                         </td>
                     </tr>                                                                                
                     <tr>

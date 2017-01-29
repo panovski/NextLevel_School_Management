@@ -14,12 +14,18 @@ public partial class Group_Classrooms : System.Web.UI.Page
     {
         if (!Page.IsPostBack)
         {
+            Login_Redirect();
             Fill_Grid();
         }
     }
     #endregion
 
     #region Functions
+    protected void Login_Redirect()
+    {
+        if (Request.Cookies["PermLevel"] == null) Response.Redirect("Default.aspx");
+        else if (Request.Cookies["PermLevel"].Value == "") Response.Redirect("Default.aspx");
+    }
     protected void Fill_Grid()
     {
         dsMain.SelectCommand = @"SELECT c.*, u.FirstName+' '+u.LastName as CreatedByUser FROM Classroom c LEFT OUTER JOIN [User] u ON u.UserID=c.CreatedBy";
@@ -71,7 +77,7 @@ public partial class Group_Classrooms : System.Web.UI.Page
     {
         String SQL = @"INSERT INTO Classroom (Name,Description,CreatedBy) 
             VALUES(N'" + tbClassroomName.Text.Replace("'", "''") + "',N'" + tbDescription.Text.Replace("'", "''") +
-            "'," + Session["UserID"] + ")";
+            "'," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ")";
         Functions.ExecuteCommand(SQL);
         Fill_Grid();
         lblInfo.Text = "The classroom is inserted!";
@@ -79,11 +85,14 @@ public partial class Group_Classrooms : System.Web.UI.Page
     }
     protected void btnDelete_Click(object sender, EventArgs e)
     {
-        String SQL = @"DELETE FROM Classroom WHERE ClassroomID=" + gvMain.SelectedValue;
-        Functions.ExecuteCommand(SQL);
-        Fill_Grid();
-        lblInfo.Text = "The classroom is deleted!";
-        lblInfo.Visible = true;
+        if (gvMain.SelectedValue != null)
+        {
+            String SQL = @"DELETE FROM Termin WHERE ClassroomID=" + gvMain.SelectedValue + "; DELETE FROM Classroom WHERE ClassroomID=" + gvMain.SelectedValue;
+            Functions.ExecuteCommand(SQL);
+            Fill_Grid();
+            lblInfo.Text = "The classroom is deleted!";
+            lblInfo.Visible = true;
+        }
     }
     protected void btnSave_Click(object sender, EventArgs e)
     {

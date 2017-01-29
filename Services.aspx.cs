@@ -29,10 +29,12 @@ public partial class Services : System.Web.UI.Page
     #region Functions
     public void Login_Redirect()
     {
-        if (Session["PermLevel"] == null) Response.Redirect("Default.aspx");
-        if (Session["PermLevel"].ToString() == ConfigurationManager.AppSettings["Admin"].ToString()
-           || Session["PermLevel"].ToString() == ConfigurationManager.AppSettings["Edit"].ToString()
-           || Session["PermLevel"].ToString() == ConfigurationManager.AppSettings["Advanced"].ToString())
+        if (Request.Cookies["PermLevel"] == null) Response.Redirect("Default.aspx");
+        else if (Request.Cookies["PermLevel"].Value == "") Response.Redirect("Default.aspx");
+        String PermLevel = Functions.Decrypt(Request.Cookies["PermLevel"].Value);
+        if (PermLevel == ConfigurationManager.AppSettings["Admin"].ToString()
+           || PermLevel == ConfigurationManager.AppSettings["Edit"].ToString()
+           || PermLevel == ConfigurationManager.AppSettings["Advanced"].ToString())
         {
             pnlTopMeni.Visible = true;
         }
@@ -41,7 +43,7 @@ public partial class Services : System.Web.UI.Page
             pnlTopMeni.Visible = false;
         }
 
-        if (Session["PermLevel"].ToString() == ConfigurationManager.AppSettings["Admin"].ToString())
+        if (PermLevel == ConfigurationManager.AppSettings["Admin"].ToString())
         {
             btnServiceType.Visible = true;
             btnDelete.Visible = true;
@@ -54,7 +56,7 @@ public partial class Services : System.Web.UI.Page
     }
     public void FillDataGrid(String WherePart)
     {
-        dsMain.SelectCommand = @"SELECT s.ServiceID, CAST(s.ServiceID AS VARCHAR(16)) + '-' + st.ServiceName as ServiceName, c.FirstName+' '+c.LastName as Customer, e.FirstName+' '+e.LastName as Employee,
+        dsMain.SelectCommand = @"SELECT s.ServiceID, CAST(s.ServiceID AS VARCHAR(16)) + '-' + st.ServiceName + '-' + st.Description as ServiceName, c.FirstName+' '+c.LastName as Customer, e.FirstName+' '+e.LastName as Employee,
                                 CASE WHEN s.Status=0 THEN 'Done' WHEN s.Status=1 THEN 'Active' END as Status
                                 FROM [Service] s LEFT OUTER JOIN ServiceType st ON st.ServiceTypeID=s.ServiceTypeID
                                 LEFT OUTER JOIN Customer c ON c.CustomerID=s.CustomerID
@@ -81,10 +83,10 @@ public partial class Services : System.Web.UI.Page
     protected void CalculatePayments()
     {
         String SQL = @"SELECT COUNT(p.PaymentID) as NumberOfPayments, 
-                    (SELECT CASE WHEN SUM(p.Ammount) IS NULL THEN 0 ELSE SUM(p.Ammount) END) as TotalPaid, st.Cost - (SELECT CASE WHEN SUM(p.Ammount) IS NULL THEN 0 ELSE SUM(p.Ammount) END) as TotalRemain					
+                    (SELECT CASE WHEN SUM(p.Ammount) IS NULL THEN 0 ELSE SUM(p.Ammount) END) as TotalPaid, s.TotalCost - (SELECT CASE WHEN SUM(p.Ammount) IS NULL THEN 0 ELSE SUM(p.Ammount) END) as TotalRemain					
 					FROM [Service] s LEFT OUTER JOIN ServiceType st ON st.ServiceTypeID=s.ServiceTypeID
 					LEFT OUTER JOIN Payment p ON p.ServiceID = s.ServiceID
-                    WHERE s.ServiceID= " + gvMain.SelectedValue + "	GROUP BY st.Cost";
+                    WHERE s.ServiceID= " + gvMain.SelectedValue + "	GROUP BY s.TotalCost";
 
         string[] Payments = Functions.ReturnIntoArray(SQL, 3);
 
@@ -160,7 +162,7 @@ public partial class Services : System.Web.UI.Page
     {
         if (gvMain.SelectedRow != null)
         {
-            String SQL = @"DELETE FROM Service WHERE ServiceID=" + gvMain.SelectedValue.ToString();
+            String SQL = @"DELETE FROM Payment WHERE ServiceID=" + gvMain.SelectedValue.ToString() + ";DELETE FROM Service WHERE ServiceID=" + gvMain.SelectedValue.ToString();
             Functions.ExecuteCommand(SQL);
             btnSearch_Click(sender, e);
         }
@@ -213,8 +215,9 @@ public partial class Services : System.Web.UI.Page
         {
             string SQLPrint = @"SELECT p.AccountNumber,p.Ammount, p.AmmountWords, CAST(s.ServiceID AS VARCHAR(16)) + '-' + st.ServiceName as PaymentGroup,
                         c.FirstName+' '+c.LastName as PaymentName, p.PaymentNumber, c.Place as PaymentPlace,
-						convert(varchar,p.DateOfPayment,104) as DateOfPayment, st.Cost as TotalCost, st.Cost-p.Ammount as RemainingCost,
-						(SELECT COUNT(*) FROM Payment p2 where p2.ServiceID=s.ServiceID) as NoPayments,
+						convert(varchar,p.DateOfPayment,104) as DateOfPayment, s.TotalCost as TotalCost, 
+						s.TotalCost-(SELECT SUM(p2.Ammount) FROM Payment p2 where p2.ServiceID=s.ServiceID AND p2.DateOfPayment<=p.DateOfPayment) as RemainingCost,
+						(SELECT COUNT(*) FROM Payment p2 where p2.ServiceID=s.ServiceID AND p2.DateOfPayment<=p.DateOfPayment) as NoPayments,
 						(SELECT COUNT(*) FROM Payment p2 where p2.ServiceID=s.ServiceID) as TotalNoPayment						                    
 						FROM Payment p LEFT OUTER JOIN [Service] s ON s.ServiceID=p.ServiceID 
 						LEFT OUTER JOIN ServiceType st ON st.ServiceTypeID=s.ServiceTypeID

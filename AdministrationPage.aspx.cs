@@ -31,11 +31,17 @@ public partial class AdministrationPage : System.Web.UI.Page
     #region Functions
     public void Login_Redirect()
     {
-        if (Session["PermLevel"] == null) Response.Redirect("Default.aspx");
-        if (Session["PermLevel"].ToString() != ConfigurationManager.AppSettings["Admin"].ToString())
-        {
+        if (Request.Cookies["PermLevel"] == null) Response.Redirect("Default.aspx");
+        else if (Request.Cookies["PermLevel"].Value == "") Response.Redirect("Default.aspx");
+        
+        if (Functions.Decrypt(Request.Cookies["PermLevel"].Value) != ConfigurationManager.AppSettings["Admin"].ToString())
             Response.Redirect("Default.aspx");
-        }
+
+        //if (Session["PermLevel"] == null) Response.Redirect("Default.aspx");
+        //if (Session["PermLevel"].ToString() != ConfigurationManager.AppSettings["Admin"].ToString())
+        //{
+        //    Response.Redirect("Default.aspx");
+        //}
     }
     protected void Fill_Dashboard_1_1()
     {
@@ -82,7 +88,7 @@ public partial class AdministrationPage : System.Web.UI.Page
     protected void Fill_Dashboard_1_2()
     {
         dsDashboard1_2.SelectCommand = @"SELECT p.PaymentID,p.PaymentNumber, p.Ammount, c.FirstName+' '+c.LastName as Customer, e.FirstName+' '+e.LastName as Employee, p.Collected, p.PaidToEmployee, p.DateOfPayment, u.FirstName+' '+u.LastName as ProcessedBy,
-                                    CEILING(st.EmployeePercentage*p.Ammount/100) as ForEmployee
+                                    CEILING((st.EmployeePercentage/st.Cost)*p.Ammount) as ForEmployee
                                     FROM Payment p LEFT OUTER JOIN [Service] s ON s.ServiceID=p.ServiceID
 									LEFT OUTER JOIN ServiceType st ON st.ServiceTypeID=s.ServiceTypeID
 									LEFT OUTER JOIN Customer c ON c.CustomerID=s.CustomerID
@@ -128,8 +134,8 @@ public partial class AdministrationPage : System.Web.UI.Page
     protected void Fill_Dashboard_2_1()
     {
         dsDashboard2_1.SelectCommand = @"SELECT e.EmployeeID,e.FirstName+' '+e.LastName as Employee,
-                        CEILING(SUM(p.Ammount/100* CASE WHEN p.ServiceID>0 THEN st.EmployeePercentage WHEN p.GroupStudentID>0 THEN g.TeacherPercentage WHEN p.InvoiceID>0 THEN g2.TeacherPercentage END)) as TotalForEmployee,
-                        CEILING(SUM(CASE WHEN p.Collected=1 THEN p.Ammount ELSE 0 END /100 * CASE WHEN p.ServiceID>0 THEN st.EmployeePercentage WHEN p.GroupStudentID>0 THEN g.TeacherPercentage WHEN p.InvoiceID>0 THEN g2.TeacherPercentage END)) as TotalFromCollected,p.PaidToEmployee
+                        CEILING(SUM(p.Ammount/100* CASE WHEN p.ServiceID>0 THEN (st.EmployeePercentage/st.Cost)*100 WHEN p.GroupStudentID>0 THEN g.TeacherPercentage WHEN p.InvoiceID>0 THEN g2.TeacherPercentage END)) as TotalForEmployee,
+                        CEILING(SUM(CASE WHEN p.Collected=1 THEN p.Ammount ELSE 0 END /100 * CASE WHEN p.ServiceID>0 THEN (st.EmployeePercentage/st.Cost)*100 WHEN p.GroupStudentID>0 THEN g.TeacherPercentage WHEN p.InvoiceID>0 THEN g2.TeacherPercentage END)) as TotalFromCollected,p.PaidToEmployee
                         FROM Payment p 
                         LEFT OUTER JOIN GroupStudent gs ON gs.GroupStudentID=p.GroupStudentID
                         LEFT OUTER JOIN [Group] g ON g.GroupID=gs.GroupID
@@ -142,13 +148,13 @@ public partial class AdministrationPage : System.Web.UI.Page
     }
     protected void Fill_Dashboard_2_2()
     {
-        dsDashboard2_2.SelectCommand = @"SELECT s.ServiceID, CAST(s.ServiceID AS VARCHAR(16)) + '-' + st.ServiceName as ServiceName, c.FirstName+' '+c.LastName as Customer, st.Cost, SUM(p.Ammount) as Paid
+        dsDashboard2_2.SelectCommand = @"SELECT s.ServiceID, CAST(s.ServiceID AS VARCHAR(16)) + '-' + st.ServiceName as ServiceName, c.FirstName+' '+c.LastName as Customer, s.TotalCost as Cost, SUM(p.Ammount) as Paid
                                         FROM [Service] s LEFT OUTER JOIN ServiceType st ON st.ServiceTypeID=s.ServiceTypeID
                                         LEFT OUTER JOIN Payment p ON p.ServiceID=s.ServiceID
 										LEFT OUTER JOIN Customer c ON c.CustomerID=s.CustomerID
-                                        group by s.ServiceID,st.ServiceName,c.FirstName,c.LastName,st.Cost
-                                        HAVING SUM(p.Ammount)<st.Cost
-                                        UNION SELECT s.ServiceID, CAST(s.ServiceID AS VARCHAR(16)) + '-' + st.ServiceName as ServiceName, c.FirstName+' '+c.LastName as Customer, st.Cost, 0 as Paid
+                                        group by s.ServiceID,st.ServiceName,c.FirstName,c.LastName,s.TotalCost
+                                        HAVING SUM(p.Ammount)<s.TotalCost
+                                        UNION SELECT s.ServiceID, CAST(s.ServiceID AS VARCHAR(16)) + '-' + st.ServiceName as ServiceName, c.FirstName+' '+c.LastName as Customer, s.TotalCost, 0 as Paid
                                         FROM [Service] s LEFT OUTER JOIN ServiceType st ON st.ServiceTypeID=s.ServiceTypeID
 										LEFT OUTER JOIN Customer c ON c.CustomerID=s.CustomerID
                                         WHERE s.ServiceID NOT IN (SELECT distinct(p.ServiceID) FROM Payment p WHERE p.ServiceID>0)";
@@ -181,9 +187,17 @@ public partial class AdministrationPage : System.Web.UI.Page
     #region Handled Events
     protected void ibtnLogout_Click(object sender, ImageClickEventArgs e)
     {
+        //System.Web.Security.FormsAuthentication.SetAuthCookie("", true);
+        Response.Cookies.Remove("UserID");
+        Response.Cookies.Remove("PermLevel");
+        Response.Cookies["UserID"].Value = "";
+        Response.Cookies["PermLevel"].Expires.AddMilliseconds(1);
+        Response.Cookies["UserID"].Expires.AddMilliseconds(1);
+
         Session["Loaded"] = false;
-        Session["najaven"] = false;
+        //Session["najaven"] = false;
         Session["PermLevel"] = null;
+
         Response.Redirect("Default.aspx");
     }
     protected void ibtnGroupTypes_Click(object sender, ImageClickEventArgs e)

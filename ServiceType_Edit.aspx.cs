@@ -14,12 +14,18 @@ public partial class ServiceType_Edit : System.Web.UI.Page
     {
         if (!Page.IsPostBack)
         {
-           Fill_Grid();
+            Login_Redirect();
+            Fill_Grid();
         }
     }
     #endregion
 
     #region Functions
+    protected void Login_Redirect()
+    {
+        if (Request.Cookies["PermLevel"] == null) Response.Redirect("Default.aspx");
+        else if (Request.Cookies["PermLevel"].Value == "") Response.Redirect("Default.aspx");
+    }
     protected void Fill_Grid()
     {
         dsMain.SelectCommand = @"SELECT *, ServiceTypeID as ID FROM ServiceType";
@@ -71,7 +77,7 @@ public partial class ServiceType_Edit : System.Web.UI.Page
         if (gvMain.SelectedValue != null)
         {
             String SQL = @"UPDATE ServiceType SET ServiceName=N'" + tbServiceName.Text.Replace("'", "''") + "', Description=N'" + tbDescription.Text +
-                   "', Cost=N'" + tbCost.Text.Replace("'", "''") + "', EmployeePercentage=N'" + tbEmployeePercentage.Text.Replace("'", "''") + "'" +
+                   "', Cost=N'" + tbCost.Text.Replace("'", "''").Replace(",", ".") + "', EmployeePercentage=N'" + tbEmployeePercentage.Text.Replace("'", "''").Replace(",", ".") + "'" +
                    " WHERE ServiceTypeID=" + gvMain.SelectedValue;
             Functions.ExecuteCommand(SQL);
             Fill_Grid();
@@ -82,7 +88,7 @@ public partial class ServiceType_Edit : System.Web.UI.Page
     {
         String SQL = @"INSERT INTO ServiceType (ServiceName,Description,Cost,CreatedBy,EmployeePercentage) 
             VALUES(N'" + tbServiceName.Text.Replace("'", "''") + "',N'" + tbDescription.Text.Replace("'", "''") +
-            "',N'" + tbCost.Text.Replace("'", "''") + "'," + Session["UserID"] + ", N'" + tbEmployeePercentage.Text.Replace("'", "''") + "')";
+            "','" + tbCost.Text.Replace("'", "''").Replace(",", ".") + "'," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ", '" + tbEmployeePercentage.Text.Replace("'", "''").Replace(",", ".") + "')";
         Functions.ExecuteCommand(SQL);
         Fill_Grid();
     }

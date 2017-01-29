@@ -15,6 +15,7 @@ public partial class Groups_Edit : System.Web.UI.Page
     {
         if (!Page.IsPostBack)
         {
+            Login_Redirect();
             Functions.FillCombo("SELECT GroupTypeID, Language + ' - ' + LevelDescription as Course FROM GroupType", ddlCourse, "Course", "GroupTypeID");
             //Functions.FillCombo("SELECT EmployeeID, FirstName +' ' + LastName as Name FROM Employee WHERE Status = 1", ddlTeacher, "Name", "EmployeeID");
             Functions.FillCombo(@"SELECT -1 as EmployeeID,'' as Name UNION 
@@ -59,10 +60,12 @@ public partial class Groups_Edit : System.Web.UI.Page
     #region Functions
     public void Login_Redirect()
     {
-        if (Session["PermLevel"] == null) Response.Redirect("Default.aspx");
-        if (Session["PermLevel"].ToString() != ConfigurationManager.AppSettings["Admin"].ToString() &&
-          Session["PermLevel"].ToString() != ConfigurationManager.AppSettings["Advanced"].ToString() &&
-          Session["PermLevel"].ToString() != ConfigurationManager.AppSettings["Edit"].ToString())
+        if (Request.Cookies["PermLevel"] == null) Response.Redirect("Default.aspx");
+        else if (Request.Cookies["PermLevel"].Value == "") Response.Redirect("Default.aspx");
+        String PermLevel = Functions.Decrypt(Request.Cookies["PermLevel"].Value);
+        if (PermLevel != ConfigurationManager.AppSettings["Admin"].ToString() &&
+          PermLevel != ConfigurationManager.AppSettings["Advanced"].ToString() &&
+          PermLevel != ConfigurationManager.AppSettings["Edit"].ToString())
         {
             Response.Redirect("Default.aspx");
         }
@@ -135,7 +138,7 @@ public partial class Groups_Edit : System.Web.UI.Page
                     Cost,EmployeeID, TeacherPercentage, Status, Invoice, CreatedBy)
                    VALUES(N'" + tbGroupName.Text.Replace("'", "''") + "'," + ddlCourse.SelectedValue + ",N'" + tbStartDate.Text.Replace("'", "''") +
                   "',N'" + tbEndDate.Text.Replace("'", "''") + "'," + tbNoClasses.Text + "," + tbNoPayments.Text +
-                  "," + tbCost.Text + "," + ddlTeacher.SelectedValue + "," + tbTeacherPercentage.Text.Replace("'", "''") + ",'" + ddlStatus.SelectedValue + "'," + Invoice + "," + Session["UserID"] + ")";
+                  "," + tbCost.Text + "," + ddlTeacher.SelectedValue + "," + tbTeacherPercentage.Text.Replace("'", "''") + ",'" + ddlStatus.SelectedValue + "'," + Invoice + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ")";
         Functions.ExecuteCommand(SQL);
         Page.ClientScript.RegisterStartupScript(this.GetType(), "Call my function", "CloseDialog()", true);
     }

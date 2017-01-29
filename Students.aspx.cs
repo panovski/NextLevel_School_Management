@@ -32,10 +32,13 @@ public partial class Students : System.Web.UI.Page
     #region Functions
     public void Login_Redirect()
     {
-        if (Session["PermLevel"] == null) Response.Redirect("Default.aspx");
-        if (Session["PermLevel"].ToString() == ConfigurationManager.AppSettings["Admin"].ToString()
-           || Session["PermLevel"].ToString() == ConfigurationManager.AppSettings["Edit"].ToString()
-           || Session["PermLevel"].ToString() == ConfigurationManager.AppSettings["Advanced"].ToString())
+        if (Request.Cookies["PermLevel"] == null) Response.Redirect("Default.aspx");
+        else if (Request.Cookies["PermLevel"].Value == "") Response.Redirect("Default.aspx");
+        
+        String PermLevel = Functions.Decrypt(Request.Cookies["PermLevel"].Value);
+        if (PermLevel == ConfigurationManager.AppSettings["Admin"].ToString()
+           || PermLevel == ConfigurationManager.AppSettings["Edit"].ToString()
+           || PermLevel == ConfigurationManager.AppSettings["Advanced"].ToString())
         {
             pnlTopMeni.Visible = true;
         }
@@ -47,7 +50,7 @@ public partial class Students : System.Web.UI.Page
             btnTransfer.Visible = false;
         }
 
-        if (Session["PermLevel"].ToString() == ConfigurationManager.AppSettings["Admin"].ToString())
+        if (PermLevel == ConfigurationManager.AppSettings["Admin"].ToString())
         {
             btnRemove.Visible = true;
             btnEdit.Visible = true;
@@ -267,7 +270,7 @@ public partial class Students : System.Web.UI.Page
                 if (Convert.ToInt32(tbDiscount.Text) > 0)
                     TotalCost = TotalCost - (TotalCost * Convert.ToInt32(tbDiscount.Text) / 100);
                 String SQL = "INSERT INTO GroupStudent (GroupID, StudentID, Status, Discount, TotalCost, CreatedBy) VALUES (" +
-                ddlCourse.SelectedValue + "," + gvStudents.SelectedValue.ToString() + ",0," + tbDiscount.Text.Replace("'", "''") + "," + TotalCost.ToString().Replace(",", ".") + "," + Session["UserID"] + ")";
+                ddlCourse.SelectedValue + "," + gvStudents.SelectedValue.ToString() + ",0," + tbDiscount.Text.Replace("'", "''") + "," + TotalCost.ToString().Replace(",", ".") + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ")";
                 Functions.ExecuteCommand(SQL);
                 Fill_Details();
             }
@@ -401,8 +404,9 @@ public partial class Students : System.Web.UI.Page
         {
             string SQLPrint = @"SELECT p.AccountNumber,p.Ammount, p.AmmountWords, g.GroupName+'-'+gt.Language+'-'+gt.LevelDescription as PaymentGroup,
                         s.FirstName+' '+s.LastName as PaymentName, p.PaymentNumber, s.Place as PaymentPlace,
-                        convert(varchar,p.DateOfPayment,104) as DateOfPayment, gs.TotalCost, gs.TotalCost-p.Ammount as RemainingCost,
-						(SELECT COUNT(*) FROM Payment p2 where p2.GroupStudentID=gs.GroupStudentID) as NoPayments, g.NumberOfPayments as TotalNoPayment
+                        convert(varchar,p.DateOfPayment,104) as DateOfPayment, gs.TotalCost, 
+						gs.TotalCost-(SELECT SUM(p2.Ammount) FROM Payment p2 where p2.GroupStudentID=gs.GroupStudentID AND p2.DateOfPayment<=p.DateOfPayment) as RemainingCost,
+						(SELECT COUNT(*) FROM Payment p2 where p2.GroupStudentID=gs.GroupStudentID AND p2.DateOfPayment<=p.DateOfPayment) as NoPayments, g.NumberOfPayments as TotalNoPayment
                         FROM Payment p LEFT OUTER JOIN GroupStudent gs ON gs.GroupStudentID=p.GroupStudentID
                         LEFT OUTER JOIN [Group] g ON g.GroupID=gs.GroupID LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID
                         LEFT OUTER JOIN Student s ON s.StudentID=gs.StudentID WHERE p.PaymentID=" + gvPayments.SelectedValue;

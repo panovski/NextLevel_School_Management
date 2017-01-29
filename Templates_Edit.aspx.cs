@@ -17,14 +17,20 @@ public partial class Templates_Edit : System.Web.UI.Page
     {
         if (!Page.IsPostBack)
         {
+            Login_Redirect();
             Functions.FillCombo(@"SELECT 1 as Value, 'Contract' as Description UNION " +
-                                " SELECT 2 as Value, 'Certificate' as Description UNION SELECT 3 as Value, 'Payment' as Description", ddlType, "Description", "Value");
+                                " SELECT 2 as Value, 'Certificate' as Description UNION SELECT 3 as Value, 'Payment' as Description UNION SELECT 4 as Value, 'Invoice' as Description", ddlType, "Description", "Value");
             Fill_Grid();
         }
     }
     #endregion
 
     #region Functions
+    protected void Login_Redirect()
+    {
+        if (Request.Cookies["PermLevel"] == null) Response.Redirect("Default.aspx");
+        else if (Request.Cookies["PermLevel"].Value == "") Response.Redirect("Default.aspx");
+    }
     protected void Fill_Grid()
     {
         dsMain.SelectCommand = @"SELECT t.*, u.FirstName + ' ' + u.LastName as CreatedByUser FROM Template t LEFT OUTER JOIN [User] u ON u.UserID=t.CreatedBy";
@@ -97,7 +103,7 @@ public partial class Templates_Edit : System.Web.UI.Page
             {
                 fuFile.PostedFile.SaveAs(Server.MapPath("~/Templates/Templates/") + fileName);
                 String SQL = "INSERT INTO Template (TemplateName,TemplateFile,TemplateType,CreatedBy) VALUES (N'" + tbTemplateName.Text.Replace("'", "''") +
-                            "','~/Templates/Templates/" + fileName + "'," + ddlType.SelectedValue + "," + Session["UserID"] + ")";
+                            "','~/Templates/Templates/" + fileName + "'," + ddlType.SelectedValue + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ")";
                 Functions.ExecuteCommand(SQL);
                 Fill_Grid();
 

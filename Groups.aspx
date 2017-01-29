@@ -345,7 +345,7 @@
                                     <asp:SqlDataSource ID="dsCertificates" runat="server" ConnectionString="<%$ ConnectionStrings:konekcija %>" SelectCommand=""></asp:SqlDataSource>                                
                                 </div>
                             </td>                             
-                            <td style="vertical-align:top">
+                            <td style="vertical-align:top" class="EditDetails">
                                 <asp:ImageButton ID="imgbtnRefresh" runat="server" ImageUrl="~/Images/Icons/Refresh1.png" OnClick="imgbtnRefresh_Click" CssClass="RefreshButton"/>
                                 <br /><br />
                                     Certificate Template:<asp:DropDownList ID="ddlTemplateCertificate" runat="server" CssClass="TextBoxRoundedFilters" ValidationGroup="2"></asp:DropDownList>                               

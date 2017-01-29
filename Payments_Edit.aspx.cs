@@ -14,7 +14,8 @@ public partial class Payments_Edit : System.Web.UI.Page
     protected void Page_Load(object sender, EventArgs e)
     {
         if (!Page.IsPostBack)
-        {           
+        {
+            Login_Redirect();
             if (Request.QueryString["ID"] != "")
             {
                 Fill_Payment(Request.QueryString["ID"]);
@@ -34,10 +35,11 @@ public partial class Payments_Edit : System.Web.UI.Page
     #region Functions
     public void Login_Redirect()
     {
-        if (Session["PermLevel"] == null) Response.Redirect("Default.aspx");
-        if (Session["PermLevel"].ToString() != ConfigurationManager.AppSettings["Admin"].ToString() &&
-          Session["PermLevel"].ToString() != ConfigurationManager.AppSettings["Advanced"].ToString() &&
-          Session["PermLevel"].ToString() != ConfigurationManager.AppSettings["Edit"].ToString())
+        if (Request.Cookies["PermLevel"]  == null) Response.Redirect("Default.aspx");
+        String PermLevel = Functions.Decrypt(Request.Cookies["PermLevel"].Value);
+        if (PermLevel != ConfigurationManager.AppSettings["Admin"].ToString() &&
+          PermLevel != ConfigurationManager.AppSettings["Advanced"].ToString() &&
+          PermLevel != ConfigurationManager.AppSettings["Edit"].ToString())
         {
             Response.Redirect("Default.aspx");
         }
@@ -68,7 +70,6 @@ public partial class Payments_Edit : System.Web.UI.Page
         tbAddPaymentNumber.Text = Payment[1];
         tbAddAmmount.Text = Payment[2];
         tbAddAmmountWords.Text = Payment[3];
-        tbAccountNumber.Text = Payment[4];
         tbAddDateOfPayment.Text = Convert.ToDateTime(Payment[5]).ToString("yyyy-MM-dd");
         tbProcessedBy.Text = Payment[15];
         tbCreatedDate.Text = Convert.ToDateTime(Payment[9]).ToString("yyyy-MM-dd");
@@ -160,7 +161,6 @@ public partial class Payments_Edit : System.Web.UI.Page
             SQL = @"UPDATE Payment SET PaymentNumber = N'" + tbAddPaymentNumber.Text.Replace("'", "''") +
              "', Ammount=" + tbAddAmmount.Text.Replace("'", "''") +
              ", AmmountWords=N'" + tbAddAmmountWords.Text.Replace("'", "''") +
-             "', AccountNumber=N'" + tbAccountNumber.Text.Replace("'", "''") +
              "', DateOfPayment='" + tbAddDateOfPayment.Text.Replace("'", "''") +
              "', GroupStudentId=" + GroupStudentID +
              " WHERE PaymentID=" + Request.QueryString["ID"];
@@ -171,7 +171,6 @@ public partial class Payments_Edit : System.Web.UI.Page
             SQL = @"UPDATE Payment SET PaymentNumber = N'" + tbAddPaymentNumber.Text.Replace("'", "''") +
               "', Ammount=" + tbAddAmmount.Text.Replace("'", "''") +
               ", AmmountWords=N'" + tbAddAmmountWords.Text.Replace("'", "''") +
-              "', AccountNumber=N'" + tbAccountNumber.Text.Replace("'", "''") +
               "', DateOfPayment='" + tbAddDateOfPayment.Text.Replace("'", "''") +
               "', ServiceID=" + ddlService.SelectedValue +
               " WHERE PaymentID=" + Request.QueryString["ID"];
@@ -183,7 +182,6 @@ public partial class Payments_Edit : System.Web.UI.Page
             SQL = @"UPDATE Payment SET PaymentNumber = N'" + tbAddPaymentNumber.Text.Replace("'", "''") +
              "', Ammount=" + tbAddAmmount.Text.Replace("'", "''") +
              ", AmmountWords=N'" + tbAddAmmountWords.Text.Replace("'", "''") +
-             "', AccountNumber=N'" + tbAccountNumber.Text.Replace("'", "''") +
              "', DateOfPayment='" + tbAddDateOfPayment.Text.Replace("'", "''") +
              "', InvoiceID=" + ddlInvoiceGroup.SelectedValue +
              " WHERE PaymentID=" + Request.QueryString["ID"];

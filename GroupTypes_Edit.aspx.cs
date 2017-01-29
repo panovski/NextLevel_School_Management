@@ -14,12 +14,18 @@ public partial class GroupTypes_Edit : System.Web.UI.Page
     {
         if (!Page.IsPostBack)
         {
+            Login_Redirect();
             Fill_Grid();
         }
     }
     #endregion
 
     #region Functions
+    protected void Login_Redirect()
+    {
+        if (Request.Cookies["PermLevel"] == null) Response.Redirect("Default.aspx");
+        else if (Request.Cookies["PermLevel"].Value == "") Response.Redirect("Default.aspx");
+    }
     protected void Fill_Grid()
     {
         dsMain.SelectCommand = @"SELECT *, GroupTypeID as ID FROM GroupType";
@@ -85,7 +91,7 @@ public partial class GroupTypes_Edit : System.Web.UI.Page
     {
         String SQL = @"INSERT INTO GroupType (Language,Program,Level,LevelDescription,CreatedBy) 
             VALUES(N'" + tbLanguage.Text.Replace("'", "''") + "',N'" + tbProgram.Text.Replace("'", "''") +
-            "',N'" + tbLevel.Text.Replace("'", "''") + "',N'" + tbLevelDescription.Text.Replace("'", "''") + "'," + Session["UserID"] + ")";
+            "',N'" + tbLevel.Text.Replace("'", "''") + "',N'" + tbLevelDescription.Text.Replace("'", "''") + "'," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ")";
         Functions.ExecuteCommand(SQL);
         Fill_Grid();
     }
@@ -96,4 +102,8 @@ public partial class GroupTypes_Edit : System.Web.UI.Page
         Fill_Grid();
     }
     #endregion
+    protected void gvMain_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        Fill_Grid();
+    }
 }

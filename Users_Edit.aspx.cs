@@ -39,9 +39,11 @@ public partial class Users_Edit : System.Web.UI.Page
     #region Functions
     public void Login_Redirect()
     {
-        if (Session["PermLevel"] == null) Response.Redirect("Default.aspx");
-        if (Session["PermLevel"].ToString() != ConfigurationManager.AppSettings["Admin"].ToString() &&
-          Session["PermLevel"].ToString() != ConfigurationManager.AppSettings["Advanced"].ToString())
+        if (Request.Cookies["PermLevel"] == null) Response.Redirect("Default.aspx");
+        else if (Request.Cookies["PermLevel"].Value == "") Response.Redirect("Default.aspx");
+        String PermLevel = Functions.Decrypt(Request.Cookies["PermLevel"].Value);
+        if (PermLevel != ConfigurationManager.AppSettings["Admin"].ToString() &&
+          PermLevel != ConfigurationManager.AppSettings["Advanced"].ToString())
         {
             Response.Redirect("Default.aspx");
         }
@@ -88,7 +90,7 @@ public partial class Users_Edit : System.Web.UI.Page
             String SQL = @"INSERT INTO [User] (Username,Password,FirstName,LastName,ContactPhone,Enabled,CreatedBy)
                     VALUES('" + tbUserName.Text.Replace("'", "''") + "','" + password + "',N'" + tbFirstName.Text.Replace("'", "''") +
                         "',N'" + tbLastName.Text.Replace("'", "''") + "',N'" + tbContactPhone.Text.Replace("'", "''") + "'," +
-                        ddlEnable.SelectedValue.Replace("'", "''") + "," + Session["UserID"] + ")";
+                        ddlEnable.SelectedValue.Replace("'", "''") + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ")";
             Functions.ExecuteCommand(SQL);
             Page.ClientScript.RegisterStartupScript(this.GetType(), "Call my function", "CloseDialog()", true);
         }

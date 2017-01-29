@@ -23,8 +23,10 @@ public partial class Employees : System.Web.UI.Page
             Login_Redirect();
             FillDataGrid("");
             Functions.FillCombo("SELECT -1 as Status, ' ' as Description UNION SELECT 1 as Status, 'Active' as Description UNION SELECT 0 as Status, 'Left' as Description", ddlStatus, "Description", "Status");
-            if (Session["PermLevel"].ToString() != ConfigurationManager.AppSettings["Admin"].ToString() &&
-                Session["PermLevel"].ToString() != ConfigurationManager.AppSettings["Advanced"].ToString())
+            String PermLevel = Functions.Decrypt(Request.Cookies["PermLevel"].Value);
+
+            if (PermLevel != ConfigurationManager.AppSettings["Admin"].ToString() &&
+                PermLevel != ConfigurationManager.AppSettings["Advanced"].ToString())
                 gvEmployees.Columns[0].Visible = false;
         }
     }
@@ -33,9 +35,14 @@ public partial class Employees : System.Web.UI.Page
     #region Functions
     public void Login_Redirect()
     {
-        if (Session["PermLevel"] == null) Response.Redirect("Default.aspx");
-        if (Session["PermLevel"].ToString() != ConfigurationManager.AppSettings["Admin"].ToString() &&
-            Session["PermLevel"].ToString() != ConfigurationManager.AppSettings["Advanced"].ToString())
+        String PermLevel = "";
+        if (Request.Cookies["PermLevel"] == null) Response.Redirect("Default.aspx");
+        else if (Request.Cookies["PermLevel"].Value == "") Response.Redirect("Default.aspx");
+        else
+            PermLevel = Functions.Decrypt(Request.Cookies["PermLevel"].Value);
+
+        if (PermLevel != ConfigurationManager.AppSettings["Admin"].ToString() &&
+            PermLevel != ConfigurationManager.AppSettings["Advanced"].ToString())
         {
             Response.Redirect("Default.aspx");
         }

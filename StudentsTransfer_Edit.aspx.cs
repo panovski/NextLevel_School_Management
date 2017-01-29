@@ -14,6 +14,7 @@ public partial class StudentsTransfer_Edit : System.Web.UI.Page
     {
         if (!Page.IsPostBack)
         {
+            Login_Redirect();   
             if (Request.QueryString["StudentID"] != "")
                 Functions.FillCombo(@"SELECT g.GroupID, g.GroupName + ' - ' + gt.Language + ' - ' + gt.LevelDescription as Course 
                                     FROM [Group] g LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID = g.GroupTypeID 
@@ -27,6 +28,11 @@ public partial class StudentsTransfer_Edit : System.Web.UI.Page
     #endregion
 
     #region Functions
+    protected void Login_Redirect()
+    {
+        if (Request.Cookies["PermLevel"] == null) Response.Redirect("Default.aspx");
+        else if (Request.Cookies["PermLevel"].Value == "") Response.Redirect("Default.aspx");
+    }
     protected string Get_PaymentNumber()
     {
         String MaxID = Functions.ExecuteScalar(@"SELECT Max(CAST(LEFT(PaymentNumber, 4) AS INT)) as PaymentN FROM Payment WHERE CAST(RIGHT(PaymentNumber, 2) AS INT)='" + DateTime.Now.ToString("yy") + "'");
@@ -149,7 +155,7 @@ public partial class StudentsTransfer_Edit : System.Web.UI.Page
         {
             //Insert into transfered table:
             String SQLInsert = @"INSERT INTO StudentTransfer(StudentID,fromGroupID,toGroupID,TransferDate,CreatedBy) VALUES(" + Request.QueryString["StudentID"] + ", " +
-                            Request.QueryString["GroupID"] + "," + ddlCourse.SelectedValue + ",N'" + tbTransferDate.Text.Replace("'", "''") + "'," + Session["UserID"] + ")";
+                            Request.QueryString["GroupID"] + "," + ddlCourse.SelectedValue + ",N'" + tbTransferDate.Text.Replace("'", "''") + "'," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ")";
             Functions.ExecuteCommand(SQLInsert);
 
             //Set as transfered and set old costs:            
@@ -173,7 +179,7 @@ public partial class StudentsTransfer_Edit : System.Web.UI.Page
                             CEILING(g.Cost/g.NumberOfClasses)*(1-1.0*" + Discount + @"/100) as TotalCostForAfter
                             FROM StudentTransfer st LEFT OUTER JOIN [Group] g ON g.GroupID=st.toGroupID
                             LEFT OUTER JOIN GroupStudent gs ON (gs.StudentID=st.StudentID AND gs.GroupID=g.GroupID)
-							WHERE st.toGroupID=" + ddlCourse.SelectedValue + " AND st.StudentID=" + Request.QueryString["StudentID"] + ")as tab)," + Discount + "," + Session["UserID"] + ")";
+							WHERE st.toGroupID=" + ddlCourse.SelectedValue + " AND st.StudentID=" + Request.QueryString["StudentID"] + ")as tab)," + Discount + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ")";
             Functions.ExecuteCommand(SQLUpdate2);
 
             //Check payments:
@@ -193,7 +199,7 @@ public partial class StudentsTransfer_Edit : System.Web.UI.Page
                 String GroupStudentID = Functions.ExecuteScalar("SELECT GroupStudentID FROM GroupStudent WHERE StudentID=" + Request.QueryString["StudentID"] + " AND GroupID=" + Request.QueryString["GroupID"]);
                 String SQLUpdate4 = @"INSERT INTO Payment (PaymentNumber,Ammount,AmmountWords,DateOfPayment,GroupStudentID,UserId,CreatedBy) VALUES('" + Get_PaymentNumber() +
                                "'," + OldCosts + ",N'" + NumberToWords(Convert.ToInt32(OldCosts), "") +
-                               "',getdate()," + GroupStudentID + "," + Session["UserID"] + "," + Session["UserID"] + ")";
+                               "',getdate()," + GroupStudentID + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ")";
                 Functions.ExecuteCommand(SQLUpdate4);
 
                 //insert the rest as new payment:
@@ -201,7 +207,7 @@ public partial class StudentsTransfer_Edit : System.Web.UI.Page
                 String GroupStudentID_NEW = Functions.ExecuteScalar("SELECT GroupStudentID FROM GroupStudent WHERE StudentID=" + Request.QueryString["StudentID"] + " AND GroupID=" + ddlCourse.SelectedValue);
                 String SQLUpdate5 = @"INSERT INTO Payment (PaymentNumber,Ammount,AmmountWords,DateOfPayment,GroupStudentID,UserId,CreatedBy) VALUES('" + Get_PaymentNumber() +
                                "'," + Rest.ToString() + ",N'" + NumberToWords(Rest, "") +
-                               "',getdate()," + GroupStudentID_NEW + "," + Session["UserID"] + "," + Session["UserID"] + ")";
+                               "',getdate()," + GroupStudentID_NEW + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ")";
                 Functions.ExecuteCommand(SQLUpdate5);
             }
             lblInfo.Text = "The transfer is made! Please open the Student again!";

@@ -126,7 +126,8 @@
 {
     color:#ff4c4c;
     font-family:Calibri;
-    font-size:1.5vw;
+    font-size:1.2vw;
+    text-shadow:0 0 0.15vw grey;
 }
 .RequredFieldSmall 
 {
@@ -145,7 +146,7 @@
     box-shadow: 0vw 0.2vw 0.1vw 0.2vw white; 
     border-radius: 1.5vw 1.5vw 1.5vw 1.5vw; 
     background-color: #d1d1d1;
-    color:white;
+    color:darkslategrey;
     width:10vw;
     height:2vw;
     font-size:1vw;
@@ -172,7 +173,7 @@
 {
     box-shadow: 0vw 0.1vw 0.1vw 0.1vw white; 
     border-radius: 1.5vw 1.5vw 1.5vw 1.5vw;  
-    color:white;
+    color:darkslategrey;
     height:2vw;
     font-size:1vw;
     margin-right:1vw;
@@ -191,7 +192,7 @@
 {
     box-shadow: 0vw 0.1vw 0.1vw 0.1vw white; 
     border-radius: 1.5vw 1.5vw 1.5vw 1.5vw;  
-    color:white;
+    color:darkslategrey;
     height:2vw;
     font-size:1vw;
     margin-right:1vw;
@@ -210,7 +211,7 @@
 {
     border-radius: 1.5vw 1.5vw 1.5vw 1.5vw; 
     background-color: #d1d1d1;
-    color:white;
+    color:darkslategrey;
     height:1.5vw;
     font-size:0.7vw;
 }
@@ -223,7 +224,7 @@
     box-shadow: 0vw 0.2vw 0.1vw 0.2vw white; 
     border-radius: 1.5vw 1.5vw 1.5vw 1.5vw; 
     background-color: #d1d1d1;
-    color:white;
+    color:darkslategrey;
     height:5vw;
     font-size:2vw;
 }
@@ -345,7 +346,7 @@
     margin-left:3vw;
     padding-left:5vw;
     border-radius:0vw 0vw 2vw 2vw;
-    background-color:whitesmoke;
+    background-color:antiquewhite;
     width:75vw;
     height:3vw;
     box-shadow: 0.1vw 0vw 0.4vw 0.2vw grey;
@@ -358,9 +359,10 @@
 {
     margin-left:3vw;
     margin-top:1vw;
+    margin-bottom:-1vw;
     padding-left:5vw;
     border-radius:2vw 2vw 0vw 0vw;
-    background-color:whitesmoke;
+    background-color:antiquewhite;
     width:75vw;
     height:4vw;
     box-shadow: 0.1vw 0vw 0.4vw 0.2vw grey;
