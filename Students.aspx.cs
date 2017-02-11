@@ -20,10 +20,18 @@ public partial class Students : System.Web.UI.Page
     {
         if (!Page.IsPostBack)
         {
-            Functions.FillCombo("SELECT -1 as Status, ' ' as Description UNION SELECT 1 as Status, 'Active' as Description UNION SELECT 0 as Status, 'Deactivated' as Description", ddlStatus, "Description", "Status");
-            Functions.FillCombo("SELECT g.GroupID, g.GroupName + ' - ' + gt.Language + ' - ' + gt.LevelDescription as Course FROM[Group] as g LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID = g.GroupTypeID WHERE g.Status=1", ddlCourse, "Course", "GroupID");
-            Functions.FillCombo("SELECT TemplateName, TemplateFile FROM Template WHERE TemplateType=2 ORDER BY CreatedDate DESC", ddlTemplateCertificate, "TemplateName", "TemplateFile");
             Login_Redirect();
+            Functions.FillCombo("SELECT -1 as Status, ' ' as Description UNION SELECT 1 as Status, 'Active' as Description UNION SELECT 0 as Status, 'Deactivated' as Description", ddlStatus, "Description", "Status");
+            Functions.FillCombo("SELECT TemplateName, TemplateFile FROM Template WHERE TemplateType=2 ORDER BY CreatedDate DESC", ddlTemplateCertificate, "TemplateName", "TemplateFile");
+
+            if (Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Edit"].ToString() ||
+                Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Readonly"].ToString())
+            {
+                Functions.FillCombo("SELECT g.GroupID, g.GroupName + ' - ' + gt.Language + ' - ' + gt.LevelDescription as Course FROM[Group] as g LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID = g.GroupTypeID LEFT OUTER JOIN Employee e ON e.EmployeeID=g.EmployeeID WHERE g.Status=1 AND e.UserID=" + Functions.Decrypt(Request.Cookies["UserID"].Value), ddlCourse, "Course", "GroupID");
+            }
+            else
+                Functions.FillCombo("SELECT g.GroupID, g.GroupName + ' - ' + gt.Language + ' - ' + gt.LevelDescription as Course FROM[Group] as g LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID = g.GroupTypeID WHERE g.Status=1", ddlCourse, "Course", "GroupID");
+                        
             btnSearch_Click(sender, e);
         }
     }
@@ -72,18 +80,47 @@ public partial class Students : System.Web.UI.Page
         WherePart = Functions.VratiWherePart(tbSSN, "SocialNumber", WherePart);
         WherePart = Functions.VratiWherePart(tbFirstName, "FirstName", WherePart);
         WherePart = Functions.VratiWherePart(tbLastName, "LastName", WherePart);
-        WherePart = Functions.VratiWherePartDDL(ddlStatus, "Enabled", WherePart);
+        WherePart = Functions.VratiWherePartDDL(ddlStatus, "Status", WherePart);
 
-        if (WherePart.Length > 0) WherePart = " WHERE " + WherePart;
+        String WhereEmployee = "";
+        if (Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Edit"].ToString() ||
+                Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Readonly"].ToString())
+        {
+            WhereEmployee = @" AND StudentID IN 
+                        (SELECT gs.StudentID FROM GroupStudent gs 
+                        LEFT OUTER JOIN [Group] g ON g.GroupID = gs.GroupID
+                        LEFT OUTER JOIN Employee e ON e.EmployeeID=g.EmployeeID
+                        WHERE e.UserID=" + Functions.Decrypt(Request.Cookies["UserID"].Value)+ ") ";
+        }
+
+        if (WherePart.Length > 0)
+            WherePart = " WHERE " + WherePart + WhereEmployee;
+        else if (WhereEmployee.Length>0)
+            WherePart = " WHERE " + WhereEmployee.Replace(" AND ","");
+
         return WherePart;
     }
     private void Fill_Details()
     {
-        dsDetails.SelectCommand = @"SELECT gs.GroupStudentID as ID, g.GroupName + ' - ' + gt.Language+' - '+gt.LevelDescription as Grupa, gs.Status, gs.Discount, gs.TotalCost, g.GroupID, gs.Transfered
+        if (Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Edit"].ToString() ||
+               Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Readonly"].ToString())
+        {
+            dsDetails.SelectCommand = @"SELECT gs.GroupStudentID as ID, g.GroupName + ' - ' + gt.Language+' - '+gt.LevelDescription as Grupa, gs.Status, gs.Discount, gs.TotalCost, g.GroupID, gs.Transfered
                                     FROM Student as s LEFT OUTER JOIN GroupStudent as gs ON gs.StudentID=s.StudentID 
                                     LEFT OUTER JOIN [Group] as g on g.GroupID=gs.GroupID
                                     LEFT OUTER JOIN GroupType as gt ON gt.GroupTypeID=g.GroupTypeID
-                                    WHERE s.StudentID=" + gvStudents.SelectedValue.ToString();
+                                    LEFT OUTER JOIN Employee e ON e.EmployeeID=g.EmployeeID
+                                    WHERE s.StudentID=" + gvStudents.SelectedValue.ToString() + " AND e.UserID=" + Functions.Decrypt(Request.Cookies["UserID"].Value);
+        }
+        else
+        {
+            dsDetails.SelectCommand = @"SELECT gs.GroupStudentID as ID, g.GroupName + ' - ' + gt.Language+' - '+gt.LevelDescription as Grupa, gs.Status, gs.Discount, gs.TotalCost, g.GroupID, gs.Transfered
+                                    FROM Student as s LEFT OUTER JOIN GroupStudent as gs ON gs.StudentID=s.StudentID 
+                                    LEFT OUTER JOIN [Group] as g on g.GroupID=gs.GroupID
+                                    LEFT OUTER JOIN GroupType as gt ON gt.GroupTypeID=g.GroupTypeID
+                                    WHERE s.StudentID=" + gvStudents.SelectedValue.ToString() ;
+        }
+
         gvDetails.DataBind();
         if (gvDetails.Rows.Count > 0)
         {
@@ -135,7 +172,7 @@ public partial class Students : System.Web.UI.Page
             gvCertificates.DataBind();
         }
     }
-    protected void Fill_Contracts()
+    protected void Fill_Contracts(String GroupID = "")
     {
         if (gvStudents.SelectedRow != null)
         {
@@ -144,6 +181,12 @@ public partial class Students : System.Web.UI.Page
                             FROM [Contract] c LEFT OUTER JOIN GroupStudent gs ON gs.GroupStudentID=c.GroupStudentID
                             LEFT OUTER JOIN [Group] g ON g.GroupID=gs.GroupID LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID
                             WHERE gs.StudentID=" + gvStudents.SelectedValue;
+
+             if (GroupID != "")
+            {
+                dsContracts.SelectCommand += " AND g.GroupID=" + GroupID;
+            }
+            
             gvContracts.DataBind();
         }
     }
@@ -318,8 +361,8 @@ public partial class Students : System.Web.UI.Page
                 Fill_Details();
                 pnlAddPermission.Visible = true;
                 Login_Redirect();
-                Fill_Certificates();
-                Fill_Contracts();
+                //Fill_Certificates();
+                //Fill_Contracts();
 
                 if (gvStudents.SelectedRow.Cells[5].Text == "Active")
                 {
@@ -397,6 +440,7 @@ public partial class Students : System.Web.UI.Page
         String SQL = "SELECT GroupID FROM GroupStudent WHERE GroupStudentID=" + gvDetails.SelectedValue;
         String GrId = Functions.ExecuteScalar(SQL);
         Fill_Certificates(GrId);
+        Fill_Contracts(GrId);
     }
     protected void btnPrintPayment_Click(object sender, EventArgs e)
     {
@@ -441,7 +485,8 @@ public partial class Students : System.Web.UI.Page
     }
     protected void gvCertificates_Sorted(object sender, EventArgs e)
     {
-        Fill_Certificates();
+        if(gvDetails.SelectedValue!=null)
+            Fill_Certificates(gvDetails.SelectedValue.ToString());
     }
     protected void gvCertificates_RowDataBound(object sender, GridViewRowEventArgs e)
     {
@@ -459,7 +504,8 @@ public partial class Students : System.Web.UI.Page
     }
     protected void gvContracts_Sorted(object sender, EventArgs e)
     {
-        Fill_Contracts();
+        if(gvDetails.SelectedValue!=null)
+            Fill_Contracts(gvDetails.SelectedValue.ToString());
     }
     protected void btnPrintSelectedContract_Click(object sender, EventArgs e)
     {
@@ -538,8 +584,11 @@ public partial class Students : System.Web.UI.Page
     }
     protected void imgbtnRefresh_Click(object sender, ImageClickEventArgs e)
     {
-        Fill_Certificates();
-        Fill_Contracts();
+        if (gvDetails.SelectedValue != null)
+        {
+            Fill_Certificates(gvDetails.SelectedValue.ToString());
+            Fill_Contracts(gvDetails.SelectedValue.ToString());
+        }
     }
     protected void btnTransfer_Click(object sender, EventArgs e)
     {

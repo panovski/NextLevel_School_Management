@@ -47,6 +47,11 @@ public partial class Users_Edit : System.Web.UI.Page
         {
             Response.Redirect("Default.aspx");
         }
+
+        if (PermLevel == ConfigurationManager.AppSettings["Admin"].ToString())
+        {
+            btnReset.Visible = true;
+        }
     }
     public void FillDetailsEdit()
     {
@@ -54,6 +59,11 @@ public partial class Users_Edit : System.Web.UI.Page
                                                         convert(varchar(25), u1.Enabled) + ';' + convert(varchar(25), u1.CreatedDate, 104)+';'+ 
                                                         u2.UserName FROM [User] as u1 LEFT OUTER JOIN [User] as u2 ON u2.UserID = u1.CreatedBy
                                                         WHERE u1.UserID =" + Request.QueryString["ID"]);
+
+//        String CurrentEmployee = Functions.ExecuteScalar(@"SELECT u1.Username + ';'+ u1.FirstName +';' + u1.LastName+';'+ u1.ContactPhone+';'+ 
+//                                                        convert(varchar(25), u1.Enabled) + ';' + convert(varchar(25), u1.CreatedDate, 104) 
+//                                                        FROM [User] as u1 
+//                                                        WHERE u1.UserID =" + Request.QueryString["ID"]);
         string[] curempl = CurrentEmployee.Split(';');
         tbUserName.Text = curempl[0];
         tbFirstName.Text = curempl[1];
@@ -98,4 +108,16 @@ public partial class Users_Edit : System.Web.UI.Page
             lblAlreadyExist.Visible = true;
     }
     #endregion
+    protected void btnReset_Click(object sender, EventArgs e)
+    {
+        string lastname = tbUserName.Text;
+        string[] array = lastname.Split('.');
+        string pass = array[1];
+        pass = Functions.Encrypt(pass);
+
+        String SQL = @"UPDATE [User] SET Password=N'"+pass+"' WHERE UserID=" + Request.QueryString["ID"];
+        Functions.ExecuteCommand(SQL);
+        lblAlreadyExist.Text = "Password was reset to the user's last name!";
+        lblAlreadyExist.Visible = true;
+    }
 }

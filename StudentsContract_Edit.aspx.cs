@@ -15,10 +15,21 @@ public partial class StudentsContract_Edit : System.Web.UI.Page
     {
         if (!Page.IsPostBack)
         {
-            Functions.FillCombo(@"SELECT gs.GroupStudentID, g.GroupName + '-' + gt.Language + '-' + gt.Level as [Description] FROM 
+            if (Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Edit"].ToString() ||
+                Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Readonly"].ToString())
+            {
+                Functions.FillCombo(@"SELECT gs.GroupStudentID, g.GroupName + '-' + gt.Language + '-' + gt.Level as [Description] FROM 
+                                GroupStudent gs LEFT OUTER JOIN [Group] g ON g.GroupID=gs.GroupID
+                                LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID
+                                LEFT OUTER JOIN Employee e ON e.EmployeeID=g.EmployeeID
+                                WHERE gs.StudentID=" + Request.QueryString["ID"] + " AND e.UserID=" + Functions.Decrypt(Request.Cookies["UserID"].Value), ddlCourse, "Description", "GroupStudentID");
+            }
+            else
+                Functions.FillCombo(@"SELECT gs.GroupStudentID, g.GroupName + '-' + gt.Language + '-' + gt.Level as [Description] FROM 
                                 GroupStudent gs LEFT OUTER JOIN [Group] g ON g.GroupID=gs.GroupID
                                 LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID
                                 WHERE gs.StudentID=" + Request.QueryString["ID"], ddlCourse, "Description", "GroupStudentID");
+
             Fill_Grid();
 
             if (Request.Cookies["PermLevel"] == null) Response.Redirect("Default.aspx");

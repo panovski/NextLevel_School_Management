@@ -70,6 +70,15 @@ public partial class Services : System.Web.UI.Page
         WherePart = Functions.VratiWherePart(tbCustomer, "c.FirstName+c.LastName", WherePart);
         WherePart = Functions.VratiWherePart(tbEmployee, "e.FirstName+e.LastName", WherePart);
 
+        if (Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Edit"].ToString() ||
+               Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Readonly"].ToString())
+        {
+            TextBox tbTempEmpl = new TextBox();
+            tbTempEmpl.Text = Functions.Decrypt(Request.Cookies["UserID"].Value);
+            WherePart = Functions.VratiWherePart(tbTempEmpl, "e.UserID", WherePart);
+            tbEmployee.Enabled = false;
+        }
+
         if (WherePart.Length > 0) WherePart = " WHERE " + WherePart;
         return WherePart;
     }

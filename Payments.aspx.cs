@@ -21,11 +21,27 @@ public partial class Payments : System.Web.UI.Page
         if (!Page.IsPostBack)
         {
             Login_Redirect();
-            Functions.FillCombo("SELECT -1 as GroupID, '' as Description UNION SELECT g.GroupId, g.GroupName + '-' + gt.Language + '-' + gt.LevelDescription as Description FROM [Group] g LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID ORDER BY GroupID", ddlGroup, "Description", "GroupID");
-            Functions.FillCombo(@"SELECT CustomerID, FirstName+' '+LastName as Name FROM Customer", ddlCustomers, "Name", "CustomerID");
-            Functions.FillCombo(@"SELECT g.GroupID, g.GroupName + ' - ' + gt.Language + ' - ' + gt.LevelDescription as Course
+
+            if (Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Edit"].ToString() ||
+                Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Readonly"].ToString())
+            {
+                Functions.FillCombo("SELECT -1 as GroupID, '' as Description UNION SELECT g.GroupId, g.GroupName + '-' + gt.Language + '-' + gt.LevelDescription as Description FROM [Group] g LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID LEFT OUTER JOIN Employee e ON e.EmployeeID=g.EmployeeID WHERE e.UserID=" + Functions.Decrypt(Request.Cookies["UserID"].Value) + " ORDER BY GroupID", ddlGroup, "Description", "GroupID");
+                Functions.FillCombo(@"SELECT g.GroupID, g.GroupName + ' - ' + gt.Language + ' - ' + gt.LevelDescription as Course
                                 FROM [Group] g LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID = g.GroupTypeID
+                                LEFT OUTER JOIN Employee e ON e.EmployeeID=g.EmployeeID
+                                WHERE g.Invoice=1 AND e.UserID=" + Functions.Decrypt(Request.Cookies["UserID"].Value), ddlInvoiceGroup, "Course", "GroupID");
+                Functions.FillCombo(@"SELECT CustomerID, FirstName+' '+LastName as Name FROM Customer WHERE CustomerID IN(SELECT CustomerID FROM 
+                                    [Service] s LEFT OUTER JOIN Employee e ON e.EmployeeID=s.EmployeeID WHERE e.UserID=" + Functions.Decrypt(Request.Cookies["UserID"].Value)+")", ddlCustomers, "Name", "CustomerID");
+            }
+            else
+            {
+                Functions.FillCombo("SELECT -1 as GroupID, '' as Description UNION SELECT g.GroupId, g.GroupName + '-' + gt.Language + '-' + gt.LevelDescription as Description FROM [Group] g LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID ORDER BY GroupID", ddlGroup, "Description", "GroupID");
+                Functions.FillCombo(@"SELECT g.GroupID, g.GroupName + ' - ' + gt.Language + ' - ' + gt.LevelDescription as Course
+                                FROM [Group] g LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID = g.GroupTypeID                              
                                 WHERE g.Invoice=1", ddlInvoiceGroup, "Course", "GroupID");
+                Functions.FillCombo(@"SELECT CustomerID, FirstName+' '+LastName as Name FROM Customer", ddlCustomers, "Name", "CustomerID");
+            }
+            
             btnSearch_Click(sender, e);
             rblType.SelectedValue = "0";
             tbAddPaymentNumber.Text = Get_PaymentNumber();
@@ -92,7 +108,17 @@ public partial class Payments : System.Web.UI.Page
         WherePart = Functions.VratiWherePartInteger(tbDateFrom, "p.DateOfPayment", ">=", WherePart);
         WherePart = Functions.VratiWherePartInteger(tbDateTo, "p.DateOfPayment", "<=", WherePart);
 
-        if (WherePart.Length > 0) WherePart = " WHERE " + WherePart;
+        String WhereEmployee = "";
+        if (Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Edit"].ToString() ||
+                Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Readonly"].ToString())
+        {
+            String UserID=Functions.Decrypt(Request.Cookies["UserID"].Value);
+            WhereEmployee = " AND (e.UserID=" + UserID + " OR u2.UserID="+UserID+ " OR u3.UserID="+UserID+") ";
+        }
+        if (WherePart.Length > 0) WherePart = " WHERE " + WherePart + WhereEmployee;
+        else if(WhereEmployee.Length>0)
+            WherePart = " WHERE " + WhereEmployee.Replace("AND ","");
+
         return WherePart;
     }
     protected void Fill_Payment(String PaymentID)
@@ -572,7 +598,20 @@ public partial class Payments : System.Web.UI.Page
     protected void tbStudentsSearch_TextChanged(object sender, EventArgs e)
     {
         ddlStudents.Items.Clear();
-        Functions.FillCombo(@"SELECT StudentID, FirstName+' '+LastName as Name FROM Student WHERE 
+        
+        if (Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Edit"].ToString() ||
+               Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Readonly"].ToString())
+        {
+            Functions.FillCombo(@"SELECT StudentID, FirstName+' '+LastName as Name FROM Student WHERE 
+                            (FirstName LIKE N'%" + tbStudentsSearch.Text.Replace("'", "''") + "%' OR LastName LIKE N'%" + tbStudentsSearch.Text.Replace("'", "''") + @"%') 
+                             AND StudentID IN 
+                            (SELECT gs.StudentID FROM GroupStudent gs 
+                            LEFT OUTER JOIN [Group] g ON g.GroupID = gs.GroupID
+                            LEFT OUTER JOIN Employee e ON e.EmployeeID=g.EmployeeID
+                            WHERE e.UserID=" + Functions.Decrypt(Request.Cookies["UserID"].Value) + ") ", ddlStudents, "Name", "StudentID");
+        }
+        else
+            Functions.FillCombo(@"SELECT StudentID, FirstName+' '+LastName as Name FROM Student WHERE 
                             (FirstName LIKE N'%" + tbStudentsSearch.Text.Replace("'", "''") + "%' OR LastName LIKE N'%" + tbStudentsSearch.Text.Replace("'", "''") + "%')", ddlStudents, "Name", "StudentID");
         if (ddlStudents.Items.Count > 0)
         {
@@ -604,8 +643,18 @@ public partial class Payments : System.Web.UI.Page
     protected void tbCustomerSearch_TextChanged(object sender, EventArgs e)
     {
         ddlCustomers.Items.Clear();
-        Functions.FillCombo(@"SELECT CustomerID, FirstName+' '+LastName as Name FROM Customer WHERE 
+        
+        if (Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Edit"].ToString() ||
+               Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Readonly"].ToString())
+        {
+            Functions.FillCombo(@"SELECT CustomerID, FirstName+' '+LastName as Name FROM Customer WHERE 
+                            (FirstName LIKE N'%" + tbCustomerSearch.Text.Replace("'", "''") + "%' OR LastName LIKE N'%" + tbCustomerSearch.Text.Replace("'", "''") + @"%') AND
+                             CustomerID IN (SELECT CustomerID FROM [Service] s LEFT OUTER JOIN Employee e ON e.EmployeeID=s.EmployeeID WHERE e.UserID="+ Functions.Decrypt(Request.Cookies["UserID"].Value) + ")", ddlCustomers, "Name", "CustomerID");              
+        }
+        else
+            Functions.FillCombo(@"SELECT CustomerID, FirstName+' '+LastName as Name FROM Customer WHERE 
                             (FirstName LIKE N'%" + tbCustomerSearch.Text.Replace("'", "''") + "%' OR LastName LIKE N'%" + tbCustomerSearch.Text.Replace("'", "''") + "%')", ddlCustomers, "Name", "CustomerID");
+        
     }
     protected void tbAddGroupSearch_TextChanged(object sender, EventArgs e)
     {
@@ -617,10 +666,26 @@ public partial class Payments : System.Web.UI.Page
     protected void ddlStudents_SelectedIndexChanged(object sender, EventArgs e)
     {
         ddlAddGroup.Items.Clear();
-        Functions.FillCombo(@"SELECT gs.GroupID, g.GroupName+'-'+gt.Language+'-'+gt.LevelDescription as Description
+
+
+        if (Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Edit"].ToString() ||
+               Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Readonly"].ToString())
+        {
+            Functions.FillCombo(@"SELECT gs.GroupID, g.GroupName+'-'+gt.Language+'-'+gt.LevelDescription as Description
+                            FROM GroupStudent gs LEFT OUTER JOIN [Group] g ON g.GroupID=gs.GroupID 
+                            LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID 
+                            LEFT OUTER JOIN Employee e ON e.EmployeeID=g.EmployeeID
+                            WHERE g.Invoice=0 AND e.UserID=" + Functions.Decrypt(Request.Cookies["UserID"].Value) + " AND gs.StudentID=" +
+                                ddlStudents.SelectedValue, ddlAddGroup, "Description", "GroupId");
+        }
+        else
+        {
+            Functions.FillCombo(@"SELECT gs.GroupID, g.GroupName+'-'+gt.Language+'-'+gt.LevelDescription as Description
                             FROM GroupStudent gs LEFT OUTER JOIN [Group] g ON g.GroupID=gs.GroupID 
                             LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID WHERE g.Invoice=0 AND gs.StudentID=" +
-                            ddlStudents.SelectedValue, ddlAddGroup, "Description", "GroupId");
+                                ddlStudents.SelectedValue, ddlAddGroup, "Description", "GroupId");
+        }
+
         if (ddlAddGroup.Items.Count > 0)
         {
             ddlAddGroup.SelectedIndex = 0;
@@ -632,7 +697,8 @@ public partial class Payments : System.Web.UI.Page
         ddlService.Items.Clear();
         Functions.FillCombo(@"SELECT s.ServiceID, CAST(s.ServiceID AS VARCHAR(16)) + '-' + st.ServiceName as ServiceName
                             FROM [Service] s LEFT OUTER JOIN ServiceType st ON st.ServiceTypeID=s.ServiceTypeID
-                            WHERE s.CustomerID=" + ddlCustomers.SelectedValue, ddlService, "ServiceName", "ServiceID");
+                            LEFT OUTER JOIN Employee e ON e.EmployeeID=s.EmployeeID
+                            WHERE s.CustomerID=" + ddlCustomers.SelectedValue + " AND e.UserID=" + Functions.Decrypt(Request.Cookies["UserID"].Value), ddlService, "ServiceName", "ServiceID");
         CalculatePaymentsService();
     }
     protected void ddlAddGroup_SelectedIndexChanged(object sender, EventArgs e)
@@ -797,7 +863,20 @@ public partial class Payments : System.Web.UI.Page
     protected void btnAllStudents_Click(object sender, ImageClickEventArgs e)
     {
         ddlStudents.Items.Clear();
-        Functions.FillCombo(@"SELECT StudentID, FirstName+' '+LastName as Name FROM Student", ddlStudents, "Name", "StudentID");
+
+        if (Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Edit"].ToString() ||
+               Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Readonly"].ToString())
+        {
+            Functions.FillCombo(@"SELECT StudentID, FirstName+' '+LastName as Name FROM Student WHERE StudentID IN 
+                            (SELECT gs.StudentID FROM GroupStudent gs 
+                            LEFT OUTER JOIN [Group] g ON g.GroupID = gs.GroupID
+                            LEFT OUTER JOIN Employee e ON e.EmployeeID=g.EmployeeID
+                            WHERE e.UserID=" + Functions.Decrypt(Request.Cookies["UserID"].Value) + ") ", ddlStudents, "Name", "StudentID");
+        }
+        else
+            Functions.FillCombo(@"SELECT StudentID, FirstName+' '+LastName as Name FROM Student", ddlStudents, "Name", "StudentID");
+
+        
     }
     #endregion
 }

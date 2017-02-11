@@ -41,7 +41,7 @@ public partial class ChangePassword : System.Web.UI.Page
             if (tbNewPassword.Text == tbConfirmPassword.Text)
             {
                 String PassEnc = Functions.Encrypt(tbNewPassword.Text);
-                SQL = "UPDATE [User] SET Password='"+PassEnc.Replace("'","''")+"'";
+                SQL = "UPDATE [User] SET Password='"+PassEnc.Replace("'","''")+"' WHERE UserID="+Functions.Decrypt(Request.Cookies["UserID"].Value);
                 Functions.ExecuteCommand(SQL);
                 lblInfoMessage.Text = "The password is changed!";
                 lblInfoMessage.Visible = true;

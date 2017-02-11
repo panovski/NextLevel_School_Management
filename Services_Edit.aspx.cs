@@ -21,6 +21,14 @@ public partial class Services_Edit : System.Web.UI.Page
             Functions.FillCombo("SELECT FirstName + ' ' + LastName as Employee, EmployeeID FROM Employee WHERE Status=1", ddlEmployee, "Employee", "EmployeeID");
             Functions.FillCombo("SELECT 1 as StatusID, 'Active' as Description UNION SELECT 0 as StatusID, 'Done' as Description", ddlStatus, "Description", "StatusID");
 
+            if (Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Edit"].ToString() ||
+               Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Readonly"].ToString())
+            {
+                String Employee = Functions.ExecuteScalar("SELECT EmployeeID FROM Employee WHERE UserID=" + Functions.Decrypt(Request.Cookies["UserID"].Value));
+                ddlEmployee.SelectedValue = Employee;
+                ddlEmployee.Enabled = false;
+            }
+
             if (Request.QueryString["ID"] != "")
             {
                 FillDetailsEdit();

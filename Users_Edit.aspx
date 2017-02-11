@@ -124,6 +124,7 @@
                 <br />
                 <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="EditFormButton" OnClick="btnSave_Click"  ValidationGroup="1" Visible="false"/>               
                 <asp:Button ID="btnInsert" runat="server" Text="Insert New Employee" CssClass="EditFormButton" ValidationGroup="1" OnClick="btnInsert_Click" Visible="false"/>                
+                <asp:Button ID="btnReset" runat="server" Text="Reset User's Password" CssClass="EditFormButton" ValidationGroup="1" OnClick="btnReset_Click" Visible="false"/>
             </td>
             <td colspan="2">
                 <asp:Label ID="lblAlreadyExist" runat="server" Text="The username allready exists!" CssClass="RequredField" Visible="false"></asp:Label>

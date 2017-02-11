@@ -24,6 +24,14 @@ public partial class Groups_Edit : System.Web.UI.Page
                                 WHERE e.Status=1 AND ua.UserTypeID NOT IN (" + ConfigurationManager.AppSettings["Admin"].ToString() +
                                 "," + ConfigurationManager.AppSettings["Advanced"].ToString() + ") GROUP BY e.EmployeeID, e.FirstName, e.LastName", ddlTeacher, "Name", "EmployeeID");
 
+            if (Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Edit"].ToString() ||
+               Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Readonly"].ToString())
+            {
+                String Employee = Functions.ExecuteScalar("SELECT EmployeeID FROM Employee WHERE UserID=" + Functions.Decrypt(Request.Cookies["UserID"].Value));
+                ddlTeacher.SelectedValue = Employee;
+                ddlTeacher.Enabled = false;
+            }
+
             Functions.FillCombo("SELECT 1 as Enable, 'Active' as Description UNION SELECT 0 as Enable, 'Finished' as Description", ddlStatus, "Description", "Enable");
 
             if (Request.QueryString["ID"] != "")
