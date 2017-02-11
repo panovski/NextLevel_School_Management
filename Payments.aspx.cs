@@ -32,6 +32,7 @@ public partial class Payments : System.Web.UI.Page
                                 WHERE g.Invoice=1 AND e.UserID=" + Functions.Decrypt(Request.Cookies["UserID"].Value), ddlInvoiceGroup, "Course", "GroupID");
                 Functions.FillCombo(@"SELECT CustomerID, FirstName+' '+LastName as Name FROM Customer WHERE CustomerID IN(SELECT CustomerID FROM 
                                     [Service] s LEFT OUTER JOIN Employee e ON e.EmployeeID=s.EmployeeID WHERE e.UserID=" + Functions.Decrypt(Request.Cookies["UserID"].Value)+")", ddlCustomers, "Name", "CustomerID");
+                rblType.Visible = false;
             }
             else
             {

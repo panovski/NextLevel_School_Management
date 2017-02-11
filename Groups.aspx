@@ -92,7 +92,7 @@
                 <asp:Button ID="btnEdit" runat="server" Text="Edit selected group" CssClass="FilterButton" ValidationGroup="1" OnClick="btnEdit_Click" />
                 <asp:Button ID="btnCreate" runat="server" Text="Add new group" CssClass="FilterButton" ValidationGroup="1" OnClick="btnCreate_Click" />
                 <asp:Button ID="btnDelete" runat="server" Text="Delete the selected group" CssClass="FilterButton" ValidationGroup="1" OnClick="btnDelete_Click" onclientclick="javascript:return confirm('Are you sure to delete the selected group completely?');" Visible="false"/>
-                <asp:Button ID="btnAddTerm" runat="server" Text="Group Terms" CssClass="FilterButton" ValidationGroup="1" OnClick="btnAddTerm_Click"  />                                
+                <asp:Button ID="btnAddTerm" runat="server" Text="Group Time Table" CssClass="FilterButton" ValidationGroup="1" OnClick="btnAddTerm_Click"  />                                
                 <asp:Button ID="bthEditGrType" runat="server" Text="Edit Group Types" CssClass="FilterButton" ValidationGroup="1" OnClick="bthEditGrType_Click" Visible="False"  />                                
                 <asp:Button ID="btnEditClassroom" runat="server" Text="Edit Classrooms" CssClass="FilterButton" ValidationGroup="1" Visible="False" OnClick="btnEditClassroom_Click"  />                                
                 <asp:Button ID="btnEditTemplates" runat="server" Text="Edit Templates" CssClass="FilterButton" ValidationGroup="1" Visible="False" OnClick="btnEditTemplates_Click"  />                                
@@ -244,7 +244,7 @@
                                 </table>
                                 </asp:Panel>                                
                                 <asp:Button ID="btnPreviewDetails" runat="server" Text="Selected Group Details" CssClass="NormalButton" OnClick="lnkDoubleClick_Click" />
-                                <asp:Button ID="btnTermsDetails" runat="server" Text="View Group Terms" CssClass="NormalButton" OnClick="btnTermsDetails_Click"  />
+                                <asp:Button ID="btnTermsDetails" runat="server" Text="View Group Time Table" CssClass="NormalButton" OnClick="btnTermsDetails_Click"  />
                             </td>
                         </tr>
                     </table>

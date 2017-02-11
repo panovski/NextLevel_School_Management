@@ -237,7 +237,7 @@
                                 </table>
                                 </asp:Panel>
                                 <asp:Button ID="btnPreviewDetails" runat="server" Text="Selected Student Details" CssClass="NormalButton" OnClick="lnkDoubleClick_Click" />
-                                <asp:Button ID="btnTermsDetails" runat="server" Text="View Group Terms" CssClass="NormalButton" OnClick="btnTermsDetails_Click"  />
+                                <asp:Button ID="btnTermsDetails" runat="server" Text="View Group Time Table" CssClass="NormalButton" OnClick="btnTermsDetails_Click"  />
                                 <asp:Button ID="btnTransfer" runat="server" Text="Transfer to another group" CssClass="NormalButton" OnClick="btnTransfer_Click"/>
                                 <asp:Button ID="btnTransferDetails" runat="server" Text="View Transfer Details" CssClass="NormalButton" OnClick="btnTransferDetails_Click"/>
                             </td>

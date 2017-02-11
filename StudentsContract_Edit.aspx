@@ -13,6 +13,16 @@
                 window.alert('The changes are saved!');
                 parent.CloseFunction(); }
     </script>
+    <script type="text/javascript">
+        function Date(textboxinput) {
+            var input = jQuery(textboxinput).val();
+            var lenght = input.length;
+            if (lenght == 2 && input.indexOf(".") < 1)
+                jQuery(textboxinput).val(input + ".");
+            if (lenght == 5 && input.charAt(4) !== '.')
+                jQuery(textboxinput).val(input + ".");
+        }
+    </script>
 </head>
 <body>
     <form id="form1" runat="server">
@@ -64,11 +74,11 @@
                             Start Date:
                         </td>
                         <td>
-                            <asp:TextBox ID="tbStartDate" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1" TextMode="Date" ></asp:TextBox>
+                            <asp:TextBox ID="tbStartDate" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1" onkeyup="javascript:Date('#tbStartDate')" ></asp:TextBox>
                         </td>
                         <td>
                             <asp:RequiredFieldValidator ID="rfvtbStartDate" runat="server" ErrorMessage="Required!" CssClass="RequredField" ControlToValidate="tbStartDate" ValidationGroup="1" ></asp:RequiredFieldValidator><br />
-                            <asp:CompareValidator ID="cvtbStartDate" runat="server" ErrorMessage="Wrong date!" Operator="DataTypeCheck" Type="Date" ControlToValidate="tbStartDate"  CssClass="RequredField" ValidationGroup="1" ></asp:CompareValidator>                             
+                            <asp:CompareValidator ID="cvtbStartDate" runat="server" ErrorMessage="Wrong date! (dd.MM.yyyy)" Operator="DataTypeCheck" Type="Date" ControlToValidate="tbStartDate"  CssClass="RequredField" ValidationGroup="1" ></asp:CompareValidator>                             
                         </td>
                     </tr>
                     <tr>
@@ -76,10 +86,10 @@
                            End Date:
                         </td>
                         <td>
-                            <asp:TextBox ID="tbEndDate" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1" TextMode="Date" ></asp:TextBox>
+                            <asp:TextBox ID="tbEndDate" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1" onkeyup="javascript:Date('#tbEndDate')" ></asp:TextBox>
                         </td>
                         <td>
-                            <asp:CompareValidator ID="tbtbEndDate" runat="server" ErrorMessage="Wrong date!" Operator="DataTypeCheck" Type="Date" ControlToValidate="tbEndDate"  CssClass="RequredField" ValidationGroup="1" ></asp:CompareValidator>                             
+                            <asp:CompareValidator ID="tbtbEndDate" runat="server" ErrorMessage="Wrong date! (dd.MM.yyyy)" Operator="DataTypeCheck" Type="Date" ControlToValidate="tbEndDate"  CssClass="RequredField" ValidationGroup="1" ></asp:CompareValidator>                             
                         </td>
                     </tr>                    
                     <tr>

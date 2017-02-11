@@ -16,6 +16,16 @@
                 parent.CloseFunction();
             }
     </script>
+    <script type="text/javascript">
+        function Date(textboxinput) {
+            var input = jQuery(textboxinput).val();
+            var lenght = input.length;
+            if (lenght == 2 && input.indexOf(".") < 1)
+                jQuery(textboxinput).val(input + ".");
+            if (lenght == 5 && input.charAt(4) !== '.')
+                jQuery(textboxinput).val(input + ".");
+        }
+    </script>
 </head>
 <body>
     <form id="form1" runat="server">
@@ -143,10 +153,10 @@
                             Until Date:
                         </td>
                         <td>
-                            <asp:TextBox ID="tbToDate" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1" TextMode="Date" ></asp:TextBox>
+                            <asp:TextBox ID="tbToDate" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1" onkeyup="javascript:Date('#tbToDate')"></asp:TextBox>
                         </td>
                         <td> 
-                            <asp:CompareValidator ID="cvtbToDate" runat="server" ErrorMessage="Wrong date!" Operator="DataTypeCheck" Type="Date" ControlToValidate="tbToDate"  CssClass="RequredField" ValidationGroup="1" ></asp:CompareValidator>                             
+                            <asp:CompareValidator ID="cvtbToDate" runat="server" ErrorMessage="Wrong date! (dd.MM.yyyy)" Operator="DataTypeCheck" Type="Date" ControlToValidate="tbToDate"  CssClass="RequredField" ValidationGroup="1" ></asp:CompareValidator>                             
                         </td>
                     </tr>     
                     <tr>

@@ -16,6 +16,16 @@
                 parent.CloseFunction();
             }
     </script>
+    <script type="text/javascript">
+        function Date(textboxinput) {
+            var input = jQuery(textboxinput).val();
+            var lenght = input.length;
+            if (lenght == 2 && input.indexOf(".") < 1)
+                jQuery(textboxinput).val(input + ".");
+            if (lenght == 5 && input.charAt(4) !== '.')
+                jQuery(textboxinput).val(input + ".");
+        }
+    </script>
 </head>
 <body>
     <form id="form1" runat="server">
@@ -156,7 +166,7 @@
                 Date of Birth:
             </td>
             <td>
-                <asp:TextBox ID="tbDateOfBirth" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1" TextMode="Date" AutoPostBack="True" OnTextChanged="tbDateOfBirth_TextChanged"></asp:TextBox>
+                <asp:TextBox ID="tbDateOfBirth" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1" AutoPostBack="True" OnTextChanged="tbDateOfBirth_TextChanged" onkeyup="javascript:Date('#tbDateOfBirth')"></asp:TextBox>
             </td>
             <td>
                 <asp:RequiredFieldValidator ID="rfvDateOfBirth" runat="server" ErrorMessage="Required!" CssClass="RequredField" ControlToValidate="tbDateOfBirth" ValidationGroup="1"></asp:RequiredFieldValidator><br />

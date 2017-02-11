@@ -99,7 +99,9 @@
     padding-left:3vw;
 }
 .TextBoxRoundedEdit
-{
+{   overflow-y: scroll;
+    max-height: 200px;
+
     color:#646363;
     font-family:Calibri;
     font-size:2vw;

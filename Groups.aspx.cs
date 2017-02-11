@@ -23,7 +23,7 @@ public partial class Groups : System.Web.UI.Page
         {
             Functions.FillCombo("SELECT '' as Language UNION SELECT DISTINCT(Language) FROM GroupType", ddlLanguage, "Language", "Language");
             Functions.FillCombo("SELECT '' as LevelDescription UNION SELECT DISTINCT(LevelDescription) FROM GroupType", ddlLevel, "LevelDescription", "LevelDescription");
-            Functions.FillCombo("SELECT StudentID, FirstName+' '+LastName as Name FROM Student WHERE Status=1", ddlStudents, "Name", "StudentID");
+            Functions.FillCombo("SELECT StudentID, FirstName+' '+LastName + ' - ' + convert(varchar(20), DateOfBirth, 104) as Name FROM Student WHERE Status=1", ddlStudents, "Name", "StudentID");
             Functions.FillCombo(@"SELECT -1 as EmployeeID,'' as Name UNION 
                                 SELECT e.EmployeeID, e.FirstName+' '+e.LastName as Name 
                                 FROM Employee e LEFT OUTER JOIN [User] u ON e.UserID=u.UserID LEFT OUTER JOIN UserAccess ua ON ua.UserID=u.UserID
@@ -553,7 +553,7 @@ public partial class Groups : System.Web.UI.Page
     protected void tbStudentsSearch_TextChanged(object sender, EventArgs e)
     {
         ddlStudents.Items.Clear();
-        Functions.FillCombo(@"SELECT StudentID, FirstName+' '+LastName as Name FROM Student WHERE Status=1 AND
+        Functions.FillCombo(@"SELECT StudentID, FirstName+' '+LastName + ' - ' + convert(varchar(20), DateOfBirth, 104) as Name FROM Student WHERE Status=1 AND
                             (FirstName LIKE N'%" + tbStudentsSearch.Text.Replace("'", "''") + "%' OR LastName LIKE N'%" + tbStudentsSearch.Text.Replace("'", "''") + "%')", ddlStudents, "Name", "StudentID");
     }
     protected void gvDetails_RowDataBound(object sender, GridViewRowEventArgs e)

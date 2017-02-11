@@ -16,7 +16,7 @@ public partial class Groups_Edit : System.Web.UI.Page
         if (!Page.IsPostBack)
         {
             Login_Redirect();
-            Functions.FillCombo("SELECT GroupTypeID, Language + ' - ' + LevelDescription as Course FROM GroupType", ddlCourse, "Course", "GroupTypeID");
+            Functions.FillCombo("SELECT GroupTypeID, Language + ' - ' + LevelDescription + ' - ' + Program as Course FROM GroupType", ddlCourse, "Course", "GroupTypeID");
             //Functions.FillCombo("SELECT EmployeeID, FirstName +' ' + LastName as Name FROM Employee WHERE Status = 1", ddlTeacher, "Name", "EmployeeID");
             Functions.FillCombo(@"SELECT -1 as EmployeeID,'' as Name UNION 
                                 SELECT e.EmployeeID, e.FirstName+' '+e.LastName as Name 
