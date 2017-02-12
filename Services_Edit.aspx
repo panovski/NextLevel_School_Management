@@ -94,6 +94,17 @@
                                         <asp:RequiredFieldValidator ID="rfvtbPlace" runat="server" ErrorMessage="Required!" CssClass="RequredField" ControlToValidate="tbPlace" ValidationGroup="1" ></asp:RequiredFieldValidator>
                                     </td>
                                 </tr>
+                                <tr>
+                        <td>
+                            Date of Birth:
+                        </td>
+                        <td>
+                            <asp:TextBox ID="tbDateOfBirth" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1" onkeyup="javascript:Date('#tbDateOfBirth')"></asp:TextBox>
+                        </td>
+                        <td> 
+                            <asp:CompareValidator ID="CompareValidator1" runat="server" ErrorMessage="Wrong date! (dd.MM.yyyy)" Operator="DataTypeCheck" Type="Date" ControlToValidate="tbDateOfBirth"  CssClass="RequredField" ValidationGroup="1" ></asp:CompareValidator>                             
+                        </td>
+                    </tr>    
                             </table>
                             </asp:Panel>
                         </td>

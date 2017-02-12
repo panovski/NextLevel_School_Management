@@ -92,7 +92,7 @@ public partial class StudentsContract_Edit : System.Web.UI.Page
             if (tbEndDate.Text == "")
                 EndD = "NULL";
             else
-                EndD = "'" + tbEndDate.Text.Replace("'", "''") + "'";
+                EndD = "'" + Convert.ToDateTime(tbEndDate.Text.Replace("'", "''")) + "'";
 
             String SQL = "UPDATE [Contract] SET GroupStudentID="+ddlCourse.SelectedValue+", StartDate='" + tbStartDate.Text.Replace("'", "''") + "', EndDate=" + EndD +
             " WHERE ContractID=" + gvMain.SelectedValue;
@@ -108,7 +108,7 @@ public partial class StudentsContract_Edit : System.Web.UI.Page
         if (tbEndDate.Text == "")
             EndD = "NULL";
         else
-            EndD = "'" + tbEndDate.Text.Replace("'", "''")+"'";
+            EndD = "'" + Convert.ToDateTime(tbEndDate.Text.Replace("'", "''"))+"'";
 
         //int NotClosed = Convert.ToInt32(Functions.ExecuteScalar("SELECT Count(*) FROM [Contract] WHERE EndDate IS NULL AND StudentID="+Request.QueryString["ID"] ));
 

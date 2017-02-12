@@ -109,6 +109,21 @@ public partial class Groups : System.Web.UI.Page
                                 WHERE gs.GroupID=" + gvMain.SelectedValue.ToString() + " AND s.Status=1 GROUP BY s.StudentID , s.FirstName + ' ' + s.LastName,gs.Status, gs.Discount, gs.TotalCost,gs.Transfered";
         gvDetails.DataBind();
     }
+    private void FillClasses()
+    {
+        if (gvDetails.SelectedIndex != null)
+        {
+            String[] Classes = Functions.ReturnIntoArray("SELECT ClassesAttended,PassedFinalTest,ReceivedCertificate FROM GroupStudent WHERE StudentID=" + gvDetails.SelectedValue +" AND GroupID="+gvMain.SelectedValue, 3);
+            if (Classes.Length > 0)
+            {
+                tbClassesAttended.Text = Classes[0];
+                if (Classes[1] != "")
+                    cbPassedFinalTest.Checked = Convert.ToBoolean(Classes[1]);
+                if (Classes[2] != "")
+                    cbReceivedCertificate.Checked = Convert.ToBoolean(Classes[2]);
+            }
+        }
+    }
     protected void Fill_Payments()
     {
         dsPayments.SelectCommand = @"SELECT * FROM Payment p LEFT OUTER JOIN GroupStudent gs ON gs.GroupStudentID=p.GroupStudentID
@@ -622,6 +637,7 @@ public partial class Groups : System.Web.UI.Page
     protected void gvDetails_SelectedIndexChanged(object sender, EventArgs e)
     {
         Fill_Payments();
+        FillClasses();
     }
     protected void gvCertificates_RowDataBound(object sender, GridViewRowEventArgs e)
     {
@@ -643,4 +659,13 @@ public partial class Groups : System.Web.UI.Page
         Fill_Details();
     }
     #endregion
+    protected void btnSaveAdd_Click(object sender, EventArgs e)
+    {
+        if((gvDetails.SelectedIndex != null) && (gvMain.SelectedIndex!=null))
+        {
+            Functions.ExecuteCommand(@"UPDATE GroupStudent SET ClassesAttended=N'" + tbClassesAttended.Text +
+            @"', PassedFinalTest='" + cbPassedFinalTest.Checked + "', ReceivedCertificate='" + cbReceivedCertificate.Checked +
+            @"' WHERE StudentID=" + gvDetails.SelectedValue + " AND GroupID=" + gvMain.SelectedValue);
+        }
+    }
 }

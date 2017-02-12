@@ -228,10 +228,15 @@
                                             <asp:TextBox ID="tbDiscount" runat="server" TextMode="Number" CssClass="TextBoxNumber"></asp:TextBox>%
                                             <asp:Button ID="btnAdd" runat="server" Text="Add" CssClass="NormalButton" OnClick="btnAdd_Click" onclientclick="javascript:return confirm('Are you sure to add the group for the student?');" />
                                             <asp:Button ID="btnRemove" runat="server" Text="Remove selected" CssClass="NormalButton" OnClick="btnRemove_Click" onclientclick="javascript:return confirm('Are you sure to remove the student from selected group?');" />
-                                            <br /><br />
-                                            <asp:Label ID="lblAlreadyAdded" runat="server" Text="The student is already member of the group!" CssClass="InfoMessage" Visible="False"></asp:Label>
+                                            <br />
+                                            Classes:<br /><asp:TextBox ID="tbClassesAttended" runat="server" TextMode="Number" CssClass="TextBoxNumber"></asp:TextBox>
+                                            <asp:CheckBox ID="cbPassedFinalTest" runat="server" Text="Final Test"/>
+                                            <asp:CheckBox ID="cbReceivedCertificate" runat="server" Text="Certificate"/>
+                                            <asp:Button ID="btnSaveAdd" runat="server" Text="Save" CssClass="NormalButton" onclientclick="javascript:return confirm('Are you sure to add the classes, final test and certificate?');" OnClick="btnSaveAdd_Click" />
+                                            <br />                                            
                                             <asp:Button ID="btnDeactivate" runat="server" Text="Change the Student to passive" CssClass="NormalButton"  onclientclick="javascript:return confirm('Are you sure to deactivate the selected user?');" OnClick="btnDeactivate_Click" Visible="false" />
                                             <asp:Button ID="btnActivate" runat="server" Text="Change the Student to active" CssClass="NormalButton"  onclientclick="javascript:return confirm('Are you sure to active the selected user?');" OnClick="btnActivate_Click" Visible="false"/>
+                                            <asp:Label ID="lblAlreadyAdded" runat="server" Text="The student is already member of the group!" CssClass="InfoMessage" Visible="False"></asp:Label>
                                         </td>
                                     </tr>
                                 </table>
@@ -357,7 +362,11 @@
                             <td style="vertical-align:top" class="EditDetails">
                                 <asp:ImageButton ID="imgbtnRefresh" runat="server" ImageUrl="~/Images/Icons/Refresh1.png" OnClick="imgbtnRefresh_Click" CssClass="RefreshButton"/>
                                 <br /><br />
-                                    Cert. Template:<br /></br><asp:DropDownList ID="ddlTemplateCertificate" runat="server" CssClass="TextBoxRoundedFilters" ValidationGroup="2" style="width:10vw"></asp:DropDownList>                               
+                                    Cert. Template:<br /><br>
+                                <br></br>
+                                <asp:DropDownList ID="ddlTemplateCertificate" runat="server" CssClass="TextBoxRoundedFilters" style="width:10vw" ValidationGroup="2">
+                                </asp:DropDownList>
+                                </br>                               
                                     
                             </td>                           
                         </tr>

@@ -100,6 +100,12 @@ public partial class Services_Edit : System.Web.UI.Page
             String SQLInsert = @"INSERT INTO [Customer] (FirstName,LastName,Contact,Place,CreatedBy) " +
                              "VALUES(N'" + tbFirstName.Text.Replace("'", "''") + "',N'" + tbLastName.Text.Replace("'", "''") + "',N'" + tbContact.Text.Replace("'", "''") + "',N'" + tbPlace.Text.Replace("'", "''") + "'," +
                              Functions.Decrypt(Request.Cookies["UserID"].Value) + "); SELECT SCOPE_IDENTITY()";
+
+            if (tbDateOfBirth.Text!="")
+                SQLInsert = @"INSERT INTO [Customer] (FirstName,LastName,Contact,Place,CreatedBy,DateOfBirth) " +
+                             "VALUES(N'" + tbFirstName.Text.Replace("'", "''") + "',N'" + tbLastName.Text.Replace("'", "''") + "',N'" + tbContact.Text.Replace("'", "''") + "',N'" + tbPlace.Text.Replace("'", "''") + "'," +
+                             Functions.Decrypt(Request.Cookies["UserID"].Value) + ",'" + Convert.ToDateTime(tbDateOfBirth.Text.Replace("'", "''")) + "'); SELECT SCOPE_IDENTITY()";
+
             CustomerID = Functions.ExecuteScalar(SQLInsert);
         }
 
@@ -108,7 +114,7 @@ public partial class Services_Edit : System.Web.UI.Page
                   ", CustomerID= " + CustomerID +
                   ", EmployeeID= " + ddlEmployee.SelectedValue +
                   ", Status= '" + ddlStatus.SelectedValue +
-                  "', ToDate='" + tbToDate.Text.Replace("'", "''") +
+                  "', ToDate='" + Convert.ToDateTime(tbToDate.Text.Replace("'", "''")) +
                   "', Quantity=" + tbQuantity.Text.Replace("'", "''") +
                   ", TotalCost='" + Convert.ToInt32(tbQuantity.Text) * Convert.ToDecimal(Cost) + 
                   "' WHERE ServiceID=" + Request.QueryString["ID"];
@@ -123,6 +129,12 @@ public partial class Services_Edit : System.Web.UI.Page
             String SQLInsert = @"INSERT INTO [Customer] (FirstName,LastName,Contact,Place,CreatedBy) " +
                             "VALUES(N'" + tbFirstName.Text.Replace("'", "''") + "',N'" + tbLastName.Text.Replace("'", "''") + "',N'" + tbContact.Text.Replace("'", "''") + "',N'" + tbPlace.Text.Replace("'", "''") + "'," +
                             Functions.Decrypt(Request.Cookies["UserID"].Value) + "); SELECT SCOPE_IDENTITY()";
+
+            if(tbDateOfBirth.Text!="")
+                SQLInsert = @"INSERT INTO [Customer] (FirstName,LastName,Contact,Place,CreatedBy, DateOfBirth) " +
+                            "VALUES(N'" + tbFirstName.Text.Replace("'", "''") + "',N'" + tbLastName.Text.Replace("'", "''") + "',N'" + tbContact.Text.Replace("'", "''") + "',N'" + tbPlace.Text.Replace("'", "''") + "'," +
+                            Functions.Decrypt(Request.Cookies["UserID"].Value) + ",'" + Convert.ToDateTime(tbDateOfBirth.Text.Replace("'", "''")) + "'); SELECT SCOPE_IDENTITY()";
+
             CustomerID = Functions.ExecuteScalar(SQLInsert);
         }
 

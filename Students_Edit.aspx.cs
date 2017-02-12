@@ -106,7 +106,7 @@ public partial class Students_Edit : System.Web.UI.Page
          "', SocialNumber= N'" + tbSocialNumber.Text.Replace("'","''") +
          "', ContactPhone= N'" + tbContactPhone.Text.Replace("'", "''") +
          "', Status=" + ddlStatus.SelectedValue +
-         ", DateOfBirth='" + tbDateOfBirth.Text.Replace("'", "''") +
+         ", DateOfBirth='" + Convert.ToDateTime(tbDateOfBirth.Text.Replace("'", "''")) +
          "', Address= N'" + tbAddress.Text.Replace("'", "''") +
          "', HouseNumber= N'" + tbHouseNumber.Text.Replace("'", "''") +
          "', Place= N'" + tbPlace.Text.Replace("'", "''") +
@@ -131,7 +131,7 @@ public partial class Students_Edit : System.Web.UI.Page
             String SQL = @"INSERT INTO Student (FirstName,LastName,SocialNumber,ContactPhone,Status,DateOfBirth,Address,
                    HouseNumber,Place,Email,Parent_FirstName,Parent_LastName,Parent_Address,Parent_HouseNumber,Parent_SocialNumber,Parent_Place, CreatedBy, Gender)
                    VALUES(N'" + tbFirstName.Text.Replace("'", "''") + "',N'" + tbLastName.Text.Replace("'", "''") + "',N'" + tbSocialNumber.Text.Replace("'", "''") +
-                   "',N'" + tbContactPhone.Text.Replace("'", "''") + "','" + ddlStatus.SelectedValue + "','" + tbDateOfBirth.Text.Replace("'", "''") +
+                   "',N'" + tbContactPhone.Text.Replace("'", "''") + "','" + ddlStatus.SelectedValue + "','" + Convert.ToDateTime(tbDateOfBirth.Text.Replace("'", "''")) +
                    "',N'" + tbAddress.Text.Replace("'", "''") + "',N'" + tbHouseNumber.Text.Replace("'", "''") + "',N'" + tbPlace.Text.Replace("'", "''") +
                    "','" + tbEmail.Text.Replace("'", "''") + "',N'" + tbParrentFirstName.Text.Replace("'", "''") + "',N'" + tbParrentLastName.Text.Replace("'", "''") +
                    "',N'" + tbParrentAddress.Text.Replace("'", "''") + "',N'" + tbParrentHouseNumber.Text.Replace("'", "''") + "',N'" + tbParrentSN.Text.Replace("'", "''") +

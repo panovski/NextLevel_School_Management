@@ -33,6 +33,8 @@ public partial class Payments : System.Web.UI.Page
                 Functions.FillCombo(@"SELECT CustomerID, FirstName+' '+LastName as Name FROM Customer WHERE CustomerID IN(SELECT CustomerID FROM 
                                     [Service] s LEFT OUTER JOIN Employee e ON e.EmployeeID=s.EmployeeID WHERE e.UserID=" + Functions.Decrypt(Request.Cookies["UserID"].Value)+")", ddlCustomers, "Name", "CustomerID");
                 rblType.Visible = false;
+                pnlCreateInvoice.Visible = false;
+                btnPrintInvoice.Visible = false;
             }
             else
             {
@@ -41,6 +43,8 @@ public partial class Payments : System.Web.UI.Page
                                 FROM [Group] g LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID = g.GroupTypeID                              
                                 WHERE g.Invoice=1", ddlInvoiceGroup, "Course", "GroupID");
                 Functions.FillCombo(@"SELECT CustomerID, FirstName+' '+LastName as Name FROM Customer", ddlCustomers, "Name", "CustomerID");
+                pnlCreateInvoice.Visible = true;
+                btnPrintInvoice.Visible = true;
             }
             
             btnSearch_Click(sender, e);
@@ -60,6 +64,7 @@ public partial class Payments : System.Web.UI.Page
         {
             pnlTopMeni.Visible = true;
             pnlPayment.Visible = true;
+            pnlCreateInvoice.Visible = true;
         }
         else if (PermLevel == ConfigurationManager.AppSettings["Edit"].ToString()
             || PermLevel == ConfigurationManager.AppSettings["Advanced"].ToString())
@@ -204,6 +209,8 @@ public partial class Payments : System.Web.UI.Page
 
         pnlButtonsAdd.Visible = false;
         pnlButtonsNew.Visible = true;
+
+        Fill_Invoice();
     }
     protected void CalculatePayments()
     {
@@ -246,10 +253,56 @@ public partial class Payments : System.Web.UI.Page
                 tbRemainingCosts.ForeColor = tbTotalPaid.ForeColor;
             }
         }
+        Fill_Invoice();
+    }
+
+    protected void Fill_Invoice()
+    {
+        lblInvoiceNumber.Text = "";
+        tbBuyer.Text = "";
+        if (rblType.SelectedValue == "0" && ddlAddGroup.SelectedValue!="")
+        {
+            String GroupStudentID = Functions.ExecuteScalar("SELECT GroupStudentID FROM GroupStudent WHERE GroupID=" + ddlAddGroup.SelectedValue + " AND StudentID=" + ddlStudents.SelectedValue);
+            String SQL = "SELECT InvoiceNumber, Buyer FROM Invoice WHERE GroupStudentID=" + GroupStudentID;
+
+            String[] Invoices = Functions.ReturnIntoArray(SQL, 2);
+            lblInvoiceNumber.Text = Invoices[0];
+            tbBuyer.Text = Invoices[1];
+        }
+        else if (rblType.SelectedValue == "1" && ddlService.SelectedValue != "")
+        {
+                String SQL = "SELECT InvoiceNumber, Buyer FROM Invoice WHERE ServiceID=" + ddlService.SelectedValue;
+
+                String[] Invoices = Functions.ReturnIntoArray(SQL, 2);
+                lblInvoiceNumber.Text = Invoices[0];
+                tbBuyer.Text = Invoices[1];
+        }
+
+        else if (rblType.SelectedValue == "2" && ddlInvoiceGroup.SelectedValue!="")
+        {
+            if (ddlInvoiceGroup.SelectedValue != null)
+            {
+                String SQL = "SELECT InvoiceNumber, Buyer FROM Invoice WHERE Invoice=" + ddlInvoiceGroup.SelectedValue;
+
+                String[] Invoices = Functions.ReturnIntoArray(SQL, 2);
+                lblInvoiceNumber.Text = Invoices[0];
+                tbBuyer.Text = Invoices[1];
+            }
+        }
+
     }
     protected string Get_PaymentNumber()
     {
         String MaxID = Functions.ExecuteScalar(@"SELECT Max(CAST(LEFT(PaymentNumber, 4) AS INT)) as PaymentN FROM Payment WHERE CAST(RIGHT(PaymentNumber, 2) AS INT)='" + DateTime.Now.ToString("yy") + "'");
+        if (MaxID == "") MaxID = "0";
+        int NewID = 0;
+        NewID = Convert.ToInt32(MaxID) + 1;
+
+        return NewID.ToString().PadLeft(4, '0') + "/" + DateTime.Now.ToString("yy");
+    }
+    protected string Get_InvoiceNumber()
+    {
+        String MaxID = Functions.ExecuteScalar(@"SELECT Max(CAST(LEFT(InvoiceNumber, 4) AS INT)) as InvoiceN FROM Invoice WHERE CAST(RIGHT(InvoiceNumber, 2) AS INT)='" + DateTime.Now.ToString("yy") + "'");
         if (MaxID == "") MaxID = "0";
         int NewID = 0;
         NewID = Convert.ToInt32(MaxID) + 1;
@@ -296,9 +349,63 @@ public partial class Payments : System.Web.UI.Page
                         FROM Payment p 
                         LEFT OUTER JOIN [Group] g ON g.GroupID=p.InvoiceID LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID
                         WHERE p.PaymentID=" + PaymentID;
-            PaymentPath = Functions.ExecuteScalar("SELECT TOP 1 TemplateFile FROM Template WHERE TemplateType=4 ORDER BY CreatedDate DESC");
+            PaymentPath = Functions.ExecuteScalar("SELECT TOP 1 TemplateFile FROM Template WHERE TemplateType=3 ORDER BY CreatedDate DESC");
         }
        
+        String PathDoc = Server.MapPath(PaymentPath.Replace(".dotx", ""));
+        Functions.PrintWord(PathDoc, SQLPrint);
+        //FileInfo fileInfo = new FileInfo(PathDoc + ".pdf");
+        FileInfo fileInfo = new FileInfo(PathDoc + "-1.docx");
+        if (fileInfo.Exists)
+        {
+            Response.Clear();
+            Response.AddHeader("Content-Disposition", "attachment; filename=" + fileInfo.Name);
+            Response.AddHeader("Content-Length", fileInfo.Length.ToString());
+            Response.ContentType = "application/octet-stream";
+            Response.Flush();
+            Response.TransmitFile(fileInfo.FullName);
+            Response.End();
+        }
+    }
+
+    protected void PrintInvoice(String InvoiceID)
+    {
+        String PaymentPath = Functions.ExecuteScalar("SELECT TOP 1 TemplateFile FROM Template WHERE TemplateType=4 ORDER BY CreatedDate DESC");
+        string SQLPrint = "";
+        
+        if (rblType.SelectedValue == "0")
+        {
+            SQLPrint = @"SELECT i.Ammount, i.AmmountWords, gt.Language+' - '+gt.LevelDescription + ' - ' + s.FirstName + ' ' + s.LastName as Description ,
+						i.Buyer, convert(varchar,i.DateOfCreation,104) as DateOfCreation,
+						convert(varchar,i.UntillDate,104) as UntillDate, i.InvoiceNumber, i.Ammount as Price,
+						1 as Quantity, i.Ammount as TotalAmmount
+                        FROM Invoice i LEFT OUTER JOIN GroupStudent gs ON gs.GroupStudentID=i.GroupStudentID
+                        LEFT OUTER JOIN [Group] g ON g.GroupID=gs.GroupID LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID
+                        LEFT OUTER JOIN Student s ON s.StudentID=gs.StudentID WHERE i.InvoiceNumber='" + InvoiceID + "'";
+            
+        }
+        else if (rblType.SelectedValue == "1")
+        {
+            SQLPrint = @"SELECT i.Ammount, i.AmmountWords, st.ServiceName as Description ,
+						i.Buyer, convert(varchar,i.DateOfCreation,104) as DateOfCreation,
+						convert(varchar,i.UntillDate,104) as UntillDate, i.InvoiceNumber, st.Cost as Price,
+						se.Quantity as Quantity, se.TotalCost as TotalAmmount
+						FROM Invoice i LEFT OUTER JOIN [Service] se ON se.ServiceID=i.ServiceID
+						LEFT OUTER JOIN ServiceType st ON st.ServiceTypeID=se.ServiceTypeID
+						WHERE i.InvoiceNumber='" + InvoiceID + "'";
+        }
+        else if (rblType.SelectedValue == "2")
+        {
+            SQLPrint = @"SELECT i.Ammount, i.AmmountWords, g.GroupName+' - '+ gt.Language+' - '+gt.LevelDescription as Description ,
+						i.Buyer, convert(varchar,i.DateOfCreation,104) as DateOfCreation,
+						convert(varchar,i.UntillDate,104) as UntillDate, i.InvoiceNumber, i.Ammount as Price,
+						1 as Quantity, i.Ammount as TotalAmmount
+                        FROM Invoice i 
+						LEFT OUTER JOIN [Group] g ON g.GroupID=i.Invoice
+						LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID
+						WHERE i.InvoiceNumber='" + InvoiceID + "'";
+        }
+
         String PathDoc = Server.MapPath(PaymentPath.Replace(".dotx", ""));
         Functions.PrintWord(PathDoc, SQLPrint);
         //FileInfo fileInfo = new FileInfo(PathDoc + ".pdf");
@@ -500,6 +607,7 @@ public partial class Payments : System.Web.UI.Page
                 tbInvoiceRemainingCosts.ForeColor = tbTotalPaid.ForeColor;
             }
         }
+        Fill_Invoice();
     }
 
     #endregion
@@ -640,6 +748,7 @@ public partial class Payments : System.Web.UI.Page
             pnlStudent.Visible = false;
             pnlInvoice.Visible = true;
         }
+        Fill_Invoice();
     }
     protected void tbCustomerSearch_TextChanged(object sender, EventArgs e)
     {
@@ -696,10 +805,21 @@ public partial class Payments : System.Web.UI.Page
     protected void ddlCustomers_SelectedIndexChanged(object sender, EventArgs e)
     {
         ddlService.Items.Clear();
-        Functions.FillCombo(@"SELECT s.ServiceID, CAST(s.ServiceID AS VARCHAR(16)) + '-' + st.ServiceName as ServiceName
+        if (Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Edit"].ToString() ||
+                Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Readonly"].ToString())
+        {
+            Functions.FillCombo(@"SELECT s.ServiceID, CAST(s.ServiceID AS VARCHAR(16)) + '-' + st.ServiceName as ServiceName
                             FROM [Service] s LEFT OUTER JOIN ServiceType st ON st.ServiceTypeID=s.ServiceTypeID
                             LEFT OUTER JOIN Employee e ON e.EmployeeID=s.EmployeeID
                             WHERE s.CustomerID=" + ddlCustomers.SelectedValue + " AND e.UserID=" + Functions.Decrypt(Request.Cookies["UserID"].Value), ddlService, "ServiceName", "ServiceID");
+        }
+        else
+        {
+            Functions.FillCombo(@"SELECT s.ServiceID, CAST(s.ServiceID AS VARCHAR(16)) + '-' + st.ServiceName as ServiceName
+                            FROM [Service] s LEFT OUTER JOIN ServiceType st ON st.ServiceTypeID=s.ServiceTypeID
+                            LEFT OUTER JOIN Employee e ON e.EmployeeID=s.EmployeeID
+                            WHERE s.CustomerID=" + ddlCustomers.SelectedValue, ddlService, "ServiceName", "ServiceID");
+        }
         CalculatePaymentsService();
     }
     protected void ddlAddGroup_SelectedIndexChanged(object sender, EventArgs e)
@@ -847,6 +967,7 @@ public partial class Payments : System.Web.UI.Page
     protected void ddlService_SelectedIndexChanged(object sender, EventArgs e)
     {
         CalculatePaymentsService();
+        Fill_Invoice();
     }
     protected void ddlInvoiceGroup_SelectedIndexChanged(object sender, EventArgs e)
     {
@@ -880,4 +1001,60 @@ public partial class Payments : System.Web.UI.Page
         
     }
     #endregion
+    protected void btnCreateInvoice_Click(object sender, EventArgs e)
+    {
+        Page.Validate("2");
+
+        if(Page.IsValid && lblInvoiceNumber.Text=="")
+        {
+            DateTime dtUntil = Convert.ToDateTime(tbAddDateOfPayment.Text).AddDays(7);
+            String InvoiceNumber = Get_InvoiceNumber();
+            
+            if (rblType.SelectedValue == "0")
+            {
+                String GroupStudentID = Functions.ExecuteScalar("SELECT GroupStudentID FROM GroupStudent WHERE GroupID=" + ddlAddGroup.SelectedValue + " AND StudentID=" + ddlStudents.SelectedValue);
+                String SQL = "INSERT INTO Invoice (InvoiceNumber,Buyer,Ammount,AmmountWords,DateOfCreation,UntillDate,GroupStudentID) VALUES(N'" + InvoiceNumber + 
+                             @"',N'"+ tbBuyer.Text.Replace("'","''")+"',N'"+tbAddAmmount.Text.Replace("'","''")+"',N'"+tbAddAmmountWords.Text.Replace("'","''")+
+                             @"','"+Convert.ToDateTime(tbAddDateOfPayment.Text)+"','"+dtUntil+"',"+GroupStudentID+")";
+                Functions.ExecuteCommand(SQL);
+
+                lblInvoiceNumber.Text = InvoiceNumber;
+            }
+
+            else if (rblType.SelectedValue == "1")
+            {
+                String SQL = "INSERT INTO Invoice (InvoiceNumber,Buyer,Ammount,AmmountWords,DateOfCreation,UntillDate,ServiceID) VALUES(N'" + InvoiceNumber +
+                             @"',N'" + tbBuyer.Text.Replace("'", "''") + "',N'" + tbAddAmmount.Text.Replace("'", "''") + "',N'" + tbAddAmmountWords.Text.Replace("'", "''") +
+                             @"','" + Convert.ToDateTime(tbAddDateOfPayment.Text) + "','" + dtUntil + "'," + ddlService.SelectedValue + ")";
+                Functions.ExecuteCommand(SQL);
+
+                lblInvoiceNumber.Text = InvoiceNumber;
+            }
+
+            else if (rblType.SelectedValue == "2")
+            {
+                String SQL = "INSERT INTO Invoice (InvoiceNumber,Buyer,Ammount,AmmountWords,DateOfCreation,UntillDate,Invoice) VALUES(N'" + InvoiceNumber +
+                             @"',N'" + tbBuyer.Text.Replace("'", "''") + "',N'" + tbAddAmmount.Text.Replace("'", "''") + "',N'" + tbAddAmmountWords.Text.Replace("'", "''") +
+                             @"','" + Convert.ToDateTime(tbAddDateOfPayment.Text) + "','" + dtUntil + "'," + ddlInvoiceGroup.SelectedValue + ")";
+                Functions.ExecuteCommand(SQL);
+
+                lblInvoiceNumber.Text = InvoiceNumber;
+            }
+        }
+    }
+    protected void btnDeleteInvoice_Click(object sender, EventArgs e)
+    {
+        if (lblInvoiceNumber.Text != "")
+        {
+            String SQL = "DELETE FROM Invoice WHERE InvoiceNumber='" + lblInvoiceNumber.Text + "'";
+            Functions.ExecuteCommand(SQL);
+
+            Fill_Invoice();
+        }
+    }
+    protected void btnPrintInvoice_Click(object sender, EventArgs e)
+    {
+        if (lblInvoiceNumber.Text != "")
+            PrintInvoice(lblInvoiceNumber.Text);
+    }
 }

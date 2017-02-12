@@ -166,7 +166,7 @@
                 Date of Birth:
             </td>
             <td>
-                <asp:TextBox ID="tbDateOfBirth" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1" AutoPostBack="True" OnTextChanged="tbDateOfBirth_TextChanged" onkeyup="javascript:Date('#tbDateOfBirth')"></asp:TextBox>
+                <asp:TextBox ID="tbDateOfBirth" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1" AutoPostBack="True" onkeyup="javascript:Date('#tbDateOfBirth')" OnTextChanged="tbDateOfBirth_TextChanged" ></asp:TextBox>
             </td>
             <td>
                 <asp:RequiredFieldValidator ID="rfvDateOfBirth" runat="server" ErrorMessage="Required!" CssClass="RequredField" ControlToValidate="tbDateOfBirth" ValidationGroup="1"></asp:RequiredFieldValidator><br />

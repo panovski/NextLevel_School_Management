@@ -19,7 +19,7 @@ public partial class Templates_Edit : System.Web.UI.Page
         {
             Login_Redirect();
             Functions.FillCombo(@"SELECT 1 as Value, 'Contract' as Description UNION " +
-                                " SELECT 2 as Value, 'Certificate' as Description UNION SELECT 3 as Value, 'Payment' as Description UNION SELECT 4 as Value, 'Invoice' as Description", ddlType, "Description", "Value");
+                                " SELECT 2 as Value, 'Certificate' as Description UNION SELECT 3 as Value, 'Payment' as Description UNION SELECT 4 as Value, 'Invoice' as Description  UNION SELECT 5 as Value, 'Service' as Description", ddlType, "Description", "Value");
             Fill_Grid();
         }
     }

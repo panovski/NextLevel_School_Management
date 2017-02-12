@@ -21,6 +21,7 @@ public partial class Services : System.Web.UI.Page
         if (!Page.IsPostBack)
         {            
             Login_Redirect();
+            Functions.FillCombo("SELECT TemplateName, TemplateFile FROM Template WHERE TemplateType=5 ORDER BY CreatedDate DESC", ddlTemplateCertificate, "TemplateName", "TemplateFile");
             btnSearch_Click(sender, e);
         }
     }
@@ -48,6 +49,7 @@ public partial class Services : System.Web.UI.Page
             btnServiceType.Visible = true;
             btnDelete.Visible = true;
             btnEdit.Visible = true;
+            btnDeleteAllCertificates.Visible = true;
         }
         else
         {
@@ -60,7 +62,7 @@ public partial class Services : System.Web.UI.Page
                                 CASE WHEN s.Status=0 THEN 'Done' WHEN s.Status=1 THEN 'Active' END as Status
                                 FROM [Service] s LEFT OUTER JOIN ServiceType st ON st.ServiceTypeID=s.ServiceTypeID
                                 LEFT OUTER JOIN Customer c ON c.CustomerID=s.CustomerID
-                                LEFT OUTER JOIN Employee e ON e.EmployeeID = s.EmployeeID " + WherePart;
+                                LEFT OUTER JOIN Employee e ON e.EmployeeID = s.EmployeeID " + WherePart + " ORDER BY s.ServiceID DESC";
     }
     private string FillWherePart()
     {
@@ -128,6 +130,38 @@ public partial class Services : System.Web.UI.Page
                 tbRemainingCosts.BackColor = tbTotalPaid.BackColor;
                 tbRemainingCosts.ForeColor = tbTotalPaid.ForeColor;
             }
+        }
+    }
+
+    protected void Fill_Certificates(String ServiceGroupID = "")
+    {
+        if (gvMain.SelectedRow != null)
+        {
+            dsCertificates.SelectCommand = @"SELECT c.*, cu.FirstName + ' ' + cu.LastName as Customer
+                                            FROM [Certificate] c LEFT OUTER JOIN [Service] s ON s.ServiceID=c.ServiceID
+                                            LEFT OUTER JOIN Customer cu ON cu.CustomerID=s.CustomerID
+                                            WHERE c.ServiceID=" + gvMain.SelectedValue;
+
+            if (ServiceGroupID != "")
+            {
+                dsCertificates.SelectCommand += " AND c.ServiceID=" + ServiceGroupID;
+            }
+            gvCertificates.DataBind();
+        }
+    }
+    private void PrintPDF(String Path)
+    {
+        //FileInfo fileInfo = new FileInfo(Path + ".pdf");
+        FileInfo fileInfo = new FileInfo(Path + "-1.docx");
+        if (fileInfo.Exists)
+        {
+            Response.Clear();
+            Response.AddHeader("Content-Disposition", "attachment; filename=" + fileInfo.Name);
+            Response.AddHeader("Content-Length", fileInfo.Length.ToString());
+            Response.ContentType = "application/octet-stream";
+            Response.Flush();
+            Response.TransmitFile(fileInfo.FullName);
+            Response.End();
         }
     }
     #endregion
@@ -206,6 +240,7 @@ public partial class Services : System.Web.UI.Page
                 row.ToolTip = string.Empty;
                 Login_Redirect();
                 Fill_Payments();
+                Fill_Certificates(gvMain.SelectedValue.ToString());
                 break;
             }
             else
@@ -282,4 +317,95 @@ public partial class Services : System.Web.UI.Page
         }
     }
     #endregion
+    protected void gvCertificates_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            e.Row.Attributes["onclick"] = Page.ClientScript.GetPostBackClientHyperlink(gvCertificates, "Select$" + e.Row.RowIndex);
+        }
+    }
+    protected void gvCertificates_Sorted(object sender, EventArgs e)
+    {
+        Fill_Certificates();
+    }
+    protected void imgbtnRefresh_Click(object sender, ImageClickEventArgs e)
+    {
+        Fill_Certificates();
+    }
+    protected void btnCreateAllCertificates_Click(object sender, EventArgs e)
+    {
+        if (gvMain.SelectedRow != null)
+        {
+            String SQL = @"INSERT INTO [Certificate] (ServiceID, CreatedBy) 
+                           VALUES ("+gvMain.SelectedValue+","+ Functions.Decrypt(Request.Cookies["UserID"].Value)+")";
+            
+            Functions.ExecuteCommand(SQL);
+            Fill_Certificates();
+        }
+    }
+    protected void btnDeleteAllCertificates_Click(object sender, EventArgs e)
+    {
+        if (gvMain.SelectedRow != null)
+        {
+            String SQL = @"DELETE FROM [Certificate] WHERE ServiceID=" + gvMain.SelectedValue;
+            Functions.ExecuteCommand(SQL);
+            Fill_Certificates();
+        }
+    }
+    protected void btnPrintSelectedCertificate_Click(object sender, EventArgs e)
+    {
+        if (gvCertificates.SelectedRow != null)
+        {
+            string FullDescription = Functions.ExecuteScalar(@"SELECT st.Description 
+                                    FROM ServiceType st LEFT OUTER JOIN [Service] s ON s.ServiceTypeID=st.ServiceTypeID
+                                    WHERE s.ServiceID=" + gvMain.SelectedValue);
+            String[] Description = FullDescription.Split(';');
+
+            String Language = "", LevelDescription = "", Level = "", Program = "", NumberOfClasses = "";
+            if (Description.Length >= 1)
+                Language = Description[0];
+            if (Description.Length >= 2)
+                LevelDescription = Description[1];
+            if (Description.Length >= 3)
+                Level = Description[2];
+            if (Description.Length >= 4)
+                Program = Description[3];
+            if (Description.Length == 5)
+                NumberOfClasses = Description[4];
+            
+            string SQLPrint = @"SELECT c.RegNo, cu.FirstName + ' ' + cu.LastName as StudentName, convert(varchar,cu.DateOfBirth,104) as DateOfBirth,
+                            cu.Place, N'" + Language + "' as Language, N'" + LevelDescription + "' as LevelDescription, N'" + Level + "' as Level, N'" + Program + "' as Program, N'" + NumberOfClasses + @"' as NumberOfClasses, 
+							convert(varchar,se.CreatedDate,104) as StartDate, convert(varchar,se.ToDate,104) as EndDate, 
+							convert(varchar,se.ToDate,104) as DateOfPrint, e.FirstName + ' ' + e.LastName as Teacher
+                            FROM [Certificate] c LEFT OUTER JOIN [Service] se ON se.ServiceID=c.ServiceID
+							LEFT OUTER JOIN Customer cu ON cu.CustomerID=se.CustomerID
+							LEFT OUTER JOIN Employee e ON e.EmployeeID=se.EmployeeID
+							LEFT OUTER JOIN ServiceType st ON st.ServiceTypeID=se.ServiceTypeID
+                            WHERE c.CertificateID=" + gvCertificates.SelectedValue;
+
+            String[] Detali = Functions.ReturnIntoArray(SQLPrint, 13);
+            String StudentName = Detali[1];
+            String Place = Detali[3];
+            String Lang = Detali[4];
+            String Teacher = Detali[12];
+            StudentName = Functions.ReturnLatin(StudentName);
+            Place = Functions.ReturnLatin(Place);
+            Lang = Functions.ReturnLatin(Lang);
+            Teacher = Functions.ReturnLatin(Teacher);
+
+            SQLPrint = @"SELECT c.RegNo, '"+StudentName +@"' as StudentName, convert(varchar,cu.DateOfBirth,104) as DateOfBirth, '"+Place+@"' as Place,
+                            N'" + Lang + "' as Language, N'" + LevelDescription + "' as LevelDescription, N'" + Level + "' as Level, N'" + Program + "' as Program, N'" + NumberOfClasses + @"' as NumberOfClasses, 
+							convert(varchar,se.CreatedDate,104) as StartDate, convert(varchar,se.ToDate,104) as EndDate, 
+							convert(varchar,se.ToDate,104) as DateOfPrint, '"+Teacher+@"' as Teacher
+                            FROM [Certificate] c LEFT OUTER JOIN [Service] se ON se.ServiceID=c.ServiceID
+							LEFT OUTER JOIN Customer cu ON cu.CustomerID=se.CustomerID
+							LEFT OUTER JOIN Employee e ON e.EmployeeID=se.EmployeeID
+							LEFT OUTER JOIN ServiceType st ON st.ServiceTypeID=se.ServiceTypeID
+                            WHERE c.CertificateID=" + gvCertificates.SelectedValue;
+
+            String PathDoc = Server.MapPath(ddlTemplateCertificate.SelectedValue.Replace(".dotx", ""));
+            Functions.PrintWord(PathDoc, SQLPrint);
+            PrintPDF(PathDoc);
+        }
+    }
 }

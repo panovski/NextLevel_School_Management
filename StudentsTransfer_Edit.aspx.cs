@@ -155,7 +155,7 @@ public partial class StudentsTransfer_Edit : System.Web.UI.Page
         {
             //Insert into transfered table:
             String SQLInsert = @"INSERT INTO StudentTransfer(StudentID,fromGroupID,toGroupID,TransferDate,CreatedBy) VALUES(" + Request.QueryString["StudentID"] + ", " +
-                            Request.QueryString["GroupID"] + "," + ddlCourse.SelectedValue + ",N'" + tbTransferDate.Text.Replace("'", "''") + "'," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ")";
+                            Request.QueryString["GroupID"] + "," + ddlCourse.SelectedValue + ",N'" + Convert.ToDateTime(tbTransferDate.Text.Replace("'", "''")) + "'," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ")";
             Functions.ExecuteCommand(SQLInsert);
 
             //Set as transfered and set old costs:            

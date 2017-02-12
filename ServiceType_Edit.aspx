@@ -70,8 +70,15 @@
                             <asp:TextBox ID="tbDescription" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1" ></asp:TextBox>
                         </td>
                         <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
                             
                         </td>
+                        <td colspan="2" style="font-size:1.3vw">
+                            ex.Language;Description;Level;Program;Number of Classes
+                        </td>                        
                     </tr>
                     <tr>
                         <td>

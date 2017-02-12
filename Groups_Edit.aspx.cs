@@ -123,8 +123,8 @@ public partial class Groups_Edit : System.Web.UI.Page
 
         String SQL = @"UPDATE [Group] SET GroupName = N'" + tbGroupName.Text.Replace("'", "''") +
       "', GroupTypeID= " + ddlCourse.SelectedValue +
-      ", StartDate= '" + tbStartDate.Text.Replace("'", "''") +
-      "', EndDate= '" + tbEndDate.Text.Replace("'", "''") +
+      ", StartDate= '" + Convert.ToDateTime(tbStartDate.Text.Replace("'", "''")) +
+      "', EndDate= '" + Convert.ToDateTime(tbEndDate.Text.Replace("'", "''")) +
       "', NumberOfClasses=" + tbNoClasses.Text +
       ", NumberOfPayments=" + tbNoPayments.Text +
       ", Cost= " + tbCost.Text +
@@ -144,8 +144,8 @@ public partial class Groups_Edit : System.Web.UI.Page
             Invoice = "1";
         String SQL = @"INSERT INTO [Group] (GroupName,GroupTypeID,StartDate,EndDate,NumberOfClasses,NumberOfPayments,
                     Cost,EmployeeID, TeacherPercentage, Status, Invoice, CreatedBy)
-                   VALUES(N'" + tbGroupName.Text.Replace("'", "''") + "'," + ddlCourse.SelectedValue + ",N'" + tbStartDate.Text.Replace("'", "''") +
-                  "',N'" + tbEndDate.Text.Replace("'", "''") + "'," + tbNoClasses.Text + "," + tbNoPayments.Text +
+                   VALUES(N'" + tbGroupName.Text.Replace("'", "''") + "'," + ddlCourse.SelectedValue + ",N'" + Convert.ToDateTime(tbStartDate.Text.Replace("'", "''")) +
+                  "',N'" + Convert.ToDateTime(tbEndDate.Text.Replace("'", "''")) + "'," + tbNoClasses.Text + "," + tbNoPayments.Text +
                   "," + tbCost.Text + "," + ddlTeacher.SelectedValue + "," + tbTeacherPercentage.Text.Replace("'", "''") + ",'" + ddlStatus.SelectedValue + "'," + Invoice + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ")";
         Functions.ExecuteCommand(SQL);
         Page.ClientScript.RegisterStartupScript(this.GetType(), "Call my function", "CloseDialog()", true);

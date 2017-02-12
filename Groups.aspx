@@ -238,7 +238,12 @@
                                             <asp:TextBox ID="tbDiscount" runat="server" TextMode="Number" CssClass="TextBoxNumber"></asp:TextBox>%
                                             <asp:Button ID="btnAdd" runat="server" Text="Add" CssClass="NormalButton" OnClick="btnAdd_Click" onclientclick="javascript:return confirm('Are you sure to add the student into the group?');" />
                                             <asp:Button ID="btnRemove" runat="server" Text="Remove selected" CssClass="NormalButton" OnClick="btnRemove_Click" onclientclick="javascript:return confirm('Are you sure to remove the student from selected group?');" />                                            
-                                            <br /><br />
+                                            <br />
+                                            Classes:<br /><asp:TextBox ID="tbClassesAttended" runat="server" TextMode="Number" CssClass="TextBoxNumber"></asp:TextBox>
+                                            <asp:CheckBox ID="cbPassedFinalTest" runat="server" Text="Final Test"/>
+                                            <asp:CheckBox ID="cbReceivedCertificate" runat="server" Text="Certificate"/>
+                                            <asp:Button ID="btnSaveAdd" runat="server" Text="Save" CssClass="NormalButton" onclientclick="javascript:return confirm('Are you sure to add the classes, final test and certificate?');" OnClick="btnSaveAdd_Click" />
+                                            <br />
                                             <asp:Label ID="lblAlreadyAdded" runat="server" Text="The student is already member of the group!" CssClass="InfoMessage" Visible="False"></asp:Label>                                            
                                         </td>
                                 </table>

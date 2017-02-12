@@ -166,7 +166,7 @@ public partial class Employees_Edit : System.Web.UI.Page
 
         String SQL = @"INSERT INTO Employee  (FirstName,LastName,ContactPhone,StartDate,Status,UserId,CreatedBy,Email)
                     VALUES(N'" + tbFirstName.Text.Replace("'", "''") + "',N'" + tbLastName.Text.Replace("'", "''") +
-                    "',N'" + tbContactPhone.Text.Replace("'", "''") + "','" + tbStartDate.Text.Replace("'", "''") + "','" +
+                    "',N'" + tbContactPhone.Text.Replace("'", "''") + "','" + Convert.ToDateTime(tbStartDate.Text.Replace("'", "''")) + "','" +
                     ddlStatus.SelectedValue.Replace("'", "''") + "'," + UserID.Replace("'", "''") + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ",'" + tbEmail.Text + "')";
         Functions.ExecuteCommand(SQL);
         Page.ClientScript.RegisterStartupScript(this.GetType(), "Call my function", "CloseDialog()", true);

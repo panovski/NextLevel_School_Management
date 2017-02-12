@@ -218,7 +218,41 @@
                             </td>                           
                         </tr>
                         </table>
-                </div>                
+                </div> 
+                
+                <div class="TabelaDetailsGrid">
+                    <table >
+                        <tr>
+                            <td class="EditDetails">
+                                Certificates:
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                
+                                <div style="width:23.9vw; height:11.5vw; overflow: scroll">
+                                <asp:GridView ID="gvCertificates" runat="server" GridLines="None" AutoGenerateColumns="false" DataKeyNames="CertificateID" DataSourceID="dsCertificates" CssClass="GridView" PagerStyle-CssClass="GridViewPager" HeaderStyle-CssClass="GridViewHeader" RowStyle-CssClass="GridViewRows" AllowPaging="True" AllowSorting="True" AlternatingRowStyle-CssClass="GridViewRowsAlt" SelectedRowStyle-CssClass="GridViewSelectedRow" EditRowStyle-CssClass="GridViewSelectedRow" OnRowDataBound="gvCertificates_RowDataBound" OnSorted="gvCertificates_Sorted">
+                                <AlternatingRowStyle CssClass="GridViewRowsAlt"></AlternatingRowStyle>
+                                    <Columns>
+                                        <asp:BoundField DataField="CertificateID" HeaderText="ID" InsertVisible="False" ReadOnly="True" SortExpression="CertificateID" Visible="false" />
+                                        <asp:BoundField DataField="RegNo" HeaderText="Reg.Number" SortExpression="RegNo" />
+                                        <asp:BoundField DataField="Customer" HeaderText="Customer" SortExpression="Customer" />
+                                    </Columns>
+                                </asp:GridView>
+                                    <asp:SqlDataSource ID="dsCertificates" runat="server" ConnectionString="<%$ ConnectionStrings:konekcija %>" SelectCommand=""></asp:SqlDataSource>                                
+                                </div>
+                            </td>                             
+                            <td style="vertical-align:top" class="EditDetails">
+                                <asp:ImageButton ID="imgbtnRefresh" runat="server" ImageUrl="~/Images/Icons/Refresh1.png" OnClick="imgbtnRefresh_Click" CssClass="RefreshButton"/>
+                                <br /><br />
+                                    Certificate Template:<asp:DropDownList ID="ddlTemplateCertificate" runat="server" CssClass="TextBoxRoundedFilters" ValidationGroup="2"></asp:DropDownList>                               
+                                    
+                                    <asp:Button ID="btnCreateAllCertificates" runat="server" Text="Create Certificate" CssClass="NormalButton" OnClick="btnCreateAllCertificates_Click"  onclientclick="javascript:return confirm('Are you sure to create certificate?');"/>
+                                    <asp:Button ID="btnDeleteAllCertificates" runat="server" Text="Delete Certificate" CssClass="NormalButton" onclientclick="javascript:return confirm('Are you sure to delete certificates in this service?');" OnClick="btnDeleteAllCertificates_Click" Visible="False"/>
+                            </td>                           
+                        </tr>
+                        </table>
+                </div>               
 
             </td>
         </tr>
@@ -229,6 +263,7 @@
         <tr>
             <td>                
                 <asp:Button ID="btnPrintPayment" runat="server" Text="Print payment" CssClass="PrintButton" OnClick="btnPrintPayment_Click"/>
+                <asp:Button ID="btnPrintSelectedCertificate" runat="server" Text="Print selected Certificate" CssClass="PrintButton" OnClick="btnPrintSelectedCertificate_Click" />
             </td>
         </tr>
     </table>

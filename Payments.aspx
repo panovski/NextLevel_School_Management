@@ -350,7 +350,41 @@
                             </td>
                         </tr>
                         <tr>
-                            <td><br /></td><td></td><td></td>
+                            <td colspan="3" style="text-align:left; padding:1vw"><br />
+                                <asp:Panel ID="pnlCreateInvoice" runat="server" Visible="False">
+                                    <div style="border:solid; border-radius:1vw; padding:0.5vw">
+                                    Create Invoice:<br />
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                Buyer/Ordered by:
+                                            </td>
+                                            <td>
+                                                <asp:TextBox ID="tbBuyer" runat="server" CssClass="TextBoxRoundedFilters" TextMode="MultiLine" ValidationGroup="10" Height="50px"></asp:TextBox>
+                                            </td>
+                                            <td>
+                                                <asp:RequiredFieldValidator ID="rfvtbBuyer" runat="server" ErrorMessage="!" ControlToValidate="tbBuyer" CssClass="RequredField" ValidationGroup="10"></asp:RequiredFieldValidator><br />                                
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                Invoice number:
+                                            </td>
+                                            <td>
+                                                <asp:Label runat="server" Text="" ID="lblInvoiceNumber"></asp:Label>
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2">
+                                                <asp:Button ID="btnCreateInvoice" runat="server" Text="Create Invoice" CssClass="NormalButton" ValidationGroup="10" OnClick="btnCreateInvoice_Click"  />
+                                                <asp:Button ID="btnDeleteInvoice" runat="server" Text="Delete Invoice" CssClass="NormalButton" ValidationGroup="10" OnClick="btnDeleteInvoice_Click" onclientclick="javascript:return confirm('Are you sure to delete the selected Invoice completely?');" />
+                                            </td>
+                                        </tr>
+                                    </table>
+                                        </div>
+                                </asp:Panel>
+                            </td>
                         </tr>   
                         <tr>
                             <td><br /></td><td></td><td></td>
@@ -377,6 +411,7 @@
         <tr>
             <td>                
                 <asp:Button ID="btnPrintPayment" runat="server" Text="Print payment" CssClass="PrintButton" OnClick="btnPrintPayment_Click" ValidationGroup="3"   />
+                <asp:Button ID="btnPrintInvoice" runat="server" Text="Print selected Invoice" CssClass="PrintButton" OnClick="btnPrintInvoice_Click" Visible="False"/>
             </td>
         </tr>
     </table>

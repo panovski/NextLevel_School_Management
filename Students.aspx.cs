@@ -135,6 +135,22 @@ public partial class Students : System.Web.UI.Page
         gvPayments.DataBind();
 
         Fill_Payments();
+        FillClasses();
+    }
+    private void FillClasses()
+    {
+        if (gvDetails.SelectedIndex != null)
+        {
+            String[] Classes = Functions.ReturnIntoArray("SELECT ClassesAttended,PassedFinalTest,ReceivedCertificate FROM GroupStudent WHERE GroupStudentID=" + gvDetails.SelectedValue, 3);
+            if (Classes.Length > 0)
+            {
+                tbClassesAttended.Text = Classes[0];
+                if (Classes[1] != "")
+                    cbPassedFinalTest.Checked = Convert.ToBoolean(Classes[1]);
+                if (Classes[2] != "")
+                    cbReceivedCertificate.Checked = Convert.ToBoolean(Classes[2]);
+            }
+        }
     }
     protected void Fill_Payments()
     {
@@ -356,6 +372,9 @@ public partial class Students : System.Web.UI.Page
         {
             if (row.RowIndex == gvStudents.SelectedIndex)
             {
+                tbClassesAttended.Text = "";
+                cbReceivedCertificate.Checked = false;
+                cbPassedFinalTest.Checked = false;
                 lblAlreadyAdded.Visible = false;
                 row.ToolTip = string.Empty;
                 Fill_Details();
@@ -434,13 +453,14 @@ public partial class Students : System.Web.UI.Page
         }
     }
     protected void gvDetails_SelectedIndexChanged(object sender, EventArgs e)
-    {
-        Fill_Payments();
-
+    {        
+        Fill_Payments();        
         String SQL = "SELECT GroupID FROM GroupStudent WHERE GroupStudentID=" + gvDetails.SelectedValue;
         String GrId = Functions.ExecuteScalar(SQL);
         Fill_Certificates(GrId);
         Fill_Contracts(GrId);
+
+        FillClasses();
     }
     protected void btnPrintPayment_Click(object sender, EventArgs e)
     {
@@ -617,4 +637,13 @@ public partial class Students : System.Web.UI.Page
         }
     }
     #endregion
+    protected void btnSaveAdd_Click(object sender, EventArgs e)
+    {
+        if (gvDetails.SelectedIndex != null)
+        {
+            Functions.ExecuteCommand(@"UPDATE GroupStudent SET ClassesAttended=N'"+tbClassesAttended.Text+
+            @"', PassedFinalTest='"+cbPassedFinalTest.Checked+"', ReceivedCertificate='"+cbReceivedCertificate.Checked+
+            @"' WHERE GroupStudentID=" + gvDetails.SelectedValue);            
+        }
+    }
 }
