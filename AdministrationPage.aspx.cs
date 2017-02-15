@@ -165,7 +165,7 @@ public partial class AdministrationPage : System.Web.UI.Page
                                     FROM Student s LEFT OUTER JOIN GroupStudent gs ON gs.StudentID=s.StudentID
                                     LEFT OUTER JOIN [Group] g ON g.GroupID=gs.GroupID
                                     LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID
-                                    WHERE gs.GroupStudentID NOT IN (SELECT GroupStudentID FROM [Contract])";
+                                    WHERE gs.GroupStudentID NOT IN (SELECT GroupStudentID FROM [Contract]) AND g.IndividualGroup=0";
     }
     protected void Fill_Dashboard_3_1()
     {

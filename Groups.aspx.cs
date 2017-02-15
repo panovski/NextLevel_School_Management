@@ -59,11 +59,13 @@ public partial class Groups : System.Web.UI.Page
         {
             pnlTopMeni.Visible = true;
             btnCreateAllCertificates.Visible = true;
+            btnEdit.Visible = true;
         }
         else
         {
             pnlTopMeni.Visible = false;
             pnlAddPermission.Visible = false;
+            btnEdit.Visible = false;
         }
 
         if (PermLevel == ConfigurationManager.AppSettings["Admin"].ToString())
@@ -73,12 +75,12 @@ public partial class Groups : System.Web.UI.Page
             btnEditTemplates.Visible = true;
             btnDeleteAllCertificates.Visible = true;
 
-            btnEdit.Visible = true;
+            //btnEdit.Visible = true;
             btnRemove.Visible = true;
         }
         else
         {
-            btnEdit.Visible = false;
+            //btnEdit.Visible = false;
             btnRemove.Visible = false;
             btnCreateAllCertificates.Visible = false;
         }
@@ -104,7 +106,8 @@ public partial class Groups : System.Web.UI.Page
     }
     private void Fill_Details()
     {
-        dsDetails.SelectCommand = @"SELECT s.StudentID as ID, s.FirstName + ' ' + s.LastName as Name,gs.Status, gs.Discount, gs.TotalCost, SUM(CASE WHEN p.Transfered=0 THEN p.Ammount END) as TotalPaid, gs.TotalCost - SUM(CASE WHEN p.Transfered=0 THEN p.Ammount END) as TotalRemain, gs.Transfered
+        dsDetails.SelectCommand = @"SELECT s.StudentID as ID, s.FirstName + ' ' + s.LastName as Name,gs.Status, gs.Discount, gs.TotalCost, SUM(CASE WHEN p.Transfered=0 THEN p.Ammount END) as TotalPaid, CASE WHEN gs.TotalCost - SUM(CASE WHEN p.Transfered=0 THEN p.Ammount END) <0 THEN 0 
+                                ELSE gs.TotalCost - SUM(CASE WHEN p.Transfered=0 THEN p.Ammount END) END as TotalRemain, gs.Transfered
                                 FROM GroupStudent as gs LEFT OUTER JOIN Student as s ON s.StudentID=gs.StudentID LEFT OUTER JOIN Payment p ON p.GroupStudentID=gs.GroupStudentID
                                 WHERE gs.GroupID=" + gvMain.SelectedValue.ToString() + " AND s.Status=1 GROUP BY s.StudentID , s.FirstName + ' ' + s.LastName,gs.Status, gs.Discount, gs.TotalCost,gs.Transfered";
         gvDetails.DataBind();
@@ -161,6 +164,10 @@ public partial class Groups : System.Web.UI.Page
             tbRemainingPayments.Text = Payments[1];
             tbTotalPaid.Text = Payments[2];
             tbRemainingCosts.Text = Payments[3];
+
+            String IndividualGroup = Functions.ExecuteScalar("SELECT IndividualGroup FROM [Group] WHERE GroupID=" + gvMain.SelectedValue);
+            if (Convert.ToBoolean(IndividualGroup))
+                tbRemainingCosts.Text = "0";
 
             if (tbRemainingCosts.Text.Length > 0)
             {
@@ -226,9 +233,12 @@ public partial class Groups : System.Web.UI.Page
         {
             try
             {
-                string Id = gvMain.SelectedValue.ToString();
-                ScriptManager.RegisterStartupScript(this, GetType(), "displayalertmessage", "ShowNewPage(" + Id + ", 'Edit Group','');", true);
-                Edited = true;
+                if (gvMain.SelectedValue != null)
+                {
+                    string Id = gvMain.SelectedValue.ToString();
+                    ScriptManager.RegisterStartupScript(this, GetType(), "displayalertmessage", "ShowNewPage(" + Id + ", 'Edit Group','');", true);
+                    Edited = true;
+                }
             }
             catch (Exception err)
             {
@@ -283,15 +293,25 @@ public partial class Groups : System.Web.UI.Page
         {
             Int32 SelectedIndex = gvMain.SelectedIndex;
             Int32 Exists = Convert.ToInt32(Functions.ExecuteScalar("SELECT COUNT(*) FROM GroupStudent WHERE GroupID=" + gvMain.SelectedValue + " AND StudentID=" + ddlStudents.SelectedValue));
+            String IndividualGroup = Functions.ExecuteScalar("SELECT IndividualGroup FROM [Group] WHERE GroupID=" + gvMain.SelectedValue);
 
             if (Exists == 0)
             {
-                if (tbDiscount.Text == "") tbDiscount.Text = "0";
-                decimal TotalCost = Convert.ToDecimal(Functions.ExecuteScalar("SELECT Cost FROM [Group] WHERE GroupID=" + gvMain.SelectedValue));
-                if (Convert.ToInt32(tbDiscount.Text) > 0)
-                    TotalCost = TotalCost - (TotalCost * Convert.ToInt32(tbDiscount.Text) / 100);
-                String SQL = "INSERT INTO GroupStudent (GroupID, StudentID, Status, Discount, TotalCost, CreatedBy) VALUES (" +
-                gvMain.SelectedValue + "," + ddlStudents.SelectedValue + ",0," + tbDiscount.Text.Replace("'", "''") + "," + TotalCost.ToString().Replace(",", ".") + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ")";
+                string SQL = "";
+                if (!Convert.ToBoolean(IndividualGroup))
+                {
+                    if (tbDiscount.Text == "") tbDiscount.Text = "0";
+                    decimal TotalCost = Convert.ToDecimal(Functions.ExecuteScalar("SELECT Cost FROM [Group] WHERE GroupID=" + gvMain.SelectedValue));
+                    if (Convert.ToInt32(tbDiscount.Text) > 0)
+                        TotalCost = TotalCost - (TotalCost * Convert.ToInt32(tbDiscount.Text) / 100);
+                    SQL = "INSERT INTO GroupStudent (GroupID, StudentID, Status, Discount, TotalCost, CreatedBy) VALUES (" +
+                    gvMain.SelectedValue + "," + ddlStudents.SelectedValue + ",0," + tbDiscount.Text.Replace("'", "''") + "," + TotalCost.ToString().Replace(",", ".") + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ")";
+                }
+                else if (Convert.ToBoolean(IndividualGroup))
+                {
+                    SQL = "INSERT INTO GroupStudent (GroupID, StudentID, Status, Discount, TotalCost, CreatedBy) VALUES (" +
+                        gvMain.SelectedValue + "," + ddlStudents.SelectedValue + ",0,0,0," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ")";
+                }
                 Functions.ExecuteCommand(SQL);
                 btnSearch_Click(sender, e);
                 gvMain.SelectedIndex = SelectedIndex;
@@ -374,7 +394,9 @@ public partial class Groups : System.Web.UI.Page
             string SQLPrint = @"SELECT p.AccountNumber,p.Ammount, p.AmmountWords, g.GroupName+'-'+gt.Language+'-'+gt.LevelDescription as PaymentGroup,
                         s.FirstName+' '+s.LastName as PaymentName, p.PaymentNumber, s.Place as PaymentPlace,
                         convert(varchar,p.DateOfPayment,104) as DateOfPayment, gs.TotalCost, 
-						gs.TotalCost-(SELECT SUM(p2.Ammount) FROM Payment p2 where p2.GroupStudentID=gs.GroupStudentID AND p2.DateOfPayment<=p.DateOfPayment) as RemainingCost,
+						CASE WHEN gs.TotalCost-(SELECT SUM(p2.Ammount)						
+						FROM Payment p2 where p2.GroupStudentID=gs.GroupStudentID AND p2.DateOfPayment<=p.DateOfPayment) < 0 THEN 0
+						ELSE gs.TotalCost-(SELECT SUM(p2.Ammount) FROM Payment p2 where p2.GroupStudentID=gs.GroupStudentID AND p2.DateOfPayment<=p.DateOfPayment) END as RemainingCost,
 						(SELECT COUNT(*) FROM Payment p2 where p2.GroupStudentID=gs.GroupStudentID AND p2.DateOfPayment<=p.DateOfPayment) as NoPayments, g.NumberOfPayments as TotalNoPayment
                         FROM Payment p LEFT OUTER JOIN GroupStudent gs ON gs.GroupStudentID=p.GroupStudentID
                         LEFT OUTER JOIN [Group] g ON g.GroupID=gs.GroupID LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID
@@ -414,15 +436,24 @@ public partial class Groups : System.Web.UI.Page
     {
         if (gvCertificates.SelectedRow != null)
         {
+            String Text_1 = "g.NumberOfClasses";
+            String Text_2 = "";
+            String IndividualGroup = Functions.ExecuteScalar("SELECT IndividualGroup FROM [Group] WHERE GroupID=" + gvMain.SelectedValue);
+            if (Convert.ToBoolean(IndividualGroup))
+            {
+                Text_1 = "gs.ClassesAttended as NumberOfClasses";
+                Text_2 = "LEFT OUTER JOIN GroupStudent gs ON gs.GroupID=c.GroupID AND gs.StudentID=c.StudentID";
+            }
+
             string SQLPrint = @"SELECT c.RegNo, s.FirstName + ' ' + s.LastName as StudentName, convert(varchar,s.DateOfBirth,104) as DateOfBirth,
-                            s.Place, gt.Language, gt.LevelDescription, gt.Level, gt.Program, g.NumberOfClasses, 
+                            s.Place, gt.Language, gt.LevelDescription, gt.Level, gt.Program, "+Text_1+@", 
 							convert(varchar,g.StartDate,104) as StartDate, convert(varchar,g.EndDate,104) as EndDate, 
 							convert(varchar,g.EndDate,104) as DateOfPrint, e.FirstName + ' ' + e.LastName as Teacher
                             FROM [Certificate] c LEFT OUTER JOIN Student s ON s.StudentID=c.StudentID
                             LEFT OUTER JOIN [Group] g ON g.GroupID=c.GroupID
                             LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID
-							LEFT OUTER JOIN Employee e ON e.EmployeeID = g.EmployeeID
-                            WHERE c.CertificateID=" + gvCertificates.SelectedValue;
+							LEFT OUTER JOIN Employee e ON e.EmployeeID = g.EmployeeID " + Text_2 + @" 
+                            WHERE c.CertificateID=" + gvCertificates.SelectedValue;            
 
             String[] Detali = Functions.ReturnIntoArray(SQLPrint, 13);
             String StudentName = Detali[1];
@@ -435,14 +466,14 @@ public partial class Groups : System.Web.UI.Page
             Teacher = Functions.ReturnLatin(Teacher);
 
             SQLPrint = @"SELECT c.RegNo, '" + StudentName + @"' as StudentName, convert(varchar,s.DateOfBirth,104) as DateOfBirth,
-                            '" + Place + @"' as Place, '" + Language + @"' as Language, gt.LevelDescription, gt.Level, gt.Program, g.NumberOfClasses, 
+                            '" + Place + @"' as Place, '" + Language + @"' as Language, gt.LevelDescription, gt.Level, gt.Program, "+Text_1+@", 
 							convert(varchar,g.StartDate,104) as StartDate, convert(varchar,g.EndDate,104) as EndDate, 
 							convert(varchar,g.EndDate,104) as DateOfPrint, '" + Teacher + @"' as Teacher,
                             (CASE WHEN s.Gender = 1 THEN '' ELSE 'a' END) as Gender
                             FROM [Certificate] c LEFT OUTER JOIN Student s ON s.StudentID=c.StudentID
                             LEFT OUTER JOIN [Group] g ON g.GroupID=c.GroupID
                             LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID
-							LEFT OUTER JOIN Employee e ON e.EmployeeID = g.EmployeeID
+							LEFT OUTER JOIN Employee e ON e.EmployeeID = g.EmployeeID " + Text_2 + @"
                             WHERE c.CertificateID=" + gvCertificates.SelectedValue;
 
             //String PathDoc = Server.MapPath("~/Templates/Certificate2016");
@@ -460,14 +491,25 @@ public partial class Groups : System.Web.UI.Page
             if (gr.RowIndex > -1)
             {
                 gvCertificates.SelectRow(gr.RowIndex);
+
+                String Text_1 = "g.NumberOfClasses";
+                String Text_2 = "";
+                String IndividualGroup = Functions.ExecuteScalar("SELECT IndividualGroup FROM [Group] WHERE GroupID=" + gvMain.SelectedValue);
+                if (Convert.ToBoolean(IndividualGroup))
+                {
+                    Text_1 = "gs.ClassesAttended as NumberOfClasses";
+                    Text_2 = "LEFT OUTER JOIN GroupStudent gs ON gs.GroupID=c.GroupID AND gs.StudentID=c.StudentID";
+                }
+
+
                 string SQLPrint = @"SELECT c.RegNo, s.FirstName + ' ' + s.LastName as StudentName, convert(varchar,s.DateOfBirth,104) as DateOfBirth,
-                            s.Place, gt.Language, gt.LevelDescription, gt.Level, gt.Program, g.NumberOfClasses, 
+                            s.Place, gt.Language, gt.LevelDescription, gt.Level, gt.Program, "+Text_1+@", 
 							convert(varchar,g.StartDate,104) as StartDate, convert(varchar,g.EndDate,104) as EndDate, 
 							convert(varchar,g.EndDate,104) as DateOfPrint, e.FirstName + ' ' + e.LastName as Teacher
                             FROM [Certificate] c LEFT OUTER JOIN Student s ON s.StudentID=c.StudentID
                             LEFT OUTER JOIN [Group] g ON g.GroupID=c.GroupID
                             LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID
-							LEFT OUTER JOIN Employee e ON e.EmployeeID = g.EmployeeID
+							LEFT OUTER JOIN Employee e ON e.EmployeeID = g.EmployeeID " + Text_2 + @"
                             WHERE c.CertificateID=" + gvCertificates.SelectedValue;
 
                 String[] Detali = Functions.ReturnIntoArray(SQLPrint, 13);
@@ -481,14 +523,14 @@ public partial class Groups : System.Web.UI.Page
                 Teacher = Functions.ReturnLatin(Teacher);
 
                 SQLPrint = @"SELECT c.RegNo, '" + StudentName + @"' as StudentName, convert(varchar,s.DateOfBirth,104) as DateOfBirth,
-                            '" + Place + @"' as Place, '" + Language + @"' as Language, gt.LevelDescription, gt.Level, gt.Program, g.NumberOfClasses, 
+                            '" + Place + @"' as Place, '" + Language + @"' as Language, gt.LevelDescription, gt.Level, gt.Program, "+Text_1+@", 
 							convert(varchar,g.StartDate,104) as StartDate, convert(varchar,g.EndDate,104) as EndDate, 
 							convert(varchar,g.EndDate,104) as DateOfPrint, '" + Teacher + @"' as Teacher,
                             (CASE WHEN s.Gender = 1 THEN '' ELSE 'a' END) as Gender
                             FROM [Certificate] c LEFT OUTER JOIN Student s ON s.StudentID=c.StudentID
                             LEFT OUTER JOIN [Group] g ON g.GroupID=c.GroupID
                             LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID
-							LEFT OUTER JOIN Employee e ON e.EmployeeID = g.EmployeeID
+							LEFT OUTER JOIN Employee e ON e.EmployeeID = g.EmployeeID " + Text_2 + @"
                             WHERE c.CertificateID=" + gvCertificates.SelectedValue;
 
                 //String PathDoc = Server.MapPath("~/Templates/");

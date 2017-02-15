@@ -77,7 +77,7 @@
                             
                         </td>
                         <td colspan="2" style="font-size:1.3vw">
-                            ex.Language;Description;Level;Program;Number of Classes
+                            ex.Language;Description;Level
                         </td>                        
                     </tr>
                     <tr>

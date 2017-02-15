@@ -45,7 +45,7 @@ public partial class Employees_Edit : System.Web.UI.Page
         tbFirstName.Text = curempl[0];
         tbLastName.Text = curempl[1];
         tbContactPhone.Text = curempl[2];
-        tbStartDate.Text = Convert.ToDateTime(curempl[3]).ToString("yyyy-MM-dd");
+        tbStartDate.Text = Convert.ToDateTime(curempl[3]).ToString("dd.MM.yyyy");
         //DateTime selectedDate = Convert.ToDateTime(curempl[3]);//.AddHours(Convert.ToDouble(ConfigurationManager.AppSettings["HourZone"]));
         //calStartDate.TodaysDate = selectedDate;
         //calStartDate.SelectedDate = calStartDate.TodaysDate;
@@ -164,9 +164,12 @@ public partial class Employees_Edit : System.Web.UI.Page
         if (UserLoginID != "")
             UserID = UserLoginID;
 
+        System.Globalization.DateTimeFormatInfo dateInfo = new System.Globalization.DateTimeFormatInfo();
+        dateInfo.ShortDatePattern = "dd.MM.yyyy";
+
         String SQL = @"INSERT INTO Employee  (FirstName,LastName,ContactPhone,StartDate,Status,UserId,CreatedBy,Email)
                     VALUES(N'" + tbFirstName.Text.Replace("'", "''") + "',N'" + tbLastName.Text.Replace("'", "''") +
-                    "',N'" + tbContactPhone.Text.Replace("'", "''") + "','" + Convert.ToDateTime(tbStartDate.Text.Replace("'", "''")) + "','" +
+                    "',N'" + tbContactPhone.Text.Replace("'", "''") + "','" + Convert.ToDateTime(tbStartDate.Text.Replace("'", "''"),dateInfo) + "','" +
                     ddlStatus.SelectedValue.Replace("'", "''") + "'," + UserID.Replace("'", "''") + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ",'" + tbEmail.Text + "')";
         Functions.ExecuteCommand(SQL);
         Page.ClientScript.RegisterStartupScript(this.GetType(), "Call my function", "CloseDialog()", true);

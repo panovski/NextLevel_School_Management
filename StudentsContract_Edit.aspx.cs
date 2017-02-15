@@ -72,9 +72,9 @@ public partial class StudentsContract_Edit : System.Web.UI.Page
     {
         String[] Contract = Functions.ReturnIntoArray("SELECT c.*, u.FirstName+' '+u.LastName as CreatedByName FROM [Contract] c LEFT OUTER JOIN [User] u ON u.UserID=c.CreatedBy WHERE c.ContractID=" + gvMain.SelectedValue, 8);
         ddlCourse.SelectedValue = Contract[1];
-        tbStartDate.Text = Convert.ToDateTime(Contract[2]).ToString("yyyy-MM-dd");
+        tbStartDate.Text = Convert.ToDateTime(Contract[2]).ToString("dd.MM.yyyy");
         if(Contract[3]!="")
-            tbEndDate.Text = Convert.ToDateTime(Contract[3]).ToString("yyyy-MM-dd");
+            tbEndDate.Text = Convert.ToDateTime(Contract[3]).ToString("dd.MM.yyyy");
         tbCreatedDate.Text = Contract[5];
         tbCreatedBy.Text = Contract[7];
         lblInfo.Visible = false;
@@ -88,11 +88,14 @@ public partial class StudentsContract_Edit : System.Web.UI.Page
     {
         if (gvMain.SelectedRow != null)
         {
+            System.Globalization.DateTimeFormatInfo dateInfo = new System.Globalization.DateTimeFormatInfo();
+            dateInfo.ShortDatePattern = "dd.MM.yyyy"; 
+
             String EndD = "";
             if (tbEndDate.Text == "")
                 EndD = "NULL";
             else
-                EndD = "'" + Convert.ToDateTime(tbEndDate.Text.Replace("'", "''")) + "'";
+                EndD = "'" + Convert.ToDateTime(tbEndDate.Text.Replace("'", "''"),dateInfo) + "'";
 
             String SQL = "UPDATE [Contract] SET GroupStudentID="+ddlCourse.SelectedValue+", StartDate='" + tbStartDate.Text.Replace("'", "''") + "', EndDate=" + EndD +
             " WHERE ContractID=" + gvMain.SelectedValue;
@@ -104,11 +107,14 @@ public partial class StudentsContract_Edit : System.Web.UI.Page
     }
     protected void btnInsert_Click(object sender, EventArgs e)
     {
+        System.Globalization.DateTimeFormatInfo dateInfo = new System.Globalization.DateTimeFormatInfo();
+        dateInfo.ShortDatePattern = "dd.MM.yyyy"; 
+
         String EndD = "";
         if (tbEndDate.Text == "")
             EndD = "NULL";
         else
-            EndD = "'" + Convert.ToDateTime(tbEndDate.Text.Replace("'", "''"))+"'";
+            EndD = "'" + Convert.ToDateTime(tbEndDate.Text.Replace("'", "''"),dateInfo)+"'";
 
         //int NotClosed = Convert.ToInt32(Functions.ExecuteScalar("SELECT Count(*) FROM [Contract] WHERE EndDate IS NULL AND StudentID="+Request.QueryString["ID"] ));
 

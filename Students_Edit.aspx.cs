@@ -61,7 +61,7 @@ public partial class Students_Edit : System.Web.UI.Page
         tbSocialNumber.Text = Student[3];
         tbContactPhone.Text = Student[4];
         ddlStatus.SelectedValue = Student[5];
-        tbDateOfBirth.Text = Convert.ToDateTime(Student[6]).ToString("yyyy-MM-dd");
+        tbDateOfBirth.Text = Convert.ToDateTime(Student[6]).ToString("dd.MM.yyyy");
         tbAddress.Text = Student[7];
         tbHouseNumber.Text = Student[8];
         tbPlace.Text = Student[9];
@@ -101,12 +101,15 @@ public partial class Students_Edit : System.Web.UI.Page
     #region Handled Events
     protected void btnSave_Click(object sender, EventArgs e)
     {
+        System.Globalization.DateTimeFormatInfo dateInfo = new System.Globalization.DateTimeFormatInfo();
+        dateInfo.ShortDatePattern = "dd.MM.yyyy"; 
+
         String SQL = @"UPDATE Student SET FirstName = N'" + tbFirstName.Text.Replace("'", "''") +
          "', LastName= N'" + tbLastName.Text.Replace("'", "''") +
          "', SocialNumber= N'" + tbSocialNumber.Text.Replace("'","''") +
          "', ContactPhone= N'" + tbContactPhone.Text.Replace("'", "''") +
          "', Status=" + ddlStatus.SelectedValue +
-         ", DateOfBirth='" + Convert.ToDateTime(tbDateOfBirth.Text.Replace("'", "''")) +
+         ", DateOfBirth='" + Convert.ToDateTime(tbDateOfBirth.Text.Replace("'", "''"),dateInfo) +
          "', Address= N'" + tbAddress.Text.Replace("'", "''") +
          "', HouseNumber= N'" + tbHouseNumber.Text.Replace("'", "''") +
          "', Place= N'" + tbPlace.Text.Replace("'", "''") +
@@ -128,10 +131,12 @@ public partial class Students_Edit : System.Web.UI.Page
         String AllreadyExist = Functions.ExecuteScalar("SELECT COUNT(*) FROM Student WHERE SocialNumber='" + tbSocialNumber.Text.Replace("'", "''") + "'");
         if (Convert.ToInt32(AllreadyExist) < 1)
         {
+            System.Globalization.DateTimeFormatInfo dateInfo = new System.Globalization.DateTimeFormatInfo();
+            dateInfo.ShortDatePattern = "dd.MM.yyyy"; 
             String SQL = @"INSERT INTO Student (FirstName,LastName,SocialNumber,ContactPhone,Status,DateOfBirth,Address,
                    HouseNumber,Place,Email,Parent_FirstName,Parent_LastName,Parent_Address,Parent_HouseNumber,Parent_SocialNumber,Parent_Place, CreatedBy, Gender)
                    VALUES(N'" + tbFirstName.Text.Replace("'", "''") + "',N'" + tbLastName.Text.Replace("'", "''") + "',N'" + tbSocialNumber.Text.Replace("'", "''") +
-                   "',N'" + tbContactPhone.Text.Replace("'", "''") + "','" + ddlStatus.SelectedValue + "','" + Convert.ToDateTime(tbDateOfBirth.Text.Replace("'", "''")) +
+                   "',N'" + tbContactPhone.Text.Replace("'", "''") + "','" + ddlStatus.SelectedValue + "','" + Convert.ToDateTime(tbDateOfBirth.Text.Replace("'", "''"),dateInfo) +
                    "',N'" + tbAddress.Text.Replace("'", "''") + "',N'" + tbHouseNumber.Text.Replace("'", "''") + "',N'" + tbPlace.Text.Replace("'", "''") +
                    "','" + tbEmail.Text.Replace("'", "''") + "',N'" + tbParrentFirstName.Text.Replace("'", "''") + "',N'" + tbParrentLastName.Text.Replace("'", "''") +
                    "',N'" + tbParrentAddress.Text.Replace("'", "''") + "',N'" + tbParrentHouseNumber.Text.Replace("'", "''") + "',N'" + tbParrentSN.Text.Replace("'", "''") +
@@ -144,13 +149,17 @@ public partial class Students_Edit : System.Web.UI.Page
     }
     protected void tbDateOfBirth_TextChanged(object sender, EventArgs e)
     {
-        double denovi = (DateTime.Now - Convert.ToDateTime(tbDateOfBirth.Text)).TotalDays;
-        double godini = denovi / 365;
+        try 
+        {
+            double denovi = (DateTime.Now - Convert.ToDateTime(tbDateOfBirth.Text)).TotalDays;
+            double godini = denovi / 365;
 
-        if (godini < 18)
-            pnlParrents.Visible = true;
-        else
-            pnlParrents.Visible = false;
+            if (godini < 18)
+                pnlParrents.Visible = true;
+            else
+                pnlParrents.Visible = false;
+        }
+        catch { }        
     }
     protected void tbSocialNumber_TextChanged(object sender, EventArgs e)
     {

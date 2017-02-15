@@ -229,6 +229,10 @@ public partial class Payments : System.Web.UI.Page
             tbTotalPaid.Text = Payments[2];
             tbRemainingCosts.Text = Payments[3];
 
+            String IndividualGroup = Functions.ExecuteScalar("SELECT IndividualGroup FROM [Group] WHERE GroupID=" + ddlAddGroup.SelectedValue);
+            if (Convert.ToBoolean(IndividualGroup))
+                tbRemainingCosts.Text = "0";
+
             if (tbRemainingCosts.Text.Length > 0)
             {
                 if (Convert.ToInt32(tbRemainingCosts.Text) > 0)
@@ -318,7 +322,9 @@ public partial class Payments : System.Web.UI.Page
             SQLPrint = @"SELECT p.AccountNumber,p.Ammount, p.AmmountWords, g.GroupName+'-'+gt.Language+'-'+gt.LevelDescription as PaymentGroup,
                         s.FirstName+' '+s.LastName as PaymentName, p.PaymentNumber, s.Place as PaymentPlace,
                         convert(varchar,p.DateOfPayment,104) as DateOfPayment, gs.TotalCost, 
-						gs.TotalCost-(SELECT SUM(p2.Ammount) FROM Payment p2 where p2.GroupStudentID=gs.GroupStudentID AND p2.DateOfPayment<=p.DateOfPayment) as RemainingCost,
+						CASE WHEN gs.TotalCost-(SELECT SUM(p2.Ammount)						
+						FROM Payment p2 where p2.GroupStudentID=gs.GroupStudentID AND p2.DateOfPayment<=p.DateOfPayment) < 0 THEN 0
+						ELSE gs.TotalCost-(SELECT SUM(p2.Ammount) FROM Payment p2 where p2.GroupStudentID=gs.GroupStudentID AND p2.DateOfPayment<=p.DateOfPayment) END as RemainingCost,
 						(SELECT COUNT(*) FROM Payment p2 where p2.GroupStudentID=gs.GroupStudentID AND p2.DateOfPayment<=p.DateOfPayment) as NoPayments, g.NumberOfPayments as TotalNoPayment
                         FROM Payment p LEFT OUTER JOIN GroupStudent gs ON gs.GroupStudentID=p.GroupStudentID
                         LEFT OUTER JOIN [Group] g ON g.GroupID=gs.GroupID LEFT OUTER JOIN GroupType gt ON gt.GroupTypeID=g.GroupTypeID
@@ -811,14 +817,14 @@ public partial class Payments : System.Web.UI.Page
             Functions.FillCombo(@"SELECT s.ServiceID, CAST(s.ServiceID AS VARCHAR(16)) + '-' + st.ServiceName as ServiceName
                             FROM [Service] s LEFT OUTER JOIN ServiceType st ON st.ServiceTypeID=s.ServiceTypeID
                             LEFT OUTER JOIN Employee e ON e.EmployeeID=s.EmployeeID
-                            WHERE s.CustomerID=" + ddlCustomers.SelectedValue + " AND e.UserID=" + Functions.Decrypt(Request.Cookies["UserID"].Value), ddlService, "ServiceName", "ServiceID");
+                            WHERE s.Status = 1 AND s.CustomerID=" + ddlCustomers.SelectedValue + " AND e.UserID=" + Functions.Decrypt(Request.Cookies["UserID"].Value), ddlService, "ServiceName", "ServiceID");
         }
         else
         {
             Functions.FillCombo(@"SELECT s.ServiceID, CAST(s.ServiceID AS VARCHAR(16)) + '-' + st.ServiceName as ServiceName
                             FROM [Service] s LEFT OUTER JOIN ServiceType st ON st.ServiceTypeID=s.ServiceTypeID
                             LEFT OUTER JOIN Employee e ON e.EmployeeID=s.EmployeeID
-                            WHERE s.CustomerID=" + ddlCustomers.SelectedValue, ddlService, "ServiceName", "ServiceID");
+                            WHERE s.Status = 1 AND s.CustomerID=" + ddlCustomers.SelectedValue, ddlService, "ServiceName", "ServiceID");
         }
         CalculatePaymentsService();
     }
@@ -830,7 +836,13 @@ public partial class Payments : System.Web.UI.Page
     {
         if (rblType.SelectedValue == "0")
         {
-            if (Convert.ToInt32(tbAddAmmount.Text) <= Convert.ToInt32(tbRemainingCosts.Text))
+            Boolean CheckDifference = Convert.ToInt32(tbAddAmmount.Text) <= Convert.ToInt32(tbRemainingCosts.Text);
+            String IndividualGroup = Functions.ExecuteScalar("SELECT IndividualGroup FROM [Group] WHERE GroupID=" + ddlAddGroup.SelectedValue);
+            if (Convert.ToBoolean(IndividualGroup))
+            {
+                CheckDifference = true;
+            }
+            if (CheckDifference)
             {
                 //if (Convert.ToInt32(tbRemainingPayments.Text) == 1 &&
                 //    Convert.ToInt32(tbRemainingCosts.Text) > Convert.ToInt32(tbAddAmmount.Text))
@@ -933,7 +945,7 @@ public partial class Payments : System.Web.UI.Page
         tbAddPaymentNumber.Text = "";
         tbAddAmmount.Text = "";
         tbAddAmmountWords.Text = "";
-        tbAddDateOfPayment.Text = Convert.ToDateTime(DateTime.Now).ToString("MM/dd/yyyy");
+        tbAddDateOfPayment.Text = Convert.ToDateTime(DateTime.Now).ToString("yyyy-MM-dd");
         tbAddPaymentNumber.Text = Get_PaymentNumber();
 
         tbCustomerSearch.Enabled = true;

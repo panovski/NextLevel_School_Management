@@ -26,12 +26,31 @@
         }
     </script>
 
+    <style type="text/css">
+        .auto-style1 {
+            height: 31px;
+        }
+    </style>
+
 </head>
 <body>
  <form id="form1" runat="server">
     <div>
     <table class="EditForma">        
         <asp:ScriptManager ID="ScriptManager1" runat="server" EnablePageMethods="true"></asp:ScriptManager>        
+        <tr style="vertical-align:top; text-align:left">
+            <td>
+            </td>
+            <td>
+               <asp:CheckBox ID="cbIndividual" runat="server" Text="Individual group" />
+            </td>
+            <td>
+                
+            </td>
+            
+            <td>                
+            </td>
+        </tr>
         <tr style="vertical-align:top; text-align:left">
             <td>
                 Group Name:
@@ -91,7 +110,7 @@
                 <asp:TextBox ID="tbNoClasses" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1" TextMode="Number"></asp:TextBox>
             </td>
             <td>
-                <asp:RequiredFieldValidator ID="rfvtbNoClasses" runat="server" ErrorMessage="Required!" CssClass="RequredField" ControlToValidate="tbNoClasses" ValidationGroup="1"></asp:RequiredFieldValidator>                
+                <asp:RequiredFieldValidator ID="rfvtbNoClasses" runat="server" ErrorMessage="Required!" CssClass="RequredField" ControlToValidate="tbNoClasses" ValidationGroup="2"></asp:RequiredFieldValidator>                
             </td>
         </tr>
         <tr>
@@ -102,18 +121,18 @@
                 <asp:TextBox ID="tbNoPayments" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1" TextMode="Number"></asp:TextBox>
             </td>
             <td>
-                <asp:RequiredFieldValidator ID="rfvtbNoPayments" runat="server" ErrorMessage="Required!" CssClass="RequredField" ControlToValidate="tbNoPayments" ValidationGroup="1"></asp:RequiredFieldValidator>                
+                <asp:RequiredFieldValidator ID="rfvtbNoPayments" runat="server" ErrorMessage="Required!" CssClass="RequredField" ControlToValidate="tbNoPayments" ValidationGroup="2"></asp:RequiredFieldValidator>                
             </td>
         </tr>
          <tr>
-            <td>
+            <td class="auto-style1">
                 Cost:
             </td>
-            <td>
+            <td class="auto-style1">
                 <asp:TextBox ID="tbCost" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1" TextMode="Number"></asp:TextBox>
             </td>
-            <td>
-                <asp:RequiredFieldValidator ID="rfvtbCost" runat="server" ErrorMessage="Required!" CssClass="RequredField" ControlToValidate="tbCost" ValidationGroup="1"></asp:RequiredFieldValidator>                
+            <td class="auto-style1">
+                <asp:RequiredFieldValidator ID="rfvtbCost" runat="server" ErrorMessage="Required!" CssClass="RequredField" ControlToValidate="tbCost" ValidationGroup="2"></asp:RequiredFieldValidator>                
             </td>
         </tr>
         <tr>
@@ -121,7 +140,7 @@
                 Teacher:
             </td>
             <td>
-                <asp:DropDownList ID="ddlTeacher" runat="server" CssClass="TextBoxRoundedEdit"></asp:DropDownList>                
+                <asp:DropDownList ID="ddlTeacher" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1" ></asp:DropDownList>                
             </td>
             <td>
                 <asp:RequiredFieldValidator ID="rfvddlTeacher" runat="server" ErrorMessage="Required!" CssClass="RequredField" ControlToValidate="ddlTeacher" ValidationGroup="1"></asp:RequiredFieldValidator>

@@ -173,6 +173,7 @@
                            <asp:BoundField DataField="LevelDescription" HeaderText="Level" SortExpression="LevelDescription"/>
                            <asp:BoundField DataField="StudentsNo" HeaderText="Students" SortExpression="StudentsNo" ItemStyle-HorizontalAlign="Center"/>
                            <asp:BoundField DataField="StatusDesc" HeaderText="Status" SortExpression="StatusDesc" ItemStyle-HorizontalAlign="Center"/>
+                           <asp:BoundField DataField="Program" HeaderText="Program" SortExpression="Program"/>
                            <asp:BoundField DataField="CreatedDate" HeaderText="Created Date" SortExpression="CreatedDate" ReadOnly="true" Visible="false"/>
                            <asp:BoundField DataField="CreatedBy" HeaderText="Created By" SortExpression="CreatedBy" ReadOnly="true" Visible="false"/>
                        </Columns>

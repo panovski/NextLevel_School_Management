@@ -104,7 +104,21 @@
                         <td> 
                             <asp:CompareValidator ID="CompareValidator1" runat="server" ErrorMessage="Wrong date! (dd.MM.yyyy)" Operator="DataTypeCheck" Type="Date" ControlToValidate="tbDateOfBirth"  CssClass="RequredField" ValidationGroup="1" ></asp:CompareValidator>                             
                         </td>
-                    </tr>    
+                    </tr>
+                                <tr>
+            <td>
+                Gender:
+            </td>
+            <td>
+                <asp:RadioButtonList ID="rblGender" runat="server" RepeatDirection="Horizontal">
+                    <asp:ListItem Value="False">Female</asp:ListItem>
+                    <asp:ListItem Value="True">Male</asp:ListItem>
+                </asp:RadioButtonList>
+            </td>
+            <td>    
+            </td>
+        </tr>
+                                    
                             </table>
                             </asp:Panel>
                         </td>

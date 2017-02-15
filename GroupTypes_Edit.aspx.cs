@@ -39,7 +39,7 @@ public partial class GroupTypes_Edit : System.Web.UI.Page
         tbProgram.Text = GroupType[2];
         tbLevel.Text = GroupType[3];
         tbLevelDescription.Text = GroupType[4];
-        tbCreatedDate.Text = Convert.ToDateTime(GroupType[5]).ToString("yyyy-MM-dd");
+        tbCreatedDate.Text = Convert.ToDateTime(GroupType[5]).ToString("dd.MM.yyyy");
         tbCreatedBy.Text = GroupType[6];
     }
     #endregion

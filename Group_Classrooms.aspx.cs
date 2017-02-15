@@ -35,7 +35,7 @@ public partial class Group_Classrooms : System.Web.UI.Page
         String[] GroupType = Functions.ReturnIntoArray(@"SELECT c.*, u.FirstName+' '+u.LastName as CreatedByUser FROM Classroom c LEFT OUTER JOIN [User] u ON u.UserID=c.CreatedBy WHERE c.ClassroomID=" + SelectedId, 6);
         tbClassroomName.Text = GroupType[1];
         tbDescription.Text = GroupType[2];
-        tbCreatedDate.Text = Convert.ToDateTime(GroupType[3]).ToString("yyyy-MM-dd");
+        tbCreatedDate.Text = Convert.ToDateTime(GroupType[3]).ToString("dd.MM.yyyy");
         tbCreatedBy.Text = GroupType[5];
     }
     #endregion

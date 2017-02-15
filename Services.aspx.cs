@@ -396,7 +396,7 @@ public partial class Services : System.Web.UI.Page
             SQLPrint = @"SELECT c.RegNo, '"+StudentName +@"' as StudentName, convert(varchar,cu.DateOfBirth,104) as DateOfBirth, '"+Place+@"' as Place,
                             N'" + Lang + "' as Language, N'" + LevelDescription + "' as LevelDescription, N'" + Level + "' as Level, N'" + Program + "' as Program, N'" + NumberOfClasses + @"' as NumberOfClasses, 
 							convert(varchar,se.CreatedDate,104) as StartDate, convert(varchar,se.ToDate,104) as EndDate, 
-							convert(varchar,se.ToDate,104) as DateOfPrint, '"+Teacher+@"' as Teacher
+							convert(varchar,se.ToDate,104) as DateOfPrint, '" + Teacher + @"' as Teacher, (CASE WHEN cu.Gender = 1 THEN '' ELSE 'a' END) as Gender
                             FROM [Certificate] c LEFT OUTER JOIN [Service] se ON se.ServiceID=c.ServiceID
 							LEFT OUTER JOIN Customer cu ON cu.CustomerID=se.CustomerID
 							LEFT OUTER JOIN Employee e ON e.EmployeeID=se.EmployeeID
