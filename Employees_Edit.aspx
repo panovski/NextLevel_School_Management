@@ -100,7 +100,7 @@
             </td>
              <td>
                 <asp:RequiredFieldValidator ID="rfvDateOfBirth" runat="server" ErrorMessage="Required!" CssClass="RequredField" ControlToValidate="tbStartDate" ValidationGroup="1"></asp:RequiredFieldValidator><br />
-                <asp:CompareValidator ID="cvtbDateOfBirth" runat="server" ErrorMessage="Wrong date! (dd.MM.yyyy)" Operator="DataTypeCheck" Type="Date" ControlToValidate="tbStartDate"  CssClass="RequredField" ValidationGroup="1" ></asp:CompareValidator>                    
+                 <asp:RegularExpressionValidator ID="revDateOfBirth" runat="server" ErrorMessage="Wrong date! (dd.MM.yyyy)" ValidationExpression="^(((0[1-9]|[12]\d|3[01])\.(0[13578]|1[02])\.((19|[2-9]\d)\d{2}))|((0[1-9]|[12]\d|30)\.(0[13456789]|1[012])\.((19|[2-9]\d)\d{2}))|((0[1-9]|1\d|2[0-8])\.02\.((19|[2-9]\d)\d{2}))|(29\.02./((1[6-9]|[2-9]\d)(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00))))$" ControlToValidate="tbStartDate"  CssClass="RequredField" ValidationGroup="1" ></asp:RegularExpressionValidator>
             </td>
         </tr>
          <tr>

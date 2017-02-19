@@ -120,7 +120,7 @@
                             </td>
                             <td>
                                 <asp:TextBox ID="tbDateFrom" runat="server" CssClass="TextBoxRoundedFilters" ValidationGroup="1" TextMode="Date" AutoPostBack="True"></asp:TextBox><br />
-                                <asp:CompareValidator ID="cvtbDateFrom" runat="server" ErrorMessage="Wrong date!" Operator="DataTypeCheck" Type="Date" ControlToValidate="tbDateFrom"  CssClass="RequredFieldSmall" ValidationGroup="1" ></asp:CompareValidator>
+                                <asp:RegularExpressionValidator ID="revDateFrom" runat="server" ErrorMessage="Wrong date! (dd.MM.yyyy)" ValidationExpression="^(((0[1-9]|[12]\d|3[01])\.(0[13578]|1[02])\.((19|[2-9]\d)\d{2}))|((0[1-9]|[12]\d|30)\.(0[13456789]|1[012])\.((19|[2-9]\d)\d{2}))|((0[1-9]|1\d|2[0-8])\.02\.((19|[2-9]\d)\d{2}))|(29\.02./((1[6-9]|[2-9]\d)(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00))))$" ControlToValidate="tbDateFrom"  CssClass="RequredField" ValidationGroup="1" ></asp:RegularExpressionValidator>
                             </td>
                             <td style="padding-left:1vw"></td>
                             <td>
@@ -128,7 +128,7 @@
                             </td>
                             <td>
                                 <asp:TextBox ID="tbDateTo" runat="server" CssClass="TextBoxRoundedFilters" ValidationGroup="1" TextMode="Date" AutoPostBack="True"></asp:TextBox><br />
-                                <asp:CompareValidator ID="cvtbDateTo" runat="server" ErrorMessage="Wrong date!" Operator="DataTypeCheck" Type="Date" ControlToValidate="tbDateTo"  CssClass="RequredFieldSmall" ValidationGroup="1" ></asp:CompareValidator>
+                                <asp:RegularExpressionValidator ID="revDateTo" runat="server" ErrorMessage="Wrong date! (dd.MM.yyyy)" ValidationExpression="^(((0[1-9]|[12]\d|3[01])\.(0[13578]|1[02])\.((19|[2-9]\d)\d{2}))|((0[1-9]|[12]\d|30)\.(0[13456789]|1[012])\.((19|[2-9]\d)\d{2}))|((0[1-9]|1\d|2[0-8])\.02\.((19|[2-9]\d)\d{2}))|(29\.02./((1[6-9]|[2-9]\d)(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00))))$" ControlToValidate="tbDateTo"  CssClass="RequredField" ValidationGroup="1" ></asp:RegularExpressionValidator>
                             </td>
                             <td style="padding-left:1vw"></td>
                             
@@ -346,7 +346,7 @@
                             </td>
                             <td style="text-align:left">
                                 <asp:RequiredFieldValidator ID="rfvtbAddDateOfPayment" runat="server" ErrorMessage="!" ControlToValidate="tbAddDateOfPayment" CssClass="RequredField" ValidationGroup="2"></asp:RequiredFieldValidator><br />                                
-                                <asp:CompareValidator ID="cvtbAddDateOfPayment" runat="server" ErrorMessage="Wrong date!" Operator="DataTypeCheck" Type="Date" ControlToValidate="tbAddDateOfPayment"  CssClass="RequredFieldSmall" ></asp:CompareValidator>
+                                <asp:RegularExpressionValidator ID="revAddDateOfPayment" runat="server" ErrorMessage="Wrong date! (dd.MM.yyyy)" ValidationExpression="^(((0[1-9]|[12]\d|3[01])\.(0[13578]|1[02])\.((19|[2-9]\d)\d{2}))|((0[1-9]|[12]\d|30)\.(0[13456789]|1[012])\.((19|[2-9]\d)\d{2}))|((0[1-9]|1\d|2[0-8])\.02\.((19|[2-9]\d)\d{2}))|(29\.02./((1[6-9]|[2-9]\d)(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00))))$" ControlToValidate="tbAddDateOfPayment"  CssClass="RequredField" ValidationGroup="1" ></asp:RegularExpressionValidator>
                             </td>
                         </tr>
                         <tr>

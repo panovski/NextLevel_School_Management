@@ -956,7 +956,8 @@ public partial class Payments : System.Web.UI.Page
     }
     protected void btnPrintPayment_Click(object sender, EventArgs e)
     {
-        PrintPayment(tbPaymentID.Text);
+        if(tbPaymentID.Text != "")
+            PrintPayment(tbPaymentID.Text);
     }
     protected void btnPreview_Click(object sender, EventArgs e)
     {
