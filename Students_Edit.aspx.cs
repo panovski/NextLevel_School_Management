@@ -58,7 +58,7 @@ public partial class Students_Edit : System.Web.UI.Page
         String[] Student = Functions.ReturnIntoArray("SELECT * FROM Student WHERE StudentID=" + Request.QueryString["ID"], 20);
         tbFirstName.Text = Student[1];
         tbLastName.Text = Student[2];
-        tbSocialNumber.Text = Student[3];
+        //tbSocialNumber.Text = Student[3];
         tbContactPhone.Text = Student[4];
         ddlStatus.SelectedValue = Student[5];
         tbDateOfBirth.Text = Convert.ToDateTime(Student[6]).ToString("dd.MM.yyyy");
@@ -70,7 +70,7 @@ public partial class Students_Edit : System.Web.UI.Page
         tbParrentLastName.Text = Student[12];
         tbParrentAddress.Text = Student[13];
         tbParrentHouseNumber.Text = Student[14];
-        tbParrentSN.Text = Student[15];
+        //tbParrentSN.Text = Student[15];
         tbParrentPlace.Text = Student[16];
         tbCreatedDate.Text = Student[17];
         tbCreatedBy.Text = Student[18];
@@ -106,7 +106,7 @@ public partial class Students_Edit : System.Web.UI.Page
 
         String SQL = @"UPDATE Student SET FirstName = N'" + tbFirstName.Text.Replace("'", "''") +
          "', LastName= N'" + tbLastName.Text.Replace("'", "''") +
-         "', SocialNumber= N'" + tbSocialNumber.Text.Replace("'","''") +
+         "', SocialNumber= N'0" + //tbSocialNumber.Text.Replace("'","''") +
          "', ContactPhone= N'" + tbContactPhone.Text.Replace("'", "''") +
          "', Status=" + ddlStatus.SelectedValue +
          ", DateOfBirth='" + Convert.ToDateTime(tbDateOfBirth.Text.Replace("'", "''"),dateInfo) +
@@ -118,7 +118,7 @@ public partial class Students_Edit : System.Web.UI.Page
          "', Parent_LastName= N'" + tbParrentLastName.Text.Replace("'", "''") +
          "', Parent_Address= N'" + tbParrentAddress.Text.Replace("'", "''") +
          "', Parent_HouseNumber= N'" + tbParrentHouseNumber.Text.Replace("'", "''") +
-         "', Parent_SocialNumber= N'" + tbParrentSN.Text.Replace("'", "''") +
+         "', Parent_SocialNumber= N'0" +// tbParrentSN.Text.Replace("'", "''") +
          "', Parent_Place= N'" + tbParrentPlace.Text + 
          "', Gender='"+ rblGender.SelectedValue +
          "' WHERE StudentID=" + Request.QueryString["ID"];
@@ -128,18 +128,22 @@ public partial class Students_Edit : System.Web.UI.Page
     }
     protected void btnInsert_Click(object sender, EventArgs e)
     {
-        String AllreadyExist = Functions.ExecuteScalar("SELECT COUNT(*) FROM Student WHERE SocialNumber='" + tbSocialNumber.Text.Replace("'", "''") + "'");
+        System.Globalization.DateTimeFormatInfo dateInfo = new System.Globalization.DateTimeFormatInfo();
+        dateInfo.ShortDatePattern = "dd.MM.yyyy"; 
+        //String AllreadyExist = Functions.ExecuteScalar("SELECT COUNT(*) FROM Student WHERE SocialNumber='" + tbSocialNumber.Text.Replace("'", "''") + "'");
+        String AllreadyExist = Functions.ExecuteScalar("SELECT COUNT(*) FROM Student WHERE FirstName=N'"+tbFirstName.Text.Replace("'","''")+"' AND LastName=N'"+tbLastName.Text.Replace("'","''")+
+                                "' AND DateOfBirth='"+Convert.ToDateTime(tbDateOfBirth.Text,dateInfo)+"'");
+
         if (Convert.ToInt32(AllreadyExist) < 1)
         {
-            System.Globalization.DateTimeFormatInfo dateInfo = new System.Globalization.DateTimeFormatInfo();
-            dateInfo.ShortDatePattern = "dd.MM.yyyy"; 
+            
             String SQL = @"INSERT INTO Student (FirstName,LastName,SocialNumber,ContactPhone,Status,DateOfBirth,Address,
                    HouseNumber,Place,Email,Parent_FirstName,Parent_LastName,Parent_Address,Parent_HouseNumber,Parent_SocialNumber,Parent_Place, CreatedBy, Gender)
-                   VALUES(N'" + tbFirstName.Text.Replace("'", "''") + "',N'" + tbLastName.Text.Replace("'", "''") + "',N'" + tbSocialNumber.Text.Replace("'", "''") +
-                   "',N'" + tbContactPhone.Text.Replace("'", "''") + "','" + ddlStatus.SelectedValue + "','" + Convert.ToDateTime(tbDateOfBirth.Text.Replace("'", "''"),dateInfo) +
+                   VALUES(N'" + tbFirstName.Text.Replace("'", "''") + "',N'" + tbLastName.Text.Replace("'", "''") + 
+                   "',N'0',N'" + tbContactPhone.Text.Replace("'", "''") + "','" + ddlStatus.SelectedValue + "','" + Convert.ToDateTime(tbDateOfBirth.Text.Replace("'", "''"),dateInfo) +
                    "',N'" + tbAddress.Text.Replace("'", "''") + "',N'" + tbHouseNumber.Text.Replace("'", "''") + "',N'" + tbPlace.Text.Replace("'", "''") +
                    "','" + tbEmail.Text.Replace("'", "''") + "',N'" + tbParrentFirstName.Text.Replace("'", "''") + "',N'" + tbParrentLastName.Text.Replace("'", "''") +
-                   "',N'" + tbParrentAddress.Text.Replace("'", "''") + "',N'" + tbParrentHouseNumber.Text.Replace("'", "''") + "',N'" + tbParrentSN.Text.Replace("'", "''") +
+                   "',N'" + tbParrentAddress.Text.Replace("'", "''") + "',N'" + tbParrentHouseNumber.Text.Replace("'", "''") + "',N'0" + //tbParrentSN.Text.Replace("'", "''") +
                    "',N'" + tbParrentPlace.Text.Replace("'", "''") + "'," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ",'" + rblGender.SelectedValue + "')";
            Functions.ExecuteCommand(SQL);
            Page.ClientScript.RegisterStartupScript(this.GetType(), "Call my function", "CloseDialog()", true);
@@ -160,17 +164,6 @@ public partial class Students_Edit : System.Web.UI.Page
                 pnlParrents.Visible = false;
         }
         catch { }        
-    }
-    protected void tbSocialNumber_TextChanged(object sender, EventArgs e)
-    {
-        if (Request.QueryString["ID"] == "")
-        {
-            String AllreadyExist = Functions.ExecuteScalar("SELECT COUNT(*) FROM Student WHERE SocialNumber='" + tbSocialNumber.Text.Replace("'", "''") + "'");
-            if (Convert.ToInt32(AllreadyExist) > 0)
-                lblAlreadyExist.Visible = true;
-            else
-                lblAlreadyExist.Visible = false;
-        }
     }
     #endregion
 }

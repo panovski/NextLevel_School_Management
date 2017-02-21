@@ -74,9 +74,8 @@ public partial class Groups : System.Web.UI.Page
             btnEditClassroom.Visible = true;
             btnEditTemplates.Visible = true;
             btnDeleteAllCertificates.Visible = true;
-
-            //btnEdit.Visible = true;
             btnRemove.Visible = true;
+            btnDelete.Visible = true;
         }
         else
         {
@@ -98,7 +97,7 @@ public partial class Groups : System.Web.UI.Page
         WherePart = Functions.VratiWherePart(tbGroupName, "g.GroupName", WherePart);
         WherePart = Functions.VratiWherePartDDL(ddlLanguage, "gt.Language", WherePart);
         WherePart = Functions.VratiWherePartDDL(ddlLevel, "gt.LevelDescription", WherePart);
-        WherePart = Functions.VratiWherePartDDL(ddlTeacher, "g.EmployeeID", WherePart);
+        WherePart = Functions.VratiWherePartDDL_ID(ddlTeacher, "g.EmployeeID", WherePart);
         WherePart = Functions.VratiWherePartDDL(ddlStatus, "g.Status", WherePart);
 
         if (WherePart.Length > 0) WherePart = " WHERE " + WherePart;
@@ -268,9 +267,13 @@ public partial class Groups : System.Web.UI.Page
     {
         if (gvMain.SelectedRow != null)
         {
-            String SQL = @"DELETE FROM GroupStudent WHERE GroupID=" + gvMain.SelectedValue.ToString();
+            String SQL = @"DELETE FROM [Certificate] WHERE GroupID=" + gvMain.SelectedValue.ToString();
             Functions.ExecuteCommand(SQL);
-            SQL = @"DELETE FROM [Group] WHERE Group=" + gvMain.SelectedValue.ToString();
+            SQL = @"DELETE FROM [Termin] WHERE GroupID=" + gvMain.SelectedValue.ToString();
+            Functions.ExecuteCommand(SQL);
+            SQL = @"DELETE FROM GroupStudent WHERE GroupID=" + gvMain.SelectedValue.ToString();
+            Functions.ExecuteCommand(SQL);
+            SQL = @"DELETE FROM [Group] WHERE GroupID=" + gvMain.SelectedValue.ToString();
             Functions.ExecuteCommand(SQL);
             btnSearch_Click(sender, e);
         }

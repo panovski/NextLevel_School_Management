@@ -62,6 +62,7 @@ public partial class Students : System.Web.UI.Page
         {
             btnRemove.Visible = true;
             btnEdit.Visible = true;
+            btnDelete.Visible = true;
         }
         else
         {
@@ -77,7 +78,7 @@ public partial class Students : System.Web.UI.Page
     {
         String WherePart = "";
 
-        WherePart = Functions.VratiWherePart(tbSSN, "SocialNumber", WherePart);
+        //WherePart = Functions.VratiWherePart(tbSSN, "SocialNumber", WherePart);
         WherePart = Functions.VratiWherePart(tbFirstName, "FirstName", WherePart);
         WherePart = Functions.VratiWherePart(tbLastName, "LastName", WherePart);
         WherePart = Functions.VratiWherePartDDL(ddlStatus, "Status", WherePart);
@@ -311,13 +312,14 @@ public partial class Students : System.Web.UI.Page
     {
         if (gvStudents.SelectedRow != null)
         {
-            //String SQL = @"UPDATE Employee SET UserID=null WHERE UserID=" + gvStudents.SelectedValue.ToString();
-            //Functions.ExecuteCommand(SQL);
-            //SQL = @"DELETE FROM [UserAccess] WHERE UserID=" + gvStudents.SelectedValue.ToString();
-            //Functions.ExecuteCommand(SQL);
-            //SQL = @"DELETE FROM [User] WHERE UserID=" + gvStudents.SelectedValue.ToString();
-            //Functions.ExecuteCommand(SQL);
-            //btnSearch_Click(sender, e);
+            String SQL = @"DELETE FROM [Certificate] WHERE StudentID=" + gvStudents.SelectedValue.ToString();
+            Functions.ExecuteCommand(SQL);
+            SQL = @"DELETE FROM [GroupStudent] WHERE StudentID=" + gvStudents.SelectedValue.ToString();
+            Functions.ExecuteCommand(SQL);
+            SQL = @"DELETE FROM [Student] WHERE StudentID=" + gvStudents.SelectedValue.ToString();
+            Functions.ExecuteCommand(SQL);
+
+            btnSearch_Click(sender, e);
         }
     }
     protected void btnAdd_Click(object sender, EventArgs e)
@@ -553,7 +555,7 @@ public partial class Students : System.Web.UI.Page
 						CASE WHEN DATEDIFF(DAY,s.DateOfBirth, GETDATE())<6570 THEN 
 						N' (малолетен преку својот законски родител-старател) ' + Parent_FirstName + ' ' + Parent_LastName +
 						N' од ' + Parent_Place + N', со стан на ул.' + Parent_Address + N' бр.' + Parent_HouseNumber + N' во ' + 
-						Parent_Place + N' и ЕМБГ:' + Parent_SocialNumber +'.' ELSE '' END as MaloletenInfo,
+						Parent_Place + N'.' ELSE '' END as MaloletenInfo,
 						gt.Language, g.NumberOfClasses, g.NumberOfPayments  as BrojMeseci, 
 						(g.NumberOfClasses/g.NumberOfPayments)*(SELECT TOP 1 DATEDIFF(MINUTE, t.TimeStart, t.TimeEnd)/60 FROM Termin t WHERE t.GroupID=g.GroupID)  as RabotniChasa, 
 						(SELECT TOP 1 DATEDIFF(MINUTE, t.TimeStart, t.TimeEnd) FROM Termin t WHERE t.GroupID=g.GroupID) as ChasMinuti,

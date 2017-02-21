@@ -48,9 +48,14 @@ public partial class Services : System.Web.UI.Page
         {
             btnServiceType.Visible = true;
             btnDelete.Visible = true;
-            btnEdit.Visible = true;
             btnDeleteAllCertificates.Visible = true;
         }
+
+        if (PermLevel == ConfigurationManager.AppSettings["Admin"].ToString() || PermLevel == ConfigurationManager.AppSettings["Advanced"].ToString())
+        {
+            btnEdit.Visible = true;
+        }
+        
         else
         {
             btnEdit.Visible = false;

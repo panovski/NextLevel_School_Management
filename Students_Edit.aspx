@@ -73,17 +73,6 @@
                         </tr>
                         <tr>
                             <td>
-                                Social Number:
-                            </td>
-                            <td>
-                                <asp:TextBox ID="tbParrentSN" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1"></asp:TextBox>
-                            </td>
-                            <td>
-                                <asp:RequiredFieldValidator ID="rfvtbParrentSN" runat="server" ErrorMessage="Required!" CssClass="RequredField" ControlToValidate="tbParrentSN" ValidationGroup="1"></asp:RequiredFieldValidator>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
                                 Address:
                             </td>
                             <td>
@@ -128,20 +117,10 @@
             </td>
             <td>
                 <asp:RequiredFieldValidator ID="rfvLastName" runat="server" ErrorMessage="Required!" CssClass="RequredField" ControlToValidate="tbLastName" ValidationGroup="1"></asp:RequiredFieldValidator>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Social Number:
-            </td>
-            <td>
-                <asp:TextBox ID="tbSocialNumber" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1" AutoPostBack="True" OnTextChanged="tbSocialNumber_TextChanged"></asp:TextBox>
-            </td>
-            <td>
-                <asp:RequiredFieldValidator ID="rfvSocialNumber" runat="server" ErrorMessage="Required!" CssClass="RequredField" ControlToValidate="tbSocialNumber" ValidationGroup="1"></asp:RequiredFieldValidator>
                 <asp:Label ID="lblAlreadyExist" runat="server" Text="The student allready exists!" CssClass="RequredField" Visible="False"></asp:Label>
             </td>
         </tr>
+       
          <tr>
             <td>
                 Contact Phone:

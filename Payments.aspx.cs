@@ -110,7 +110,7 @@ public partial class Payments : System.Web.UI.Page
 
         WherePart = Functions.VratiWherePart(tbPaymentNumber, "p.PaymentNumber", WherePart);
         WherePart = Functions.VratiWherePart(tbStudent, "s.FirstName+s.LastName", WherePart);
-        WherePart = Functions.VratiWherePartDDL(ddlGroup, "g.GroupID", WherePart);
+        WherePart = Functions.VratiWherePartDDL_ID(ddlGroup, "g.GroupID", WherePart);
         WherePart = Functions.VratiWherePartInteger(tbDateFrom, "p.DateOfPayment", ">=", WherePart);
         WherePart = Functions.VratiWherePartInteger(tbDateTo, "p.DateOfPayment", "<=", WherePart);
 

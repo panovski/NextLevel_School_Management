@@ -120,14 +120,6 @@
                             <td>
                                 <asp:TextBox ID="tbLastName" runat="server" CssClass="TextBoxRoundedFilters" ValidationGroup="1"></asp:TextBox>
                             </td>
-                            <td style="padding-left:1vw">
-                            </td>
-                            <td>
-                                SSN:
-                            </td>
-                            <td>
-                                <asp:TextBox ID="tbSSN" runat="server" CssClass="TextBoxRoundedFilters" ValidationGroup="1"></asp:TextBox>
-                            </td>
                             <td style="padding-left:1vw"></td>
                             <td style="text-align:right">
                                 <asp:Button ID="btnSearch" runat="server" Text="Search" CssClass="FilterButton" ValidationGroup="1" OnClick="btnSearch_Click" />                                                                                                

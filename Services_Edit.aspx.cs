@@ -126,6 +126,9 @@ public partial class Services_Edit : System.Web.UI.Page
     }
     protected void btnInsert_Click(object sender, EventArgs e)
     {
+        System.Globalization.DateTimeFormatInfo dateInfo = new System.Globalization.DateTimeFormatInfo();
+        dateInfo.ShortDatePattern = "dd.MM.yyyy";
+
         String CustomerID = ddlCustomer.SelectedValue;
         if (cbNewCustomer.Checked)
         {
@@ -136,7 +139,7 @@ public partial class Services_Edit : System.Web.UI.Page
             if(tbDateOfBirth.Text!="")
                 SQLInsert = @"INSERT INTO [Customer] (FirstName,LastName,Contact,Place,CreatedBy, DateOfBirth, Gender) " +
                             "VALUES(N'" + tbFirstName.Text.Replace("'", "''") + "',N'" + tbLastName.Text.Replace("'", "''") + "',N'" + tbContact.Text.Replace("'", "''") + "',N'" + tbPlace.Text.Replace("'", "''") + "'," +
-                            Functions.Decrypt(Request.Cookies["UserID"].Value) + ",'" + Convert.ToDateTime(tbDateOfBirth.Text.Replace("'", "''")) + "','" + rblGender.SelectedValue + "'); SELECT SCOPE_IDENTITY()";
+                            Functions.Decrypt(Request.Cookies["UserID"].Value) + ",'" + Convert.ToDateTime(tbDateOfBirth.Text.Replace("'", "''"),dateInfo) + "','" + rblGender.SelectedValue + "'); SELECT SCOPE_IDENTITY()";
 
             CustomerID = Functions.ExecuteScalar(SQLInsert);
         }
@@ -144,7 +147,7 @@ public partial class Services_Edit : System.Web.UI.Page
         String Cost = Functions.ExecuteScalar("SELECT Cost FROM ServiceType WHERE ServiceTypeID=" + ddlServiceType.SelectedValue);
         String SQL = @"INSERT INTO [Service] (ServiceTypeID,CustomerID,EmployeeID,Status,ToDate,Quantity,TotalCost,CreatedBy)
                    VALUES(" + ddlServiceType.SelectedValue + "," + CustomerID + "," + ddlEmployee.SelectedValue + "," + ddlStatus.SelectedValue +
-                  ",N'" + tbToDate.Text.Replace("'", "''") + "'," + tbQuantity.Text.Replace("'", "''") + ",'" + Convert.ToInt32(tbQuantity.Text) * Convert.ToDecimal(Cost) + "'," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ")";
+                  ",N'" + Convert.ToDateTime(tbToDate.Text.Replace("'", "''"),dateInfo) + "'," + tbQuantity.Text.Replace("'", "''") + ",'" + Convert.ToInt32(tbQuantity.Text) * Convert.ToDecimal(Cost) + "'," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ")";
         Functions.ExecuteCommand(SQL);
         Page.ClientScript.RegisterStartupScript(this.GetType(), "Call my function", "CloseDialog()", true);
     }
