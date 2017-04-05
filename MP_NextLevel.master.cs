@@ -13,33 +13,40 @@ public partial class MP_NextLevel : System.Web.UI.MasterPage
     #region Page Load
     protected void Page_Load(object sender, EventArgs e)
     {
-        //if (Functions.Decrypt(Request.Cookies["UserID"].Value) == "")
-        //{
-        //    Response.Redirect("Default.aspx");
-        //}
         lblUser.Text = "";
         if (Session["Loaded"] == null) Session["Loaded"] = false;
+
+        if (Request.Cookies["Loaded"] == null)
+        {
+            HttpCookie Loaded = new HttpCookie("Loaded");
+            Loaded.Value = "false";
+            Loaded.Expires = DateTime.Now.AddHours(8);
+            Response.SetCookie(Loaded);
+        }
         
         
-        //if (Functions.Decrypt(Request.Cookies["UserID"].Value) != "")
-        //if (Session["najaven"] != null && Convert.ToBoolean(Session["Loaded"]) != false)
         if (Request.Cookies["UserID"] != null)
-        if (Functions.Decrypt(Request.Cookies["UserID"].Value) != "" && Convert.ToBoolean(Session["Loaded"]) != false)
+        //if (Functions.Decrypt(Request.Cookies["UserID"].Value) != "" && Convert.ToBoolean(Session["Loaded"]) != false)
+            if (Functions.Decrypt(Request.Cookies["UserID"].Value) != "" && Convert.ToBoolean(Request.Cookies["Loaded"].Value) != false)
         {
             String SQL = "SELECT COUNT(*) FROM UserAccess WHERE UserID=" + Functions.Decrypt(Request.Cookies["UserID"].Value);// Session["UserID"];
             int rez = Convert.ToInt32(Functions.ExecuteScalar(SQL));
             //if (!Convert.ToBoolean(Session["najaven"]))
             if (Functions.Decrypt(Request.Cookies["UserID"].Value) == "")
-                pnlMeni.Visible = false;
-            else if (rez < 1)
             {
                 pnlMeni.Visible = false;
-                btnLogout.Visible = true;
-                lblUser.Visible = true;
-                pnlUser.Visible = true;
-                lblUser.Text = Functions.Decrypt(Request.Cookies["UserLoged"].Value);// Session["UserLoged"].ToString();
+                //lblInfo.Text = "1";
             }
-            else
+            //else if (rez < 1)
+            //{
+            //    pnlMeni.Visible = false;
+            //    btnLogout.Visible = true;
+            //    lblUser.Visible = true;
+            //    pnlUser.Visible = true;
+            //    lblUser.Text = Functions.Decrypt(Request.Cookies["UserLoged"].Value);// Session["UserLoged"].ToString();
+            //}
+            //else
+            else if (rez > 0)
             {
                 btnLogout.Visible = true;
                 pnlMeni.Visible = true;
@@ -57,7 +64,6 @@ public partial class MP_NextLevel : System.Web.UI.MasterPage
                 //    Session["PermLevel"].ToString() == ConfigurationManager.AppSettings["Readonly"].ToString())
                 if (Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Edit"].ToString() ||
                         Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Readonly"].ToString())
-                
                 {
                     pnlMiTeachers.Visible = false;
                     pnlMiAdministrate.Visible = false;
@@ -66,7 +72,6 @@ public partial class MP_NextLevel : System.Web.UI.MasterPage
                 //    Session["PermLevel"].ToString() == ConfigurationManager.AppSettings["Advanced"].ToString())
                 if (Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Admin"].ToString() ||
                         Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Advanced"].ToString())
-                
                 {
                     pnlMiTeachers.Visible = true;
                 }
@@ -75,6 +80,11 @@ public partial class MP_NextLevel : System.Web.UI.MasterPage
                 {
                     pnlMiAdministrate.Visible = true;
                 }
+                HttpCookie Loaded = new HttpCookie("Loaded");
+                Loaded.Value = "true";
+                Loaded.Expires = DateTime.Now.AddHours(8);
+                Response.SetCookie(Loaded);
+
                 Session["Loaded"] = true;
             }
         }
@@ -98,12 +108,13 @@ public partial class MP_NextLevel : System.Web.UI.MasterPage
         Response.Cookies["PermLevel"].Expires.AddMilliseconds(1);
         Response.Cookies["UserID"].Expires.AddMilliseconds(1);
 
+        HttpCookie Loaded = new HttpCookie("Loaded");
+        Loaded.Value = "false";
+        Loaded.Expires = DateTime.Now.AddHours(8);
+        Response.SetCookie(Loaded);
+
         Session["Loaded"] = false;
-        //Session["najaven"] = false;
-        
-        //Session["Loaded"] = false;
-        //Session["najaven"] = false;
-        //Session["PermLevel"] = null;
+
         btnLogout.Visible = false;
         
         Response.Redirect("Default.aspx");

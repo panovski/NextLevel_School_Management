@@ -55,7 +55,7 @@ public partial class Students_Edit : System.Web.UI.Page
     }
     public void FillDetailsEdit()
     {
-        String[] Student = Functions.ReturnIntoArray("SELECT * FROM Student WHERE StudentID=" + Request.QueryString["ID"], 20);
+        String[] Student = Functions.ReturnIntoArray("SELECT s.*, u.FirstName+' '+u.LastName FROM [Student] s LEFT OUTER JOIN [User] u ON u.UserID=s.CreatedBy WHERE s.StudentID=" + Request.QueryString["ID"], 21);
         tbFirstName.Text = Student[1];
         tbLastName.Text = Student[2];
         //tbSocialNumber.Text = Student[3];
@@ -73,7 +73,7 @@ public partial class Students_Edit : System.Web.UI.Page
         //tbParrentSN.Text = Student[15];
         tbParrentPlace.Text = Student[16];
         tbCreatedDate.Text = Student[17];
-        tbCreatedBy.Text = Student[18];
+        tbCreatedBy.Text = Student[20];
         rblGender.SelectedValue = Student[19];
 
         double denovi = (DateTime.Now - Convert.ToDateTime(Student[6])).TotalDays;
@@ -104,52 +104,68 @@ public partial class Students_Edit : System.Web.UI.Page
         System.Globalization.DateTimeFormatInfo dateInfo = new System.Globalization.DateTimeFormatInfo();
         dateInfo.ShortDatePattern = "dd.MM.yyyy"; 
 
-        String SQL = @"UPDATE Student SET FirstName = N'" + tbFirstName.Text.Replace("'", "''") +
-         "', LastName= N'" + tbLastName.Text.Replace("'", "''") +
-         "', SocialNumber= N'0" + //tbSocialNumber.Text.Replace("'","''") +
-         "', ContactPhone= N'" + tbContactPhone.Text.Replace("'", "''") +
-         "', Status=" + ddlStatus.SelectedValue +
-         ", DateOfBirth='" + Convert.ToDateTime(tbDateOfBirth.Text.Replace("'", "''"),dateInfo) +
-         "', Address= N'" + tbAddress.Text.Replace("'", "''") +
-         "', HouseNumber= N'" + tbHouseNumber.Text.Replace("'", "''") +
-         "', Place= N'" + tbPlace.Text.Replace("'", "''") +
-         "', Email='" + tbEmail.Text.Replace("'", "''") +
-         "', Parent_FirstName= N'" + tbParrentFirstName.Text.Replace("'", "''") +
-         "', Parent_LastName= N'" + tbParrentLastName.Text.Replace("'", "''") +
-         "', Parent_Address= N'" + tbParrentAddress.Text.Replace("'", "''") +
-         "', Parent_HouseNumber= N'" + tbParrentHouseNumber.Text.Replace("'", "''") +
-         "', Parent_SocialNumber= N'0" +// tbParrentSN.Text.Replace("'", "''") +
-         "', Parent_Place= N'" + tbParrentPlace.Text + 
-         "', Gender='"+ rblGender.SelectedValue +
-         "' WHERE StudentID=" + Request.QueryString["ID"];
-        Functions.ExecuteCommand(SQL);
-
-        Page.ClientScript.RegisterStartupScript(this.GetType(), "Call my function", "CloseDialog()", true);
-    }
-    protected void btnInsert_Click(object sender, EventArgs e)
-    {
-        System.Globalization.DateTimeFormatInfo dateInfo = new System.Globalization.DateTimeFormatInfo();
-        dateInfo.ShortDatePattern = "dd.MM.yyyy"; 
-        //String AllreadyExist = Functions.ExecuteScalar("SELECT COUNT(*) FROM Student WHERE SocialNumber='" + tbSocialNumber.Text.Replace("'", "''") + "'");
-        String AllreadyExist = Functions.ExecuteScalar("SELECT COUNT(*) FROM Student WHERE FirstName=N'"+tbFirstName.Text.Replace("'","''")+"' AND LastName=N'"+tbLastName.Text.Replace("'","''")+
-                                "' AND DateOfBirth='"+Convert.ToDateTime(tbDateOfBirth.Text,dateInfo)+"'");
+        String AllreadyExist = Functions.ExecuteScalar("SELECT COUNT(*) FROM Student WHERE FirstName=N'" + tbFirstName.Text.Replace("'", "''") + "' AND LastName=N'" + tbLastName.Text.Replace("'", "''") +
+                                    "' AND DateOfBirth='" + Convert.ToDateTime(tbDateOfBirth.Text, dateInfo) + "' AND StudentID<>"+Request.QueryString["ID"]);
 
         if (Convert.ToInt32(AllreadyExist) < 1)
         {
-            
-            String SQL = @"INSERT INTO Student (FirstName,LastName,SocialNumber,ContactPhone,Status,DateOfBirth,Address,
-                   HouseNumber,Place,Email,Parent_FirstName,Parent_LastName,Parent_Address,Parent_HouseNumber,Parent_SocialNumber,Parent_Place, CreatedBy, Gender)
-                   VALUES(N'" + tbFirstName.Text.Replace("'", "''") + "',N'" + tbLastName.Text.Replace("'", "''") + 
-                   "',N'0',N'" + tbContactPhone.Text.Replace("'", "''") + "','" + ddlStatus.SelectedValue + "','" + Convert.ToDateTime(tbDateOfBirth.Text.Replace("'", "''"),dateInfo) +
-                   "',N'" + tbAddress.Text.Replace("'", "''") + "',N'" + tbHouseNumber.Text.Replace("'", "''") + "',N'" + tbPlace.Text.Replace("'", "''") +
-                   "','" + tbEmail.Text.Replace("'", "''") + "',N'" + tbParrentFirstName.Text.Replace("'", "''") + "',N'" + tbParrentLastName.Text.Replace("'", "''") +
-                   "',N'" + tbParrentAddress.Text.Replace("'", "''") + "',N'" + tbParrentHouseNumber.Text.Replace("'", "''") + "',N'0" + //tbParrentSN.Text.Replace("'", "''") +
-                   "',N'" + tbParrentPlace.Text.Replace("'", "''") + "'," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ",'" + rblGender.SelectedValue + "')";
-           Functions.ExecuteCommand(SQL);
-           Page.ClientScript.RegisterStartupScript(this.GetType(), "Call my function", "CloseDialog()", true);
+
+            String SQL = @"UPDATE Student SET FirstName = N'" + tbFirstName.Text.Replace("'", "''") +
+             "', LastName= N'" + tbLastName.Text.Replace("'", "''") +
+             "', SocialNumber= N'0" + //tbSocialNumber.Text.Replace("'","''") +
+             "', ContactPhone= N'" + tbContactPhone.Text.Replace("'", "''") +
+             "', Status=" + ddlStatus.SelectedValue +
+             ", DateOfBirth='" + Convert.ToDateTime(tbDateOfBirth.Text.Replace("'", "''"), dateInfo) +
+             "', Address= N'" + tbAddress.Text.Replace("'", "''") +
+             "', HouseNumber= N'" + tbHouseNumber.Text.Replace("'", "''") +
+             "', Place= N'" + tbPlace.Text.Replace("'", "''") +
+             "', Email='" + tbEmail.Text.Replace("'", "''") +
+             "', Parent_FirstName= N'" + tbParrentFirstName.Text.Replace("'", "''") +
+             "', Parent_LastName= N'" + tbParrentLastName.Text.Replace("'", "''") +
+             "', Parent_Address= N'" + tbParrentAddress.Text.Replace("'", "''") +
+             "', Parent_HouseNumber= N'" + tbParrentHouseNumber.Text.Replace("'", "''") +
+             "', Parent_SocialNumber= N'0" +// tbParrentSN.Text.Replace("'", "''") +
+             "', Parent_Place= N'" + tbParrentPlace.Text +
+             "', Gender='" + rblGender.SelectedValue +
+             "' WHERE StudentID=" + Request.QueryString["ID"];
+            Functions.ExecuteCommand(SQL);
+            Page.ClientScript.RegisterStartupScript(this.GetType(), "Call my function", "CloseDialog()", true);
         }
         else
             lblAlreadyExist.Visible = true;
+    }
+    protected void btnInsert_Click(object sender, EventArgs e)
+    {
+        if (!pnlParrents.Visible)
+        {
+            tbDateOfBirth_TextChanged(sender, e);            
+        }
+        Page.Validate("1");
+        if (Page.IsValid)
+        {
+            System.Globalization.DateTimeFormatInfo dateInfo = new System.Globalization.DateTimeFormatInfo();
+            dateInfo.ShortDatePattern = "dd.MM.yyyy";
+            //String AllreadyExist = Functions.ExecuteScalar("SELECT COUNT(*) FROM Student WHERE SocialNumber='" + tbSocialNumber.Text.Replace("'", "''") + "'");
+            String AllreadyExist = Functions.ExecuteScalar("SELECT COUNT(*) FROM Student WHERE FirstName=N'" + tbFirstName.Text.Replace("'", "''") + "' AND LastName=N'" + tbLastName.Text.Replace("'", "''") +
+                                    "' AND DateOfBirth='" + Convert.ToDateTime(tbDateOfBirth.Text, dateInfo) + "'");
+
+            if (Convert.ToInt32(AllreadyExist) < 1)
+            {
+
+                String SQL = @"INSERT INTO Student (FirstName,LastName,SocialNumber,ContactPhone,Status,DateOfBirth,Address,
+                   HouseNumber,Place,Email,Parent_FirstName,Parent_LastName,Parent_Address,Parent_HouseNumber,Parent_SocialNumber,Parent_Place, CreatedBy, Gender)
+                   VALUES(N'" + tbFirstName.Text.Replace("'", "''") + "',N'" + tbLastName.Text.Replace("'", "''") +
+                       "',N'0',N'" + tbContactPhone.Text.Replace("'", "''") + "','" + ddlStatus.SelectedValue + "','" + Convert.ToDateTime(tbDateOfBirth.Text.Replace("'", "''"), dateInfo) +
+                       "',N'" + tbAddress.Text.Replace("'", "''") + "',N'" + tbHouseNumber.Text.Replace("'", "''") + "',N'" + tbPlace.Text.Replace("'", "''") +
+                       "','" + tbEmail.Text.Replace("'", "''") + "',N'" + tbParrentFirstName.Text.Replace("'", "''") + "',N'" + tbParrentLastName.Text.Replace("'", "''") +
+                       "',N'" + tbParrentAddress.Text.Replace("'", "''") + "',N'" + tbParrentHouseNumber.Text.Replace("'", "''") + "',N'0" + //tbParrentSN.Text.Replace("'", "''") +
+                       "',N'" + tbParrentPlace.Text.Replace("'", "''") + "'," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ",'" + rblGender.SelectedValue + "')";
+                Functions.ExecuteCommand(SQL);
+                Page.ClientScript.RegisterStartupScript(this.GetType(), "Call my function", "CloseDialog()", true);
+            }
+            else
+                lblAlreadyExist.Visible = true;
+        }
     }
     protected void tbDateOfBirth_TextChanged(object sender, EventArgs e)
     {

@@ -79,7 +79,7 @@ public partial class Groups_Edit : System.Web.UI.Page
     }
     public void FillDetailsEdit()
     {
-        String[] Group = Functions.ReturnIntoArray("SELECT * FROM [Group] WHERE GroupID=" + Request.QueryString["ID"], 15);
+        String[] Group = Functions.ReturnIntoArray("SELECT g.*, u.FirstName+' '+u.LastName FROM [Group] g LEFT OUTER JOIN [User] u ON u.UserID=g.CreatedBy WHERE g.GroupID=" + Request.QueryString["ID"], 16);
         tbGroupName.Text = Group[1];
         ddlCourse.SelectedValue = Group[2];
         tbStartDate.Text = Convert.ToDateTime(Group[3]).ToString("dd.MM.yyyy");
@@ -95,7 +95,7 @@ public partial class Groups_Edit : System.Web.UI.Page
         if (Convert.ToBoolean(Group[11])) Checked = true;
         cbInvoice.Checked = Checked;
         tbCreatedDate.Text = Group[12];
-        tbCreatedBy.Text = Group[13];
+        tbCreatedBy.Text = Group[15];
         cbIndividual.Checked = Convert.ToBoolean(Group[14]);
 
         String PermLevel = Functions.Decrypt(Request.Cookies["PermLevel"].Value);
@@ -163,6 +163,9 @@ public partial class Groups_Edit : System.Web.UI.Page
           ", Status=" + ddlStatus.SelectedValue +
           ", Invoice=" + Invoice + IndividualText +
           " WHERE GroupID=" + Request.QueryString["ID"];
+            Functions.ExecuteCommand(SQL);
+
+            SQL = @"UPDATE GroupStudent SET TotalCost="+Cost+"-"+Cost+"*Discount/100 WHERE GroupID=2019";
             Functions.ExecuteCommand(SQL);
 
             Page.ClientScript.RegisterStartupScript(this.GetType(), "Call my function", "CloseDialog()", true);

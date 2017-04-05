@@ -72,7 +72,7 @@ public partial class Students : System.Web.UI.Page
     }
     public void FillDataGrid(String WherePart)
     {
-        dsStudents.SelectCommand = @"SELECT *, CASE WHEN Status=1 THEN 'Active' WHEN Status=0 THEN 'Deactivated' END as StatusDesc FROM Student " + WherePart + " ORDER BY LastName";
+        dsStudents.SelectCommand = @"SELECT *, CASE WHEN Status=1 THEN 'Active' WHEN Status=0 THEN 'Deactivated' END as StatusDesc FROM Student " + WherePart + " ORDER BY LastName, FirstName";
     }
     private string FillWherePart()
     {
@@ -314,8 +314,13 @@ public partial class Students : System.Web.UI.Page
         {
             String SQL = @"DELETE FROM [Certificate] WHERE StudentID=" + gvStudents.SelectedValue.ToString();
             Functions.ExecuteCommand(SQL);
+
+            SQL = "DELETE FROM [Payment] WHERE GroupStudentID IN (SELECT GroupStudentID FROM GroupStudent WHERE StudentID=" + gvStudents.SelectedValue.ToString() + ")";
+            Functions.ExecuteCommand(SQL);
+
             SQL = @"DELETE FROM [GroupStudent] WHERE StudentID=" + gvStudents.SelectedValue.ToString();
             Functions.ExecuteCommand(SQL);
+
             SQL = @"DELETE FROM [Student] WHERE StudentID=" + gvStudents.SelectedValue.ToString();
             Functions.ExecuteCommand(SQL);
 
@@ -357,7 +362,10 @@ public partial class Students : System.Web.UI.Page
     {
         if (gvDetails.SelectedRow != null)
         {
-            String SQL = "DELETE FROM GroupStudent WHERE GroupStudentID =" + gvDetails.SelectedValue + " AND StudentID=" + gvStudents.SelectedValue;
+            String SQL = "DELETE FROM [Payment] WHERE GroupStudentID=" + gvDetails.SelectedValue;
+            Functions.ExecuteCommand(SQL);
+
+            SQL = "DELETE FROM GroupStudent WHERE GroupStudentID =" + gvDetails.SelectedValue + " AND StudentID=" + gvStudents.SelectedValue;
             Functions.ExecuteCommand(SQL);
             Fill_Details();
         }
@@ -668,9 +676,12 @@ public partial class Students : System.Web.UI.Page
     {
         if (gvDetails.SelectedIndex != null)
         {
-            Functions.ExecuteCommand(@"UPDATE GroupStudent SET ClassesAttended=N'"+tbClassesAttended.Text+
-            @"', PassedFinalTest='"+cbPassedFinalTest.Checked+"', ReceivedCertificate='"+cbReceivedCertificate.Checked+
-            @"' WHERE GroupStudentID=" + gvDetails.SelectedValue);            
+            if (gvDetails.SelectedIndex > 0)
+            {
+                Functions.ExecuteCommand(@"UPDATE GroupStudent SET ClassesAttended=N'" + tbClassesAttended.Text +
+                @"', PassedFinalTest='" + cbPassedFinalTest.Checked + "', ReceivedCertificate='" + cbReceivedCertificate.Checked +
+                @"' WHERE GroupStudentID=" + gvDetails.SelectedValue);
+            }
         }
     }
 }

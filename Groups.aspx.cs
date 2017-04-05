@@ -94,7 +94,7 @@ public partial class Groups : System.Web.UI.Page
     {
         String WherePart = "";
 
-        WherePart = Functions.VratiWherePart(tbGroupName, "g.GroupName", WherePart);
+        WherePart = Functions.VratiWherePartEqual(tbGroupName, "g.GroupName", WherePart);
         WherePart = Functions.VratiWherePartDDL(ddlLanguage, "gt.Language", WherePart);
         WherePart = Functions.VratiWherePartDDL(ddlLevel, "gt.LevelDescription", WherePart);
         WherePart = Functions.VratiWherePartDDL_ID(ddlTeacher, "g.EmployeeID", WherePart);
@@ -329,7 +329,9 @@ public partial class Groups : System.Web.UI.Page
         if (gvDetails.SelectedRow != null)
         {
             Int32 SelectedIndex = gvMain.SelectedIndex;
-            String SQL = "DELETE FROM GroupStudent WHERE StudentId=" + gvDetails.SelectedValue + " AND GroupID=" + gvMain.SelectedValue;
+            String SQL = "DELETE FROM [Payment] WHERE GroupStudentID IN (SELECT g.GroupStudentID FROM GroupStudent g WHERE g.StudentID=" + gvDetails.SelectedValue + " AND g.GroupID=" + gvMain.SelectedValue+")";
+            Functions.ExecuteCommand(SQL);
+            SQL = "DELETE FROM GroupStudent WHERE StudentId=" + gvDetails.SelectedValue + " AND GroupID=" + gvMain.SelectedValue;
             Functions.ExecuteCommand(SQL);
             btnSearch_Click(sender, e);
             gvMain.SelectedIndex = SelectedIndex;

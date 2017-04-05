@@ -37,10 +37,12 @@
                             <asp:Panel ID="pnlMiServices" runat="server" Visible="False"><a class="MeniItems" href="Services.aspx" data-hover="Services">Services</a><br/></asp:Panel>                           
                             <asp:Panel ID="pnlMiChangePassword" runat="server" Visible="False"><a class="MeniItems" href="ChangePassword.aspx" data-hover="Change Password">Change Password</a><br /></asp:Panel>
                             <asp:Panel ID="pnlMiAdministrate" runat="server" Visible="False"><a class="MeniItems" href="AdministrationPage.aspx" data-hover="Administrate">Administrate</a><br /></asp:Panel>
-                             <asp:Panel ID="pnlUser" runat="server"><asp:Label ID="lblUser" runat="server" Text="User" CssClass="Label_Small"></asp:Label><br /></asp:Panel>
+                            <asp:Panel ID="pnlUser" runat="server"><asp:Label ID="lblUser" runat="server" Text="User" CssClass="Label_Small"></asp:Label><br /></asp:Panel>
+                            
                             <br /><br />
                         </nav>
                         </asp:Panel>
+                        <asp:Label ID="lblInfo" runat="server" Text=""></asp:Label>
                     </div>
                     </td>
                     <td class="MasterContainer">

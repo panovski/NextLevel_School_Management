@@ -50,6 +50,11 @@ public partial class _Default : System.Web.UI.Page
     }
     public void Login_Redirect()
     {
+        HttpCookie Loaded = new HttpCookie("Loaded");
+        Loaded.Value = "true";
+        Loaded.Expires = DateTime.Now.AddHours(8);
+        Response.SetCookie(Loaded);
+
         Session["Loaded"] = true;
             //if (Convert.ToBoolean(Session["najaven"]) && Session["PermLevel"].ToString() == ConfigurationManager.AppSettings["Admin"].ToString())
         if (Request.Cookies["UserID"]!=null && Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Admin"].ToString())

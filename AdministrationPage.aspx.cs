@@ -180,6 +180,7 @@ public partial class AdministrationPage : System.Web.UI.Page
                                     t.TimeStart, t.TimeEnd, g.GroupName
                                     FROM Termin t LEFT OUTER JOIN [Group] g ON g.GroupID=t.GroupID
                                     LEFT OUTER JOIN ClassRoom c ON c.ClassRoomID=t.ClassRoomID
+                                    WHERE g.Status=1
                                     ORDER BY ClassRoomID, t.Day";
     }
     #endregion
@@ -193,6 +194,11 @@ public partial class AdministrationPage : System.Web.UI.Page
         Response.Cookies["UserID"].Value = "";
         Response.Cookies["PermLevel"].Expires.AddMilliseconds(1);
         Response.Cookies["UserID"].Expires.AddMilliseconds(1);
+
+        HttpCookie Loaded = new HttpCookie("Loaded");
+        Loaded.Value = "false";
+        Loaded.Expires = DateTime.Now.AddHours(8);
+        Response.SetCookie(Loaded);
 
         Session["Loaded"] = false;
         //Session["najaven"] = false;

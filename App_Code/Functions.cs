@@ -332,6 +332,34 @@ public class Functions
         return WherePart;
     }
 
+    public static string VratiWherePartEqual(TextBox Kontrola, String Kolona, String WherePart)
+    {
+        String WherePart1 = "";
+        if (Kontrola.Text.Length > 0)
+        {
+            string[] Lista = Kontrola.Text.ToString().Split(',');
+            foreach (string word in Lista)
+            {
+                String tWord = word.Trim();
+                if (WherePart1.Length > 0) WherePart1 += " OR ";
+                WherePart1 += " " + Kolona + " = '" + tWord + "' ";
+            }
+
+            if (WherePart.Length > 0)
+            {
+                if (WherePart1.Length > 0)
+                    WherePart += " AND (" + WherePart1 + ") ";
+            }
+            else
+            {
+                if (WherePart1.Length > 0)
+                    WherePart += " (" + WherePart1 + ") ";
+            }
+        }
+
+        return WherePart;
+    }
+
     public static string VratiWherePartDDL(DropDownList Kontrola, String Kolona, String WherePart)
     {
         String WherePart1 = "";
