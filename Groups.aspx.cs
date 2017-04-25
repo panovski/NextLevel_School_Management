@@ -30,6 +30,9 @@ public partial class Groups : System.Web.UI.Page
                                 WHERE e.Status=1 AND ua.UserTypeID NOT IN ("+ ConfigurationManager.AppSettings["Admin"].ToString() +
                                 ","+ ConfigurationManager.AppSettings["Advanced"].ToString() + ") GROUP BY e.EmployeeID, e.FirstName, e.LastName", ddlTeacher, "Name", "EmployeeID");
             
+            Functions.FillCombo(@"SELECT 1 as Value, 'Progress Test' as Description UNION " +
+                                " SELECT 2 as Value, 'Final-Oral' as Description UNION SELECT 3 as Value, 'Final-Written' as Description", ddlTestType, "Description", "Value");
+
             if (Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Edit"].ToString() ||
                 Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Readonly"].ToString())
             {
@@ -76,6 +79,9 @@ public partial class Groups : System.Web.UI.Page
             btnDeleteAllCertificates.Visible = true;
             btnRemove.Visible = true;
             btnDelete.Visible = true;
+            btnDeleteTest.Visible = true;
+            btnChangeDiscount.Visible = true;
+            btnClearCost.Visible = true;
         }
         else
         {
@@ -150,7 +156,7 @@ public partial class Groups : System.Web.UI.Page
     protected void CalculatePayments()
     {
         String SQL = @"SELECT COUNT(p.PaymentID) as NumberOfPayments, g.NumberOfPayments-COUNT(p.PaymentID) as RemainPayments,
-                    (SELECT CASE WHEN SUM(p.Ammount) IS NULL THEN 0 ELSE SUM(p.Ammount) END) as TotalPaid, gs.TotalCost-gs.TotalCost*gs.Discount/100 - (SELECT CASE WHEN SUM(p.Ammount) IS NULL THEN 0 ELSE SUM(p.Ammount) END) as TotalRemain
+                    (SELECT CASE WHEN SUM(p.Ammount) IS NULL THEN 0 ELSE SUM(p.Ammount) END) as TotalPaid, gs.TotalCost - (SELECT CASE WHEN SUM(p.Ammount) IS NULL THEN 0 ELSE SUM(p.Ammount) END) as TotalRemain
                     FROM GroupStudent gs LEFT OUTER JOIN Payment p ON p.GroupStudentID=gs.GroupStudentID
                     LEFT OUTER JOIN [Group] g ON g.GroupID=gs.GroupID
                     WHERE p.Transfered=0 AND gs.GroupID='" + gvMain.SelectedValue + "' AND gs.StudentID='" + gvDetails.SelectedValue + "' " +//gs.GroupStudentID=" + gvDetails.SelectedValue +
@@ -206,6 +212,19 @@ public partial class Groups : System.Web.UI.Page
                 dsCertificates.SelectCommand += " AND c.GroupID=" + GroupID;
             }
             gvCertificates.DataBind();
+        }
+    }
+    protected void Fill_Tests()
+    {
+        if (gvMain.SelectedRow != null)
+        {
+            dsUsedTests.SelectCommand = @"SELECT t.*, u.FirstName + ' ' + u.LastName as CreatedByUser,
+                            CASE WHEN t.TestType=1 THEN 'Progress Test' WHEN t.TestType=2 THEN 'Final-Oral' WHEN t.TestType=3 THEN 'Final-Written' END as TypeOpis
+                            FROM [Test] t LEFT OUTER JOIN [Group] g ON g.GroupID=t.GroupID 
+                            LEFT OUTER JOIN [User] u ON u.UserID=t.CreatedBy
+                            WHERE t.GroupID=" + gvMain.SelectedValue;
+            gvUsedTests.DataBind();
+            lblInfo.Visible = false;
         }
     }
     private void PrintPDF(String Path)
@@ -272,6 +291,8 @@ public partial class Groups : System.Web.UI.Page
             SQL = @"DELETE FROM [Termin] WHERE GroupID=" + gvMain.SelectedValue.ToString();
             Functions.ExecuteCommand(SQL);
             SQL = @"DELETE FROM GroupStudent WHERE GroupID=" + gvMain.SelectedValue.ToString();
+            Functions.ExecuteCommand(SQL);
+            SQL = @"DELETE FROM [Test] WHERE GroupID=" + gvMain.SelectedValue.ToString();
             Functions.ExecuteCommand(SQL);
             SQL = @"DELETE FROM [Group] WHERE GroupID=" + gvMain.SelectedValue.ToString();
             Functions.ExecuteCommand(SQL);
@@ -616,7 +637,7 @@ public partial class Groups : System.Web.UI.Page
     {
         ddlStudents.Items.Clear();
         Functions.FillCombo(@"SELECT StudentID, FirstName+' '+LastName + ' - ' + convert(varchar(20), DateOfBirth, 104) as Name FROM Student WHERE Status=1 AND
-                            (FirstName LIKE N'%" + tbStudentsSearch.Text.Replace("'", "''") + "%' OR LastName LIKE N'%" + tbStudentsSearch.Text.Replace("'", "''") + "%')", ddlStudents, "Name", "StudentID");
+                            (FirstName LIKE N'%" + tbStudentsSearch.Text.Replace("'", "''") + "%' OR LastName LIKE N'%" + tbStudentsSearch.Text.Replace("'", "''") + "%' OR FirstName + ' ' + LastName LIKE N'%" + tbStudentsSearch.Text.Replace("'", "''") + "%' OR LastName + ' ' + FirstName LIKE N'%" + tbStudentsSearch.Text.Replace("'", "''") + "%')", ddlStudents, "Name", "StudentID");
     }
     protected void gvDetails_RowDataBound(object sender, GridViewRowEventArgs e)
     {
@@ -652,6 +673,7 @@ public partial class Groups : System.Web.UI.Page
                 row.ToolTip = string.Empty;
                 Fill_Details();
                 Fill_Certificates(gvMain.SelectedValue.ToString());
+                Fill_Tests();
                 pnlAddPermission.Visible = true;
                 Login_Redirect();
                 break;
@@ -713,6 +735,141 @@ public partial class Groups : System.Web.UI.Page
             Functions.ExecuteCommand(@"UPDATE GroupStudent SET ClassesAttended=N'" + tbClassesAttended.Text +
             @"', PassedFinalTest='" + cbPassedFinalTest.Checked + "', ReceivedCertificate='" + cbReceivedCertificate.Checked +
             @"' WHERE StudentID=" + gvDetails.SelectedValue + " AND GroupID=" + gvMain.SelectedValue);
+        }
+    }
+    protected void btnSave_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (gvMain.SelectedRow != null)
+            {
+                string fileName = Path.GetFileName(fuFile.PostedFile.FileName);
+                if (fileName != "")
+                {
+                    fuFile.PostedFile.SaveAs(Server.MapPath("~/Templates/Templates/") + gvMain.SelectedValue + "-" + fileName);
+                    String SQL = "INSERT INTO Test (TestName,TestFile,TestType,GroupID,CreatedBy) VALUES (N'" + fileName +
+                                "','~/Templates/Templates/" + gvMain.SelectedValue + "-" + fileName + "'," + ddlTestType.SelectedValue + "," + gvMain.SelectedValue + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ")";
+                    Functions.ExecuteCommand(SQL);
+                    Fill_Tests();
+                    lblInfo.Text = "The test is Uploaded!";
+                    lblInfo.Visible = true;
+                }
+            }
+        }
+        catch (Exception err)
+        {
+            HttpContext.Current.Session["ErrorMessage"] = err.Message.ToString();
+            if (HttpContext.Current != null)
+                HttpContext.Current.Response.Redirect(@"~\Error.aspx");
+        }
+    }
+    protected void btnDownload_Click(object sender, EventArgs e)
+    {
+        if (gvUsedTests.SelectedRow != null && gvMain.SelectedRow != null)
+        {
+            System.Web.HttpResponse response = System.Web.HttpContext.Current.Response;
+            response.ClearContent();
+            response.Clear();
+            String Path = "~/Templates/Templates/" + gvMain.SelectedValue + "-" + gvUsedTests.SelectedRow.Cells[1].Text.ToString();
+            string[] FileName = Path.Split('/');
+            response.ContentType = "text/plain";
+            response.AddHeader("Content-Disposition",
+                               "attachment; filename=" + FileName[3] + ";");
+            response.TransmitFile(Server.MapPath(Path));
+            response.Flush();
+            response.End();
+        }
+    }
+    protected void btnEditChanges_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (gvMain.SelectedRow != null && gvUsedTests.SelectedRow != null)
+            {
+                String SQL = "";
+                string fileName = Path.GetFileName(fuFile.PostedFile.FileName);
+                if (fileName != "")
+                {
+                    fuFile.PostedFile.SaveAs(Server.MapPath("~/Templates/Templates/") + gvMain.SelectedValue + "-" + fileName);
+
+                    SQL = "UPDATE Template SET TemplateName=N'" + fileName +
+                            "',TemplateFile='~/Templates/Templates/" + gvMain.SelectedValue + "-" + fileName + "',TemplateType=" + ddlTestType.SelectedValue + ", CreatedDate=GetDate() WHERE TestID=" + gvUsedTests.SelectedValue;
+                }
+                else
+                {
+                    SQL = "UPDATE Template SET TemplateName=N'" + fileName + "',TemplateType=" + ddlTestType.SelectedValue + ", CreatedDate=GetDate() WHERE TestID=" + gvUsedTests.SelectedValue;
+                }
+
+                Functions.ExecuteCommand(SQL);
+                Fill_Tests();
+                lblInfo.Text = "All changes are saved!";
+                lblInfo.Visible = true;
+            }
+        }
+        catch (Exception err)
+        {
+            HttpContext.Current.Session["ErrorMessage"] = err.Message.ToString();
+            if (HttpContext.Current != null)
+                HttpContext.Current.Response.Redirect(@"~\Error.aspx");
+        }
+    }
+    protected void gvUsedTests_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            e.Row.Attributes["onclick"] = Page.ClientScript.GetPostBackClientHyperlink(gvUsedTests, "Select$" + e.Row.RowIndex);
+            e.Row.ToolTip = "Click to select this row.";
+        }
+    }
+    protected void btnDeleteTest_Click(object sender, EventArgs e)
+    {
+        if (gvUsedTests.SelectedRow != null)
+        {
+            String SQL = @"DELETE FROM [Test] WHERE TestID=" + gvUsedTests.SelectedValue;
+            Functions.ExecuteCommand(SQL);
+            Fill_Tests();
+            lblInfo.Text = "The test is deleted!";
+            lblInfo.Visible = true;
+        }
+    }
+    protected void gvUsedTests_Sorted(object sender, EventArgs e)
+    {
+        Fill_Tests();
+    }
+    protected void btnChangeDiscount_Click(object sender, EventArgs e)
+    {
+        if ((gvDetails.SelectedIndex != null) && (gvMain.SelectedIndex != null))
+        {
+            Int32 SelectedIndex = gvMain.SelectedIndex;
+
+            if (tbDiscount.Text == "") tbDiscount.Text = "0";
+            decimal TotalCost = Convert.ToDecimal(Functions.ExecuteScalar("SELECT Cost FROM [Group] WHERE GroupID=" + gvMain.SelectedValue));
+            if (Convert.ToInt32(tbDiscount.Text) > 0)
+                TotalCost = TotalCost - (TotalCost * Convert.ToInt32(tbDiscount.Text) / 100);
+
+            Functions.ExecuteCommand(@"UPDATE GroupStudent SET TotalCost=N'" + TotalCost.ToString().Replace(",", ".") + "', Discount=N'" + tbDiscount.Text +
+            @"' WHERE StudentID=" + gvDetails.SelectedValue + " AND GroupID=" + gvMain.SelectedValue);
+
+            btnSearch_Click(sender, e);
+            gvMain.SelectedIndex = SelectedIndex;
+            Fill_Details();
+        }
+    }
+    protected void btnClearCost_Click(object sender, EventArgs e)
+    {
+        if ((gvDetails.SelectedIndex != null) && (gvMain.SelectedIndex != null))
+        {
+            Int32 SelectedIndex = gvMain.SelectedIndex;
+            decimal TotalPaid = 0;
+            if (gvDetails.SelectedRow.Cells[5].Text!="")  TotalPaid = Convert.ToDecimal(gvDetails.SelectedRow.Cells[5].Text.Replace("ден",""));
+
+            Functions.ExecuteCommand(@"UPDATE GroupStudent SET TotalCost=N'" + TotalPaid.ToString().Replace(",", ".") + 
+            @"' WHERE StudentID=" + gvDetails.SelectedValue + " AND GroupID=" + gvMain.SelectedValue);
+
+            btnSearch_Click(sender, e);
+            gvMain.SelectedIndex = SelectedIndex;
+            Fill_Details();
+            Fill_Payments();
         }
     }
 }

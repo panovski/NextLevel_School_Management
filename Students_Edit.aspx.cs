@@ -171,6 +171,7 @@ public partial class Students_Edit : System.Web.UI.Page
     {
         try 
         {
+            pnlParrents.Visible = true;
             double denovi = (DateTime.Now - Convert.ToDateTime(tbDateOfBirth.Text)).TotalDays;
             double godini = denovi / 365;
 
@@ -179,7 +180,7 @@ public partial class Students_Edit : System.Web.UI.Page
             else
                 pnlParrents.Visible = false;
         }
-        catch { }        
+        catch { pnlParrents.Visible = true; }        
     }
     #endregion
 }

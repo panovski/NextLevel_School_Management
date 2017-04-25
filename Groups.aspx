@@ -238,7 +238,8 @@
                                             Discount:<br />
                                             <asp:TextBox ID="tbDiscount" runat="server" TextMode="Number" CssClass="TextBoxNumber"></asp:TextBox>%
                                             <asp:Button ID="btnAdd" runat="server" Text="Add" CssClass="NormalButton" OnClick="btnAdd_Click" onclientclick="javascript:return confirm('Are you sure to add the student into the group?');" />
-                                            <asp:Button ID="btnRemove" runat="server" Text="Remove selected" CssClass="NormalButton" OnClick="btnRemove_Click" onclientclick="javascript:return confirm('Are you sure to remove the student from selected group?');" />                                            
+                                            <asp:Button ID="btnRemove" runat="server" Text="Remove" CssClass="NormalButton" OnClick="btnRemove_Click" onclientclick="javascript:return confirm('Are you sure to remove the student from selected group?');" />                                            
+                                            <asp:Button ID="btnChangeDiscount" runat="server" Text="Change Discount" CssClass="NormalButton" onclientclick="javascript:return confirm('Are you sure to change the discount for the student from selected group?');" OnClick="btnChangeDiscount_Click" Visible="False" />                                            
                                             <br />
                                             Classes:<br /><asp:TextBox ID="tbClassesAttended" runat="server" TextMode="Number" CssClass="TextBoxNumber"></asp:TextBox>
                                             <asp:CheckBox ID="cbPassedFinalTest" runat="server" Text="Final Test"/>
@@ -320,7 +321,7 @@
                                         <td>
                                         </td>
                                         <td>
-                                            
+                                            <asp:Button ID="btnClearCost" runat="server" Text="Clear Cost" CssClass="NormalButton" onclientclick="javascript:return confirm('Are you sure to clear the cost for the student from selected group?');" Visible="False" OnClick="btnClearCost_Click" />
                                         </td>
                                     </tr>
                                 </table>
@@ -363,10 +364,59 @@
                         </table>
                 </div>
 
+                <div class="TabelaDetailsGrid">
+                    <table >
+                        <tr>
+                            <td class="EditDetails">
+                                Used Progress Tests:
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                
+                                <div style="width:23.9vw; height:11.5vw; overflow: scroll">
+                                <asp:GridView ID="gvUsedTests" runat="server" GridLines="None" AutoGenerateColumns="false" DataKeyNames="TestID" DataSourceID="dsUsedTests" CssClass="GridView" PagerStyle-CssClass="GridViewPager" HeaderStyle-CssClass="GridViewHeader" RowStyle-CssClass="GridViewRows" AllowPaging="True" AllowSorting="True" AlternatingRowStyle-CssClass="GridViewRowsAlt" SelectedRowStyle-CssClass="GridViewSelectedRow" EditRowStyle-CssClass="GridViewSelectedRow" OnRowDataBound="gvUsedTests_RowDataBound" OnSorted="gvUsedTests_Sorted">
+                                <AlternatingRowStyle CssClass="GridViewRowsAlt"></AlternatingRowStyle>
+                                    <Columns>
+                                        <asp:BoundField DataField="TestID" HeaderText="ID" InsertVisible="False" ReadOnly="True" SortExpression="TestID" Visible="false" />
+                                        <asp:BoundField DataField="TestName" HeaderText="Test Name" SortExpression="TestName"/>
+                                        <asp:BoundField DataField="TypeOpis" HeaderText="Type" SortExpression="TypeOpis"/>
+                                        <asp:BoundField DataField="TestFile" HeaderText="Test File" SortExpression="TestFile" Visible="false"/>
+                                        <asp:BoundField DataField="CreatedDate" HeaderText="Created Date" SortExpression="CreatedDate" ReadOnly="true" Visible="false"/>
+                                        <asp:BoundField DataField="CreatedByUser" HeaderText="Created By" SortExpression="CreatedByUser" ReadOnly="true" Visible="false"/>
+                                    </Columns>
+                                </asp:GridView>
+                                    <asp:SqlDataSource ID="dsUsedTests" runat="server" ConnectionString="<%$ ConnectionStrings:konekcija %>" SelectCommand=""></asp:SqlDataSource>                                
+                                </div>
+                            </td>                             
+                            <td style="vertical-align:top" class="EditDetails">
+                                Upload Test:
+                                <br /><br />
+                                    Type: <asp:DropDownList ID="ddlTestType" runat="server" CssClass="TextBoxRoundedFilters" ValidationGroup="3"></asp:DropDownList>
+                                <br />
+                                Upload: <asp:FileUpload ID="fuFile" runat="server" ValidationGroup="3" />
+                                <asp:RequiredFieldValidator ID="rfvfuFile" runat="server" ErrorMessage="!" CssClass="RequredField" ControlToValidate="fuFile" ValidationGroup="3" ></asp:RequiredFieldValidator>
+                                <asp:RegularExpressionValidator ID="revfuFile" runat="server" ErrorMessae="Just .docx is allowed!" CssClass="RequredField" ControlToValidate="fuFile" ValidationGroup="3" ValidationExpression="^(([a-zA-Z]:)|(\\{2}\w+)\$?)(\\(\w[\w].*))(.docx)$"></asp:RegularExpressionValidator>
+                                <br /><asp:Label ID="lblPath" runat="server" CssClass="RequredField" Text="" Visible="false"></asp:Label>
+                                <asp:Button ID="btnSave" runat="server" CssClass="NormalButton" OnClick="btnSave_Click" Text="Upload" ValidationGroup="3" CausesValidation="False"/>
+                                <asp:Button ID="btnEditChanges" runat="server" CssClass="NormalButton" Text="Save changes" OnClick="btnEditChanges_Click" ValidationGroup="3" visible="false" />
+                                <asp:Button ID="btnDownload" runat="server" CssClass="NormalButton" Text="Download" OnClick="btnDownload_Click" />
+                                <asp:Button ID="btnDeleteTest" runat="server" Text="Delete" CssClass="NormalButton" ValidationGroup="3" OnClick="btnDeleteTest_Click" onclientclick="javascript:return confirm('Are you sure to delete the selected test completely?');"/>
+                                <br/>
+                                <asp:Label ID="lblInfo" runat="server" CssClass="RequredField" Text="" Visible="False"></asp:Label>                                
+                            </td>                           
+                        </tr>
+                        </table>
+                </div>
+
             </td>
         </tr>
     </table>
-    </ContentTemplate>    
+    </ContentTemplate>
+  <triggers>
+      <asp:PostBackTrigger ControlID = "btnSave" />
+      <asp:PostBackTrigger ControlID = "btnDownload" />
+  </triggers>    
     </asp:UpdatePanel>
     <table id="TabelaBottomn" class="MeniBottom">
         <tr>

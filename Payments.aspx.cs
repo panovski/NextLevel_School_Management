@@ -215,7 +215,7 @@ public partial class Payments : System.Web.UI.Page
     protected void CalculatePayments()
     {
         String SQL = @"SELECT COUNT(p.PaymentID) as NumberOfPayments, g.NumberOfPayments-COUNT(p.PaymentID) as RemainPayments,
-                    (SELECT CASE WHEN SUM(CASE WHEN p.Transfered=0 THEN p.Ammount END) IS NULL THEN 0 ELSE SUM(CASE WHEN p.Transfered=0 THEN p.Ammount END) END) as TotalPaid, (gs.TotalCost - gs.TotalCost*gs.Discount/100) - (SELECT CASE WHEN SUM(CASE WHEN p.Transfered=0 THEN p.Ammount END) IS NULL THEN 0 ELSE SUM(CASE WHEN p.Transfered=0 THEN p.Ammount END) END) as TotalRemain
+                    (SELECT CASE WHEN SUM(CASE WHEN p.Transfered=0 THEN p.Ammount END) IS NULL THEN 0 ELSE SUM(CASE WHEN p.Transfered=0 THEN p.Ammount END) END) as TotalPaid, (gs.TotalCost) - (SELECT CASE WHEN SUM(CASE WHEN p.Transfered=0 THEN p.Ammount END) IS NULL THEN 0 ELSE SUM(CASE WHEN p.Transfered=0 THEN p.Ammount END) END) as TotalRemain
                     FROM GroupStudent gs LEFT OUTER JOIN Payment p ON p.GroupStudentID=gs.GroupStudentID
                     LEFT OUTER JOIN [Group] g ON g.GroupID=gs.GroupID
                     WHERE gs.GroupID=" + ddlAddGroup.SelectedValue + " AND gs.StudentID=" + ddlStudents.SelectedValue +
@@ -718,7 +718,7 @@ public partial class Payments : System.Web.UI.Page
                Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Readonly"].ToString())
         {
             Functions.FillCombo(@"SELECT StudentID, FirstName+' '+LastName as Name FROM Student WHERE 
-                            (FirstName LIKE N'%" + tbStudentsSearch.Text.Replace("'", "''") + "%' OR LastName LIKE N'%" + tbStudentsSearch.Text.Replace("'", "''") + @"%') 
+                            (FirstName LIKE N'%" + tbStudentsSearch.Text.Replace("'", "''") + "%' OR LastName LIKE N'%" + tbStudentsSearch.Text.Replace("'", "''") + "%' OR FirstName + ' ' + LastName LIKE N'%" + tbStudentsSearch.Text.Replace("'", "''") + "%' OR LastName + ' ' + FirstName LIKE N'%" + tbStudentsSearch.Text.Replace("'", "''") + @"%') 
                              AND StudentID IN 
                             (SELECT gs.StudentID FROM GroupStudent gs 
                             LEFT OUTER JOIN [Group] g ON g.GroupID = gs.GroupID
@@ -727,7 +727,7 @@ public partial class Payments : System.Web.UI.Page
         }
         else
             Functions.FillCombo(@"SELECT StudentID, FirstName+' '+LastName as Name FROM Student WHERE 
-                            (FirstName LIKE N'%" + tbStudentsSearch.Text.Replace("'", "''") + "%' OR LastName LIKE N'%" + tbStudentsSearch.Text.Replace("'", "''") + "%')", ddlStudents, "Name", "StudentID");
+                            (FirstName LIKE N'%" + tbStudentsSearch.Text.Replace("'", "''") + "%' OR LastName LIKE N'%" + tbStudentsSearch.Text.Replace("'", "''") + "%' OR FirstName + ' ' + LastName LIKE N'%" + tbStudentsSearch.Text.Replace("'", "''") + "%' OR LastName + ' ' + FirstName LIKE N'%" + tbStudentsSearch.Text.Replace("'", "''") + "%')", ddlStudents, "Name", "StudentID");
         if (ddlStudents.Items.Count > 0)
         {
             ddlStudents.SelectedIndex = 0;
