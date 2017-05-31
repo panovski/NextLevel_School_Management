@@ -24,6 +24,7 @@ public partial class AdministrationPage : System.Web.UI.Page
             Fill_Dashboard_2_2();
             Fill_Dashboard_2_3();
             Fill_Dashboard_3_1();
+            Fill_Dashboard_3_2();
         }
     }
     #endregion
@@ -182,6 +183,17 @@ public partial class AdministrationPage : System.Web.UI.Page
                                     LEFT OUTER JOIN ClassRoom c ON c.ClassRoomID=t.ClassRoomID
                                     WHERE g.Status=1
                                     ORDER BY ClassRoomID, t.Day";
+    }
+
+    protected void Fill_Dashboard_3_2()
+    {
+        dsDashboard3_2.SelectCommand = @"SELECT gs.GroupStudentID, g.GroupName, st.FirstName+' '+st.LastName as Student, gs.TotalCost as Cost, CASE WHEN SUM(p.Ammount) IS NULL THEN 0 ELSE SUM(p.Ammount) END as Paid
+                                        FROM [GroupStudent] gs LEFT OUTER JOIN [Group] g ON g.GroupID=gs.GroupID
+                                        LEFT OUTER JOIN Payment p ON p.GroupStudentID=gs.GroupStudentID
+                                        LEFT OUTER JOIN Student st ON st.StudentID=gs.StudentID
+                                        WHERE g.Status=0
+                                        GROUP BY gs.GroupStudentID, g.GroupName, st.FirstName,st.LastName, gs.TotalCost
+                                        HAVING CASE WHEN SUM(p.Ammount) IS NULL THEN 0 ELSE SUM(p.Ammount) END <gs.TotalCost";
     }
     #endregion
 
@@ -475,4 +487,20 @@ public partial class AdministrationPage : System.Web.UI.Page
         Fill_Dashboard_3_1();
     }
     #endregion
+    protected void btnRefresh3_2_Click(object sender, ImageClickEventArgs e)
+    {
+        Fill_Dashboard_3_2();
+    }
+    protected void gvDashboard3_2_PageIndexChanged(object sender, EventArgs e)
+    {
+
+    }
+    protected void gvDashboard3_2_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+
+    }
+    protected void gvDashboard3_2_Sorted(object sender, EventArgs e)
+    {
+
+    }
 }

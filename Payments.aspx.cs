@@ -333,7 +333,7 @@ public partial class Payments : System.Web.UI.Page
         }
         else if (rblType.SelectedValue == "1")
         {
-            SQLPrint = @"SELECT p.AccountNumber,p.Ammount, p.AmmountWords, CAST(s.ServiceID AS VARCHAR(16)) + '-' + st.ServiceName as PaymentGroup,
+            SQLPrint = @"SELECT p.AccountNumber,p.Ammount, p.AmmountWords, CAST(s.ServiceID AS VARCHAR(16)) + '-' + st.ServiceName + '-' + st.Description as PaymentGroup,
                         c.FirstName+' '+c.LastName as PaymentName, p.PaymentNumber, c.Place as PaymentPlace,
 						convert(varchar,p.DateOfPayment,104) as DateOfPayment, s.TotalCost as TotalCost, 
 						s.TotalCost-(SELECT SUM(p2.Ammount) FROM Payment p2 where p2.ServiceID=s.ServiceID AND p2.DateOfPayment<=p.DateOfPayment) as RemainingCost,
@@ -392,7 +392,7 @@ public partial class Payments : System.Web.UI.Page
         }
         else if (rblType.SelectedValue == "1")
         {
-            SQLPrint = @"SELECT i.Ammount, i.AmmountWords, st.ServiceName as Description ,
+            SQLPrint = @"SELECT i.Ammount, i.AmmountWords, st.ServiceName + ' - ' + st.Description as Description ,
 						i.Buyer, convert(varchar,i.DateOfCreation,104) as DateOfCreation,
 						convert(varchar,i.UntillDate,104) as UntillDate, i.InvoiceNumber, st.Cost as Price,
 						se.Quantity as Quantity, se.TotalCost as TotalAmmount
@@ -814,14 +814,14 @@ public partial class Payments : System.Web.UI.Page
         if (Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Edit"].ToString() ||
                 Functions.Decrypt(Request.Cookies["PermLevel"].Value) == ConfigurationManager.AppSettings["Readonly"].ToString())
         {
-            Functions.FillCombo(@"SELECT s.ServiceID, CAST(s.ServiceID AS VARCHAR(16)) + '-' + st.ServiceName as ServiceName
+            Functions.FillCombo(@"SELECT s.ServiceID, CAST(s.ServiceID AS VARCHAR(16)) + '-' + st.ServiceName  +'-' + st.Description as ServiceName
                             FROM [Service] s LEFT OUTER JOIN ServiceType st ON st.ServiceTypeID=s.ServiceTypeID
                             LEFT OUTER JOIN Employee e ON e.EmployeeID=s.EmployeeID
                             WHERE s.Status = 1 AND s.CustomerID=" + ddlCustomers.SelectedValue + " AND e.UserID=" + Functions.Decrypt(Request.Cookies["UserID"].Value), ddlService, "ServiceName", "ServiceID");
         }
         else
         {
-            Functions.FillCombo(@"SELECT s.ServiceID, CAST(s.ServiceID AS VARCHAR(16)) + '-' + st.ServiceName as ServiceName
+            Functions.FillCombo(@"SELECT s.ServiceID, CAST(s.ServiceID AS VARCHAR(16)) + '-' + st.ServiceName +'-' + st.Description as ServiceName
                             FROM [Service] s LEFT OUTER JOIN ServiceType st ON st.ServiceTypeID=s.ServiceTypeID
                             LEFT OUTER JOIN Employee e ON e.EmployeeID=s.EmployeeID
                             WHERE s.Status = 1 AND s.CustomerID=" + ddlCustomers.SelectedValue, ddlService, "ServiceName", "ServiceID");
@@ -834,6 +834,8 @@ public partial class Payments : System.Web.UI.Page
     }
     protected void btnAddPayment_Click(object sender, EventArgs e)
     {
+        System.Globalization.DateTimeFormatInfo dateInfo = new System.Globalization.DateTimeFormatInfo();
+        dateInfo.ShortDatePattern = "dd.MM.yyyy"; 
         if (rblType.SelectedValue == "0")
         {
             Boolean CheckDifference = Convert.ToInt32(tbAddAmmount.Text) <= Convert.ToInt32(tbRemainingCosts.Text);
@@ -856,7 +858,7 @@ public partial class Payments : System.Web.UI.Page
                 String SQL = @"INSERT INTO Payment (PaymentNumber,Ammount,AmmountWords,DateOfPayment,
                                 GroupStudentID,UserId,CreatedBy) VALUES('" + tbAddPaymentNumber.Text.Replace("'", "''") +
                             "'," + tbAddAmmount.Text + ",N'" + tbAddAmmountWords.Text.Replace("'", "''") +
-                            "',N'" + tbAddDateOfPayment.Text.Replace("'", "''") + "'," + GroupStudentID + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + "); SELECT SCOPE_IDENTITY()";
+                            "',N'" + Convert.ToDateTime(tbAddDateOfPayment.Text.Replace("'", "''"), dateInfo).ToString("MM.dd.yyyy") + "'," + GroupStudentID + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + "); SELECT SCOPE_IDENTITY()";
                 String ID = Functions.ExecuteScalar(SQL);
                 //CalculatePayments();
                 Fill_Payment(ID);
@@ -878,7 +880,7 @@ public partial class Payments : System.Web.UI.Page
                 String SQL = @"INSERT INTO Payment (PaymentNumber,Ammount,AmmountWords,DateOfPayment,
                                 ServiceID,UserId,CreatedBy) VALUES('" + tbAddPaymentNumber.Text.Replace("'", "''") +
                             "'," + tbAddAmmount.Text + ",N'" + tbAddAmmountWords.Text.Replace("'", "''") +
-                            "',N'" + tbAddDateOfPayment.Text.Replace("'", "''") + "'," + ddlService.SelectedValue + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + "); SELECT SCOPE_IDENTITY()";
+                            "',N'" + Convert.ToDateTime(tbAddDateOfPayment.Text.Replace("'", "''"), dateInfo).ToString("MM.dd.yyyy") + "'," + ddlService.SelectedValue + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + "); SELECT SCOPE_IDENTITY()";
                 String ID = Functions.ExecuteScalar(SQL);
                 Fill_Payment(ID);
                 lblInfo.Text = "The payments is inserted!";
@@ -899,7 +901,7 @@ public partial class Payments : System.Web.UI.Page
                 String SQL = @"INSERT INTO Payment (PaymentNumber,Ammount,AmmountWords,DateOfPayment,
                                 InvoiceID,UserId,CreatedBy) VALUES('" + tbAddPaymentNumber.Text.Replace("'", "''") +
                             "'," + tbAddAmmount.Text + ",N'" + tbAddAmmountWords.Text.Replace("'", "''") +
-                            "',N'" + tbAddDateOfPayment.Text.Replace("'", "''") + "'," + ddlInvoiceGroup.SelectedValue + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + "); SELECT SCOPE_IDENTITY()";
+                            "',N'" + Convert.ToDateTime(tbAddDateOfPayment.Text.Replace("'", "''"), dateInfo).ToString("MM.dd.yyyy") + "'," + ddlInvoiceGroup.SelectedValue + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + "); SELECT SCOPE_IDENTITY()";
                 String ID = Functions.ExecuteScalar(SQL);
                 Fill_Payment(ID);
                 lblInfo.Text = "The payments is inserted!";
@@ -945,7 +947,7 @@ public partial class Payments : System.Web.UI.Page
         tbAddPaymentNumber.Text = "";
         tbAddAmmount.Text = "";
         tbAddAmmountWords.Text = "";
-        tbAddDateOfPayment.Text = Convert.ToDateTime(DateTime.Now).ToString("yyyy-MM-dd");
+        tbAddDateOfPayment.Text = Convert.ToDateTime(DateTime.Now).ToString("dd.MM.yyyy");//Convert.ToDateTime(DateTime.Now).ToString("yyyy-MM-dd");
         tbAddPaymentNumber.Text = Get_PaymentNumber();
 
         tbCustomerSearch.Enabled = true;
@@ -1023,12 +1025,15 @@ public partial class Payments : System.Web.UI.Page
             DateTime dtUntil = Convert.ToDateTime(tbAddDateOfPayment.Text).AddDays(7);
             String InvoiceNumber = Get_InvoiceNumber();
             
+            System.Globalization.DateTimeFormatInfo dateInfo = new System.Globalization.DateTimeFormatInfo();
+            dateInfo.ShortDatePattern = "dd.MM.yyyy"; 
+
             if (rblType.SelectedValue == "0")
             {
                 String GroupStudentID = Functions.ExecuteScalar("SELECT GroupStudentID FROM GroupStudent WHERE GroupID=" + ddlAddGroup.SelectedValue + " AND StudentID=" + ddlStudents.SelectedValue);
                 String SQL = "INSERT INTO Invoice (InvoiceNumber,Buyer,Ammount,AmmountWords,DateOfCreation,UntillDate,GroupStudentID) VALUES(N'" + InvoiceNumber + 
                              @"',N'"+ tbBuyer.Text.Replace("'","''")+"',N'"+tbAddAmmount.Text.Replace("'","''")+"',N'"+tbAddAmmountWords.Text.Replace("'","''")+
-                             @"','"+Convert.ToDateTime(tbAddDateOfPayment.Text)+"','"+dtUntil+"',"+GroupStudentID+")";
+                             @"','" + Convert.ToDateTime(tbAddDateOfPayment.Text, dateInfo).ToString("MM.dd.yyyy") + "','" + dtUntil.ToString("MM.dd.yyyy") + "'," + GroupStudentID + ")";
                 Functions.ExecuteCommand(SQL);
 
                 lblInvoiceNumber.Text = InvoiceNumber;
@@ -1038,7 +1043,7 @@ public partial class Payments : System.Web.UI.Page
             {
                 String SQL = "INSERT INTO Invoice (InvoiceNumber,Buyer,Ammount,AmmountWords,DateOfCreation,UntillDate,ServiceID) VALUES(N'" + InvoiceNumber +
                              @"',N'" + tbBuyer.Text.Replace("'", "''") + "',N'" + tbAddAmmount.Text.Replace("'", "''") + "',N'" + tbAddAmmountWords.Text.Replace("'", "''") +
-                             @"','" + Convert.ToDateTime(tbAddDateOfPayment.Text) + "','" + dtUntil + "'," + ddlService.SelectedValue + ")";
+                             @"','" + Convert.ToDateTime(tbAddDateOfPayment.Text, dateInfo).ToString("MM.dd.yyyy") + "','" + dtUntil.ToString("MM.dd.yyyy") + "'," + ddlService.SelectedValue + ")";
                 Functions.ExecuteCommand(SQL);
 
                 lblInvoiceNumber.Text = InvoiceNumber;
@@ -1048,7 +1053,7 @@ public partial class Payments : System.Web.UI.Page
             {
                 String SQL = "INSERT INTO Invoice (InvoiceNumber,Buyer,Ammount,AmmountWords,DateOfCreation,UntillDate,Invoice) VALUES(N'" + InvoiceNumber +
                              @"',N'" + tbBuyer.Text.Replace("'", "''") + "',N'" + tbAddAmmount.Text.Replace("'", "''") + "',N'" + tbAddAmmountWords.Text.Replace("'", "''") +
-                             @"','" + Convert.ToDateTime(tbAddDateOfPayment.Text) + "','" + dtUntil + "'," + ddlInvoiceGroup.SelectedValue + ")";
+                             @"','" + Convert.ToDateTime(tbAddDateOfPayment.Text, dateInfo).ToString("MM.dd.yyyy") + "','" + dtUntil.ToString("MM.dd.yyyy") + "'," + ddlInvoiceGroup.SelectedValue + ")";
                 Functions.ExecuteCommand(SQL);
 
                 lblInvoiceNumber.Text = InvoiceNumber;

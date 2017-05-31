@@ -82,6 +82,7 @@ public partial class Groups : System.Web.UI.Page
             btnDeleteTest.Visible = true;
             btnChangeDiscount.Visible = true;
             btnClearCost.Visible = true;
+            btnChangePassedPayments.Visible = true;
         }
         else
         {
@@ -127,8 +128,12 @@ public partial class Groups : System.Web.UI.Page
                 tbClassesAttended.Text = Classes[0];
                 if (Classes[1] != "")
                     cbPassedFinalTest.Checked = Convert.ToBoolean(Classes[1]);
+                else
+                    cbPassedFinalTest.Checked = false;
                 if (Classes[2] != "")
                     cbReceivedCertificate.Checked = Convert.ToBoolean(Classes[2]);
+                else
+                    cbReceivedCertificate.Checked = false;
             }
         }
     }
@@ -227,6 +232,20 @@ public partial class Groups : System.Web.UI.Page
             lblInfo.Visible = false;
         }
     }
+    protected void FillNumberPassedPayments()
+    {
+        if (gvMain.SelectedRow != null)
+        {
+            String NumberOfPayments = Functions.ExecuteScalar("SELECT NumberOfPayments FROM [Group] WHERE GroupID=" + gvMain.SelectedValue);
+            String SQL = "SELECT 0 as Value, '0' as Description";
+            if (NumberOfPayments == "") NumberOfPayments = "0";
+            for (int i = 1; i <= Convert.ToInt32(NumberOfPayments); i++)
+            {
+                SQL += " UNION SELECT " + i.ToString() + " as Value, '" + i.ToString() + "' as Description";
+            }
+            Functions.FillCombo(SQL, ddlPassedPayments, "Description", "Value");
+        }
+    }
     private void PrintPDF(String Path)
     {
         //FileInfo fileInfo = new FileInfo(Path + ".pdf");
@@ -302,6 +321,10 @@ public partial class Groups : System.Web.UI.Page
     protected void btnSearch_Click(object sender, EventArgs e)
     {
         String WherePart = FillWherePart();
+
+        if (Request.QueryString["ID"] != "" && Request.QueryString["ID"] != null)
+            WherePart += " AND GroupID=" + Request.QueryString["ID"];
+
         FillDataGrid(WherePart);
         gvMain.DataBind();
         if (gvMain.Rows.Count < 1)
@@ -326,8 +349,18 @@ public partial class Groups : System.Web.UI.Page
                 {
                     if (tbDiscount.Text == "") tbDiscount.Text = "0";
                     decimal TotalCost = Convert.ToDecimal(Functions.ExecuteScalar("SELECT Cost FROM [Group] WHERE GroupID=" + gvMain.SelectedValue));
+        
                     if (Convert.ToInt32(tbDiscount.Text) > 0)
                         TotalCost = TotalCost - (TotalCost * Convert.ToInt32(tbDiscount.Text) / 100);
+
+                    decimal NewCost = Convert.ToDecimal(ddlPassedPayments.SelectedValue);
+                    if (Convert.ToInt32(ddlPassedPayments.SelectedValue) > 0)
+                    {
+                        int NumberOfPayments = Convert.ToInt32(Functions.ExecuteScalar("SELECT NumberOfPayments FROM [Group] WHERE GroupID=" + gvMain.SelectedValue));
+                        NewCost = (TotalCost / NumberOfPayments) * Convert.ToInt32(ddlPassedPayments.SelectedValue);
+                    }
+                    TotalCost -= NewCost;
+
                     SQL = "INSERT INTO GroupStudent (GroupID, StudentID, Status, Discount, TotalCost, CreatedBy) VALUES (" +
                     gvMain.SelectedValue + "," + ddlStudents.SelectedValue + ",0," + tbDiscount.Text.Replace("'", "''") + "," + TotalCost.ToString().Replace(",", ".") + "," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ")";
                 }
@@ -472,7 +505,7 @@ public partial class Groups : System.Web.UI.Page
             }
 
             string SQLPrint = @"SELECT c.RegNo, s.FirstName + ' ' + s.LastName as StudentName, convert(varchar,s.DateOfBirth,104) as DateOfBirth,
-                            s.Place, gt.Language, gt.LevelDescription, gt.Level, gt.Program, "+Text_1+@", 
+                            s.PlaceOfBirth, gt.Language, gt.LevelDescription, gt.Level, gt.Program, " + Text_1 + @", 
 							convert(varchar,g.StartDate,104) as StartDate, convert(varchar,g.EndDate,104) as EndDate, 
 							convert(varchar,g.EndDate,104) as DateOfPrint, e.FirstName + ' ' + e.LastName as Teacher
                             FROM [Certificate] c LEFT OUTER JOIN Student s ON s.StudentID=c.StudentID
@@ -529,7 +562,7 @@ public partial class Groups : System.Web.UI.Page
 
 
                 string SQLPrint = @"SELECT c.RegNo, s.FirstName + ' ' + s.LastName as StudentName, convert(varchar,s.DateOfBirth,104) as DateOfBirth,
-                            s.Place, gt.Language, gt.LevelDescription, gt.Level, gt.Program, "+Text_1+@", 
+                            s.PlaceOfBirth, gt.Language, gt.LevelDescription, gt.Level, gt.Program, " + Text_1 + @", 
 							convert(varchar,g.StartDate,104) as StartDate, convert(varchar,g.EndDate,104) as EndDate, 
 							convert(varchar,g.EndDate,104) as DateOfPrint, e.FirstName + ' ' + e.LastName as Teacher
                             FROM [Certificate] c LEFT OUTER JOIN Student s ON s.StudentID=c.StudentID
@@ -674,6 +707,7 @@ public partial class Groups : System.Web.UI.Page
                 Fill_Details();
                 Fill_Certificates(gvMain.SelectedValue.ToString());
                 Fill_Tests();
+                FillNumberPassedPayments();
                 pnlAddPermission.Visible = true;
                 Login_Redirect();
                 break;
@@ -842,12 +876,36 @@ public partial class Groups : System.Web.UI.Page
         {
             Int32 SelectedIndex = gvMain.SelectedIndex;
 
-            if (tbDiscount.Text == "") tbDiscount.Text = "0";
-            decimal TotalCost = Convert.ToDecimal(Functions.ExecuteScalar("SELECT Cost FROM [Group] WHERE GroupID=" + gvMain.SelectedValue));
-            if (Convert.ToInt32(tbDiscount.Text) > 0)
-                TotalCost = TotalCost - (TotalCost * Convert.ToInt32(tbDiscount.Text) / 100);
+            //if (tbDiscount.Text == "") tbDiscount.Text = "0";
+            //decimal TotalCost = Convert.ToDecimal(Functions.ExecuteScalar("SELECT Cost FROM [Group] WHERE GroupID=" + gvMain.SelectedValue));
+            //if (Convert.ToInt32(tbDiscount.Text) > 0)
+            //    TotalCost = TotalCost - (TotalCost * Convert.ToInt32(tbDiscount.Text) / 100);
 
-            Functions.ExecuteCommand(@"UPDATE GroupStudent SET TotalCost=N'" + TotalCost.ToString().Replace(",", ".") + "', Discount=N'" + tbDiscount.Text +
+            //=======================================
+            if (tbDiscount.Text == "") tbDiscount.Text = "0";
+            String[] Group = Functions.ReturnIntoArray("SELECT Cost, NumberOfPayments FROM [Group] WHERE GroupID=" + gvMain.SelectedValue, 2);
+            decimal TotalCost = Convert.ToDecimal(Group[0]);
+            int NumberOfPayments = Convert.ToInt32(Group[1]);
+            decimal RataOsnovna = TotalCost / NumberOfPayments;
+
+            String[] GroupDetails = Functions.ReturnIntoArray("SELECT TotalCost, Discount FROM [GroupStudent] WHERE GroupID=" + gvMain.SelectedValue + " AND StudentID=" + gvDetails.SelectedValue, 2);
+
+            decimal Cost = Convert.ToDecimal(GroupDetails[0]);
+            decimal Discount = Convert.ToDecimal(GroupDetails[1]);
+            decimal Rata = Cost / NumberOfPayments;
+            decimal TotalPaid = Convert.ToDecimal(Functions.ExecuteScalar(@"SELECT CASE WHEN SUM(Ammount) IS NULL THEN 0 ELSE SUM(Ammount) END as Ammount
+                                FROM Payment WHERE GroupStudentID= (SELECT GroupStudentID FROM GroupStudent WHERE GroupID="+ gvMain.SelectedValue + " AND StudentID="+gvDetails.SelectedValue+")" ));
+
+            if (Cost < 1) Rata = TotalPaid / NumberOfPayments;
+            
+            int NumberOfPaidPayments = 0;
+            if (Rata > 0) NumberOfPaidPayments = Convert.ToInt32(TotalPaid / Rata);
+            
+            decimal NovaRata = RataOsnovna - (RataOsnovna * Convert.ToDecimal(tbDiscount.Text)/100);
+            decimal Ostatok = NovaRata * (NumberOfPayments - NumberOfPaidPayments);
+            Ostatok += TotalPaid;
+
+            Functions.ExecuteCommand(@"UPDATE GroupStudent SET TotalCost=N'" + Ostatok.ToString().Replace(",", ".") + "', Discount=N'" + tbDiscount.Text +
             @"' WHERE StudentID=" + gvDetails.SelectedValue + " AND GroupID=" + gvMain.SelectedValue);
 
             btnSearch_Click(sender, e);
@@ -870,6 +928,44 @@ public partial class Groups : System.Web.UI.Page
             gvMain.SelectedIndex = SelectedIndex;
             Fill_Details();
             Fill_Payments();
+        }
+    }
+    protected void btnChangePassedPayments_Click(object sender, EventArgs e)
+    {
+        if ((gvDetails.SelectedIndex != null) && (gvMain.SelectedIndex != null))
+        {
+            Int32 SelectedIndex = gvMain.SelectedIndex;
+            
+            String[] Group = Functions.ReturnIntoArray("SELECT Cost, NumberOfPayments FROM [Group] WHERE GroupID=" + gvMain.SelectedValue, 2);
+            decimal TotalCost = Convert.ToDecimal(Group[0]);
+            int NumberOfPayments = Convert.ToInt32(Group[1]);
+            decimal Rata = TotalCost / NumberOfPayments;
+
+            String[] GroupDetails = Functions.ReturnIntoArray("SELECT TotalCost, Discount FROM [GroupStudent] WHERE GroupID=" + gvMain.SelectedValue + " AND StudentID=" + gvDetails.SelectedValue, 2);
+
+            decimal Cost = Convert.ToDecimal(GroupDetails[0]);
+            decimal Discount = Convert.ToDecimal(GroupDetails[1]);
+            decimal RataWithDiscount = Convert.ToDecimal(Rata - (Rata * Discount / 100));
+
+            decimal NewCost = Convert.ToDecimal(ddlPassedPayments.SelectedValue);
+
+
+            TotalCost = TotalCost - (TotalCost * Convert.ToInt32(Discount) / 100);
+            NewCost = (TotalCost / NumberOfPayments) * Convert.ToInt32(ddlPassedPayments.SelectedValue);
+
+            //if (Convert.ToInt32(ddlPassedPayments.SelectedValue) > 0)
+            //{
+            //    NewCost = Cost - (RataWithDiscount * Convert.ToInt32(ddlPassedPayments.SelectedValue));
+            //}
+            
+            TotalCost -= NewCost;
+
+            Functions.ExecuteCommand(@"UPDATE GroupStudent SET TotalCost=N'" + TotalCost.ToString().Replace(",", ".") + 
+               @"' WHERE StudentID=" + gvDetails.SelectedValue + " AND GroupID=" + gvMain.SelectedValue);
+
+            btnSearch_Click(sender, e);
+            gvMain.SelectedIndex = SelectedIndex;
+            Fill_Details();
         }
     }
 }

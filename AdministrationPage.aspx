@@ -400,6 +400,41 @@
                      </table>
                 </div>
             </td>
+
+                       <td>
+                        <div class="DashboardItem3">  
+                     <table style="width:100%">
+                         <tr>
+
+                        <td class="DashboardDetails" >
+                                 Students - Still not paid (finished groups):
+                             </td>
+                             <td style="text-align:right">
+                                 <asp:ImageButton ID="btnRefresh3_2" runat="server" ImageUrl="~/Images/Icons/Refresh1.png" CssClass="RefreshButton" OnClick="btnRefresh3_2_Click" />
+                             </td>
+                         </tr>                    
+                         <tr>
+                             <td colspan="2">
+                                <div style="width:25vw; height:15vw; overflow: scroll">
+                                <asp:GridView ID="gvDashboard3_2" runat="server" GridLines="None" AutoGenerateColumns="false" DataKeyNames="GroupStudentID" DataSourceID="dsDashboard3_2" CssClass="GridView" PagerStyle-CssClass="GridViewPager" HeaderStyle-CssClass="GridViewHeader" RowStyle-CssClass="GridViewRows" AllowPaging="True" AllowSorting="True" AlternatingRowStyle-CssClass="GridViewRowsAlt" SelectedRowStyle-CssClass="GridViewSelectedRow" EditRowStyle-CssClass="GridViewSelectedRow" OnRowDataBound="gvDashboard3_2_RowDataBound" OnSorted="gvDashboard3_2_Sorted" OnPageIndexChanged="gvDashboard3_2_PageIndexChanged">
+                                <AlternatingRowStyle CssClass="GridViewRowsAlt"></AlternatingRowStyle>
+                                    <Columns>
+                                        <asp:BoundField DataField="GroupStudentID" HeaderText="ID" InsertVisible="False" ReadOnly="True" SortExpression="GroupStudentID" Visible="false" />
+                                        <asp:BoundField DataField="GroupName" HeaderText="Group" SortExpression="GroupName" />
+                                        <asp:BoundField DataField="Student" HeaderText="Student" SortExpression="Student" />
+                                        <asp:BoundField DataField="Cost" HeaderText="Cost" SortExpression="Cost" DataFormatString="{0} ден." ItemStyle-HorizontalAlign="Right"/>
+                                        <asp:BoundField DataField="Paid" HeaderText="Paid" SortExpression="Paid" DataFormatString="{0} ден." ItemStyle-HorizontalAlign="Right"/>
+                                    </Columns>
+                                </asp:GridView>
+                                    <asp:SqlDataSource ID="dsDashboard3_2" runat="server" ConnectionString="<%$ ConnectionStrings:konekcija %>" SelectCommand=""></asp:SqlDataSource>                                
+                                </div>
+                             </td>
+                             </tr>
+                     </table>
+                </div>
+            </td>
+
+
                    </tr>
                </table>
            </td> 

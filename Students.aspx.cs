@@ -559,7 +559,7 @@ public partial class Students : System.Web.UI.Page
         {
             string SQLPrint = @"SELECT FirstName + ' ' + LastName as StudentName, Address as StudentAddress,
                         HouseNumber as StudentHouseNumber, Place as StudentPlace, SocialNumber as StudentSN,
-                        Place as StudentGrad, convert(varchar,c.StartDate,104) as StartDate,
+                        PlaceOfBirth as StudentGrad, convert(varchar,c.StartDate,104) as StartDate,
 						CASE WHEN DATEDIFF(DAY,s.DateOfBirth, GETDATE())<6570 THEN 
 						N' (малолетен преку својот законски родител-старател) ' + Parent_FirstName + ' ' + Parent_LastName +
 						N' од ' + Parent_Place + N', со стан на ул.' + Parent_Address + N' бр.' + Parent_HouseNumber + N' во ' + 
@@ -594,7 +594,7 @@ public partial class Students : System.Web.UI.Page
             }
 
             string SQLPrint = @"SELECT c.RegNo, s.FirstName + ' ' + s.LastName as StudentName, convert(varchar, s.DateOfBirth, 104) as DateOfBirth,
-                            s.Place, gt.Language, gt.LevelDescription, gt.Level, gt.Program, g.NumberOfClasses, 
+                            s.PlaceOfBirth, gt.Language, gt.LevelDescription, gt.Level, gt.Program, g.NumberOfClasses, 
 							convert(varchar, g.StartDate, 104) as StartDate, convert(varchar, g.EndDate, 104) as EndDate, 
 							convert(varchar, g.EndDate, 104) as DateOfPrint, e.FirstName + ' ' + e.LastName as Teacher
                             FROM [Certificate] c LEFT OUTER JOIN Student s ON s.StudentID=c.StudentID
@@ -682,6 +682,18 @@ public partial class Students : System.Web.UI.Page
                 @"', PassedFinalTest='" + cbPassedFinalTest.Checked + "', ReceivedCertificate='" + cbReceivedCertificate.Checked +
                 @"' WHERE GroupStudentID=" + gvDetails.SelectedValue);
             }
+        }
+    }
+    protected void btnViewGroup_Click(object sender, EventArgs e)
+    {
+        if (gvDetails.SelectedRow != null)
+        {
+            try
+            {
+                String GroupID = Functions.ExecuteScalar("SELECT GroupID FROM [GroupStudent] WHERE GroupStudentID=" + gvDetails.SelectedValue);
+                Response.Redirect("Groups.aspx?ID="+GroupID);
+            }
+            catch { }
         }
     }
 }

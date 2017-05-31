@@ -237,6 +237,7 @@
                                 <asp:Button ID="btnTermsDetails" runat="server" Text="View Group Time Table" CssClass="NormalButton" OnClick="btnTermsDetails_Click"  />
                                 <asp:Button ID="btnTransfer" runat="server" Text="Transfer to another group" CssClass="NormalButton" OnClick="btnTransfer_Click"/>
                                 <asp:Button ID="btnTransferDetails" runat="server" Text="View Transfer Details" CssClass="NormalButton" OnClick="btnTransferDetails_Click"/>
+                                <asp:Button ID="btnViewGroup" runat="server" Text="View Group" CssClass="NormalButton" OnClick="btnViewGroup_Click" />
                             </td>
                         </tr>
                     </table>
@@ -355,9 +356,12 @@
                                 <asp:ImageButton ID="imgbtnRefresh" runat="server" ImageUrl="~/Images/Icons/Refresh1.png" OnClick="imgbtnRefresh_Click" CssClass="RefreshButton"/>
                                 <br /><br />
                                     Cert. Template:<br /><br>
+                                <br>
                                 <br></br>
                                 <asp:DropDownList ID="ddlTemplateCertificate" runat="server" CssClass="TextBoxRoundedFilters" style="width:10vw" ValidationGroup="2">
                                 </asp:DropDownList>
+                                <br></br>
+                                </br>
                                 </br>                               
                                     
                             </td>                           

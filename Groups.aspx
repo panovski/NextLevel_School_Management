@@ -189,7 +189,7 @@
                    </div>             
             </td>
             <td style="vertical-align:top;">
-                <div class="TabelaDetailsGrid">
+                <div class="TabelaDetailsStandard">
                     <table>
                         <tr>
                             <td style="width:20vw; vertical-align:top;">
@@ -202,7 +202,7 @@
                                         </td>
                                     </tr>
                                 </table> 
-                                <div style="width:23.9vw; height:11.3vw; overflow: scroll;">
+                                <div style="width:23.9vw; height:15.3vw; overflow: scroll;">
                                 <asp:GridView ID="gvDetails" runat="server" GridLines="None" AutoGenerateColumns="false" DataKeyNames="ID" DataSourceID="dsDetails" CssClass="GridView" PagerStyle-CssClass="GridViewPager" HeaderStyle-CssClass="GridViewHeader" RowStyle-CssClass="GridViewRows" AllowPaging="True" AllowSorting="True" AlternatingRowStyle-CssClass="GridViewRowsAlt" SelectedRowStyle-CssClass="GridViewSelectedRow" EditRowStyle-CssClass="GridViewSelectedRow" OnRowDataBound="gvDetails_RowDataBound" OnSorted="gvDetails_Sorted" OnSelectedIndexChanged="gvDetails_SelectedIndexChanged" OnPageIndexChanged="gvDetails_PageIndexChanged">
                                 <AlternatingRowStyle CssClass="GridViewRowsAlt"></AlternatingRowStyle>
                                     <Columns>
@@ -241,6 +241,10 @@
                                             <asp:Button ID="btnRemove" runat="server" Text="Remove" CssClass="NormalButton" OnClick="btnRemove_Click" onclientclick="javascript:return confirm('Are you sure to remove the student from selected group?');" />                                            
                                             <asp:Button ID="btnChangeDiscount" runat="server" Text="Change Discount" CssClass="NormalButton" onclientclick="javascript:return confirm('Are you sure to change the discount for the student from selected group?');" OnClick="btnChangeDiscount_Click" Visible="False" />                                            
                                             <br />
+                                            Passed Payments:
+                                            <asp:DropDownList ID="ddlPassedPayments" runat="server" CssClass="TextBoxRoundedFilters"></asp:DropDownList>                                            
+                                            <asp:Button ID="btnChangePassedPayments" runat="server" Text="Change" CssClass="NormalButton" onclientclick="javascript:return confirm('Are you sure to change the passed payments for the student from selected group?');"  Visible="False" OnClick="btnChangePassedPayments_Click" />                                            
+                                            <br /><br />
                                             Classes:<br /><asp:TextBox ID="tbClassesAttended" runat="server" TextMode="Number" CssClass="TextBoxNumber"></asp:TextBox>
                                             <asp:CheckBox ID="cbPassedFinalTest" runat="server" Text="Final Test"/>
                                             <asp:CheckBox ID="cbReceivedCertificate" runat="server" Text="Certificate"/>

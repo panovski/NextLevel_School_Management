@@ -262,7 +262,7 @@ public partial class Services : System.Web.UI.Page
     {
         if (gvPayments.SelectedRow != null)
         {
-            string SQLPrint = @"SELECT p.AccountNumber,p.Ammount, p.AmmountWords, CAST(s.ServiceID AS VARCHAR(16)) + '-' + st.ServiceName as PaymentGroup,
+            string SQLPrint = @"SELECT p.AccountNumber,p.Ammount, p.AmmountWords, CAST(s.ServiceID AS VARCHAR(16)) + '-' + st.ServiceName + '-' + st.Description as PaymentGroup,
                         c.FirstName+' '+c.LastName as PaymentName, p.PaymentNumber, c.Place as PaymentPlace,
 						convert(varchar,p.DateOfPayment,104) as DateOfPayment, s.TotalCost as TotalCost, 
 						s.TotalCost-(SELECT SUM(p2.Ammount) FROM Payment p2 where p2.ServiceID=s.ServiceID AND p2.DateOfPayment<=p.DateOfPayment) as RemainingCost,

@@ -44,6 +44,11 @@
             </td>
 
             <td rowspan="7" style="vertical-align:top; text-align:left">
+                Ask for parrent:
+                <asp:RadioButtonList ID="rblParrent" runat="server" RepeatDirection="Horizontal" ToolTip="Parrent" AutoPostBack="True" OnSelectedIndexChanged="rblParrent_SelectedIndexChanged">
+                    <asp:ListItem Value="1">Yes</asp:ListItem>
+                    <asp:ListItem Value="0">No</asp:ListItem>
+                </asp:RadioButtonList>
                 <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="EditFormButton" OnClick="btnSave_Click"  ValidationGroup="1" Visible="false"/>               
                 <asp:Button ID="btnInsert" runat="server" Text="Insert New Student" CssClass="EditFormButton" ValidationGroup="1" OnClick="btnInsert_Click" Visible="false"/>                
                 <asp:Panel ID="pnlParrents" runat="server" Visible="false">
@@ -150,6 +155,17 @@
             <td>
                 <asp:RequiredFieldValidator ID="rfvDateOfBirth" runat="server" ErrorMessage="Required!" CssClass="RequredField" ControlToValidate="tbDateOfBirth" ValidationGroup="1"></asp:RequiredFieldValidator><br />
                 <asp:RegularExpressionValidator ID="revtbDateOfBirth" runat="server" ErrorMessage="Wrong date! (dd.MM.yyyy)" ValidationExpression="^(((0[1-9]|[12]\d|3[01])\.(0[13578]|1[02])\.((19|[2-9]\d)\d{2}))|((0[1-9]|[12]\d|30)\.(0[13456789]|1[012])\.((19|[2-9]\d)\d{2}))|((0[1-9]|1\d|2[0-8])\.02\.((19|[2-9]\d)\d{2}))|(29\.02./((1[6-9]|[2-9]\d)(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00))))$" ControlToValidate="tbDateOfBirth"  CssClass="RequredField" ValidationGroup="1" ></asp:RegularExpressionValidator>                                          
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Place of Birth:
+            </td>
+            <td>
+                <asp:TextBox ID="tbPlaceOfBirth" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1" AutoPostBack="True" ></asp:TextBox>
+            </td>
+            <td>
+                <asp:RequiredFieldValidator ID="rfvtbPlaceOfBirth" runat="server" ErrorMessage="Required!" CssClass="RequredField" ControlToValidate="tbPlaceOfBirth" ValidationGroup="1"></asp:RequiredFieldValidator><br />
             </td>
         </tr>
         <tr>

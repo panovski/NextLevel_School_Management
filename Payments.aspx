@@ -341,7 +341,7 @@
                                 Date of Payment:
                             </td>
                             <td>
-                                <asp:TextBox ID="tbAddDateOfPayment" runat="server" CssClass="TextBoxRoundedFilters" TextMode="Date" TabIndex="5" ValidationGroup="2"></asp:TextBox>
+                                <asp:TextBox ID="tbAddDateOfPayment" runat="server" CssClass="TextBoxRoundedFilters" TabIndex="5" ValidationGroup="2"></asp:TextBox>
                                 
                             </td>
                             <td style="text-align:left">

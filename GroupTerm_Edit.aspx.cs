@@ -41,8 +41,8 @@ public partial class GroupTerm_Edit : System.Web.UI.Page
                 btnRemove.Visible = true;
             }
             else
-            {
-                btnRemove.Visible = false;
+            {   //decided with Giovanni on 30.05.2017 to be disabled:
+                //btnRemove.Visible = false;
             }
         }
     }
