@@ -140,8 +140,8 @@
         </tr>
         <tr style="vertical-align:top">
             <td>             
-                   <div class="TabelaMalaGrid">
-                   <div style="width:25.5vw; height:30.3vw; overflow: scroll">                   
+                   <div class="TabelaMalaGridPayments">
+                   <div style="width:23vw; height:30.3vw; overflow: scroll">                   
                    <asp:GridView ID="gvMain" runat="server" GridLines="None" AutoGenerateColumns="False" DataKeyNames="PaymentID" DataSourceID="dsMain" CssClass="GridView" PagerStyle-CssClass="GridViewPager" HeaderStyle-CssClass="GridViewHeader" RowStyle-CssClass="GridViewRows" AllowPaging="True" AllowSorting="True" PageSize="13" AlternatingRowStyle-CssClass="GridViewRowsAlt" SelectedRowStyle-CssClass="GridViewSelectedRow" EditRowStyle-CssClass="GridViewSelectedRow" OnRowDataBound="gvMain_RowDataBound" OnSelectedIndexChanged="gvMain_SelectedIndexChanged" OnSorted="gvMain_Sorted" OnPageIndexChanging="gvMain_PageIndexChanged" >
                     <AlternatingRowStyle CssClass="GridViewRowsAlt"></AlternatingRowStyle>
                        <Columns>
@@ -168,7 +168,7 @@
                    </div>             
             </td>
             <td style="vertical-align:top;">  
-                <div class="TabelaDetailsStandard">
+                <div class="TabelaDetailsStandardPayments">
                     <asp:Panel ID="pnlPayment" runat="server" Visible="False">
                     <table class="EditDetailsStandard" style="text-align:right; vertical-align:top;">
                         <tr>

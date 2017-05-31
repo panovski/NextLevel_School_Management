@@ -292,6 +292,18 @@
    width:75vw;
    font-size:1vw;
 }
+.TabelaMalaGridPayments
+{
+   margin:0.8vw 0vw 0vw 3vw;
+   background-color: whitesmoke;
+   border:0;
+   padding:0.4vw;
+   border-radius: 0.8vw;
+   box-shadow: 0.1vw 0vw 0.4vw 0.2vw grey;
+   width:24vw;
+   font-size:1vw;
+   vertical-align:top;
+}
 .TabelaMalaGrid 
 {
    margin:0.8vw 0vw 0vw 3vw;
@@ -329,6 +341,19 @@
    font-size:0.8vw;
    vertical-align:top;
    width:47.9vw;
+}
+.TabelaDetailsStandardPayments 
+{
+   margin:0.8vw 0vw 0vw 1vw;
+   background-color: whitesmoke;
+   border:0;
+   padding:0.4vw;
+   padding-bottom:1vw;
+   border-radius: 0.8vw;
+   box-shadow: 0.1vw 0vw 0.4vw 0.2vw grey;
+   font-size:0.8vw;
+   vertical-align:top;
+   width:49.5vw;
 }
 .TabelaFilters 
 {
