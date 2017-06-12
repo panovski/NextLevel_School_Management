@@ -109,6 +109,16 @@
                                 <asp:RequiredFieldValidator ID="rfvtbParrentPlace" runat="server" ErrorMessage="Required!" CssClass="RequredField" ControlToValidate="tbParrentPlace" ValidationGroup="1"></asp:RequiredFieldValidator>
                             </td>
                         </tr>
+                        <tr>
+                            <td>
+                                Phone Number / Mobile:
+                            </td>
+                            <td>
+                                <asp:TextBox ID="tbParentPhone" runat="server" CssClass="TextBoxRoundedEdit" ValidationGroup="1"></asp:TextBox>
+                            </td>
+                            <td>
+                            </td>
+                        </tr>
                     </table>
                 </asp:Panel>                            
             </td>

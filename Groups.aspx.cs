@@ -77,6 +77,7 @@ public partial class Groups : System.Web.UI.Page
             btnEditClassroom.Visible = true;
             btnEditTemplates.Visible = true;
             btnDeleteAllCertificates.Visible = true;
+            btnDeleteCertificate.Visible = true;
             btnRemove.Visible = true;
             btnDelete.Visible = true;
             btnDeleteTest.Visible = true;
@@ -966,6 +967,27 @@ public partial class Groups : System.Web.UI.Page
             btnSearch_Click(sender, e);
             gvMain.SelectedIndex = SelectedIndex;
             Fill_Details();
+        }
+    }
+    protected void btnCreateOneCertificate_Click(object sender, EventArgs e)
+    {
+        if (gvMain.SelectedRow != null && gvDetails.SelectedRow!=null)
+        {
+            String SQL = @"INSERT INTO [Certificate] (StudentID, GroupID , CreatedBy) 
+                            SELECT StudentID, GroupID, " + Functions.Decrypt(Request.Cookies["UserID"].Value) + " FROM GroupStudent gs WHERE GroupID=" + gvMain.SelectedValue +
+                            " AND StudentID="+gvDetails.SelectedValue+" AND gs.Transfered=0 AND StudentID NOT IN (SELECT StudentID FROM [Certificate] WHERE GroupId=gs.GroupID AND StudentID=gs.StudentID)";
+
+            Functions.ExecuteCommand(SQL);
+            Fill_Certificates();
+        }
+    }
+    protected void btnDeleteCertificate_Click(object sender, EventArgs e)
+    {
+        if (gvCertificates.SelectedRow != null)
+        {
+            String SQL = @"DELETE FROM [Certificate] WHERE CertificateID=" + gvCertificates.SelectedValue;
+            Functions.ExecuteCommand(SQL);
+            Fill_Certificates();
         }
     }
 }

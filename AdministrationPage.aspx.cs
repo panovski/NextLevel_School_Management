@@ -486,14 +486,13 @@ public partial class AdministrationPage : System.Web.UI.Page
     {
         Fill_Dashboard_3_1();
     }
-    #endregion
     protected void btnRefresh3_2_Click(object sender, ImageClickEventArgs e)
     {
         Fill_Dashboard_3_2();
     }
     protected void gvDashboard3_2_PageIndexChanged(object sender, EventArgs e)
     {
-
+        Fill_Dashboard_3_2();
     }
     protected void gvDashboard3_2_RowDataBound(object sender, GridViewRowEventArgs e)
     {
@@ -501,6 +500,8 @@ public partial class AdministrationPage : System.Web.UI.Page
     }
     protected void gvDashboard3_2_Sorted(object sender, EventArgs e)
     {
-
+        Fill_Dashboard_3_2();
     }
+    #endregion
+
 }

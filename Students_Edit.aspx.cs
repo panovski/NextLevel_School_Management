@@ -55,7 +55,7 @@ public partial class Students_Edit : System.Web.UI.Page
     }
     public void FillDetailsEdit()
     {
-        String[] Student = Functions.ReturnIntoArray("SELECT s.*, u.FirstName+' '+u.LastName FROM [Student] s LEFT OUTER JOIN [User] u ON u.UserID=s.CreatedBy WHERE s.StudentID=" + Request.QueryString["ID"], 22);
+        String[] Student = Functions.ReturnIntoArray("SELECT s.*, u.FirstName+' '+u.LastName FROM [Student] s LEFT OUTER JOIN [User] u ON u.UserID=s.CreatedBy WHERE s.StudentID=" + Request.QueryString["ID"], 23);
         tbFirstName.Text = Student[1];
         tbLastName.Text = Student[2];
         //tbSocialNumber.Text = Student[3];
@@ -73,9 +73,10 @@ public partial class Students_Edit : System.Web.UI.Page
         //tbParrentSN.Text = Student[15];
         tbParrentPlace.Text = Student[16];
         tbCreatedDate.Text = Student[17];
-        tbCreatedBy.Text = Student[21];
+        tbCreatedBy.Text = Student[22];
         rblGender.SelectedValue = Student[19];
         tbPlaceOfBirth.Text = Student[20];
+        tbParentPhone.Text = Student[21];
 
         double denovi = (DateTime.Now - Convert.ToDateTime(Student[6])).TotalDays;
         double godini = denovi / 365;
@@ -127,6 +128,7 @@ public partial class Students_Edit : System.Web.UI.Page
              "', Parent_HouseNumber= N'" + tbParrentHouseNumber.Text.Replace("'", "''") +
              "', Parent_SocialNumber= N'0" +// tbParrentSN.Text.Replace("'", "''") +
              "', Parent_Place= N'" + tbParrentPlace.Text +
+             "', Parent_Telephone= N'" + tbParentPhone.Text +
              "', Gender='" + rblGender.SelectedValue +
              "', PlaceOfBirth=N'" + tbPlaceOfBirth.Text.Replace("'", "''") +
              "' WHERE StudentID=" + Request.QueryString["ID"];
@@ -158,13 +160,13 @@ public partial class Students_Edit : System.Web.UI.Page
             {
 
                 String SQL = @"INSERT INTO Student (FirstName,LastName,SocialNumber,ContactPhone,Status,DateOfBirth,Address,
-                   HouseNumber,Place,Email,Parent_FirstName,Parent_LastName,Parent_Address,Parent_HouseNumber,Parent_SocialNumber,Parent_Place, CreatedBy, Gender, PlaceOfBirth)
+                   HouseNumber,Place,Email,Parent_FirstName,Parent_LastName,Parent_Address,Parent_HouseNumber,Parent_SocialNumber,Parent_Place, Parent_Telephone, CreatedBy, Gender, PlaceOfBirth)
                    VALUES(N'" + tbFirstName.Text.Replace("'", "''") + "',N'" + tbLastName.Text.Replace("'", "''") +
                        "',N'0',N'" + tbContactPhone.Text.Replace("'", "''") + "','" + ddlStatus.SelectedValue + "','" + Convert.ToDateTime(tbDateOfBirth.Text.Replace("'", "''"), dateInfo) +
                        "',N'" + tbAddress.Text.Replace("'", "''") + "',N'" + tbHouseNumber.Text.Replace("'", "''") + "',N'" + tbPlace.Text.Replace("'", "''") +
                        "','" + tbEmail.Text.Replace("'", "''") + "',N'" + tbParrentFirstName.Text.Replace("'", "''") + "',N'" + tbParrentLastName.Text.Replace("'", "''") +
                        "',N'" + tbParrentAddress.Text.Replace("'", "''") + "',N'" + tbParrentHouseNumber.Text.Replace("'", "''") + "',N'0" + //tbParrentSN.Text.Replace("'", "''") +
-                       "',N'" + tbParrentPlace.Text.Replace("'", "''") + "'," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ",'" + rblGender.SelectedValue + ", N'" + tbPlaceOfBirth.Text.Replace("'", "''") + "')";
+                       "',N'" + tbParrentPlace.Text.Replace("'", "''") + "',N'" + tbParentPhone.Text.Replace("'", "''") + "'," + Functions.Decrypt(Request.Cookies["UserID"].Value) + ",'" + rblGender.SelectedValue + "', N'" + tbPlaceOfBirth.Text.Replace("'", "''") + "')";
                 Functions.ExecuteCommand(SQL);
                 Page.ClientScript.RegisterStartupScript(this.GetType(), "Call my function", "CloseDialog()", true);
             }

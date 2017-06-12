@@ -363,6 +363,8 @@
                                     
                                     <asp:Button ID="btnCreateAllCertificates" runat="server" Text="Create all Certificates" CssClass="NormalButton" OnClick="btnCreateAllCertificates_Click"  onclientclick="javascript:return confirm('Are you sure to create certificates for everyone?');"/>
                                     <asp:Button ID="btnDeleteAllCertificates" runat="server" Text="Delete all Certificates" CssClass="NormalButton" onclientclick="javascript:return confirm('Are you sure to delete all certificates in this group?');" OnClick="btnDeleteAllCertificates_Click" Visible="False"/>
+                                    <asp:Button ID="btnCreateOneCertificate" runat="server" Text="Create Certificate" CssClass="NormalButton" onclientclick="javascript:return confirm('Are you sure to create certificates for selected user?');" OnClick="btnCreateOneCertificate_Click"/>
+                                    <asp:Button ID="btnDeleteCertificate" runat="server" Text="Delete selected Certificate" CssClass="NormalButton" onclientclick="javascript:return confirm('Are you sure to delete the selected certificate?');" Visible="False" OnClick="btnDeleteCertificate_Click"/>
                             </td>                           
                         </tr>
                         </table>
